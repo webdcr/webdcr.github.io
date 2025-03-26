@@ -169,7 +169,7 @@ layout: default
 
   {% assign days = "Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday" |
   split: "," %} {% for day in days %} {% assign showsThisDay = site.data.shows |
-  where: "Day", day %}
+  where: "Day", day %} {% assign showsThisDay = showsThisDay | sort: 'Time' %}
   <div class="daydiv" id="daydiv_{{ day }}">
     <h2>{{ day }}</h2>
     {% if showsThisDay.size > 0 %}

@@ -1,0 +1,18 @@
+---
+layout: default
+---
+
+<h1 class="pagetitle">Latest News</h1>
+
+<p>
+  Dartmouth College Radio is more than just music—we also cover campus events,
+  student life, music, culture, and more. Check back here for our exclusive
+  coverage.
+</p>
+
+{% for post in site.posts %} {% if post.type == "news" %}
+<h2>{{ post.title }}</h2>
+<p>{{ post.date | date: "%B %d, %Y" }}</p>
+<p>{{ post.excerpt }}</p>
+<a href="{{ post.url }}">Read more</a>
+{% endif %} {% endfor %}

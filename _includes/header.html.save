@@ -1,0 +1,11 @@
+<header>
+	<h1 style="color:green">WEBDCR</h1>
+  <nav>
+    <ul>
+      <li><a href="/">Home</a></li>
+      <li><a href="/news">About</a></li>
+    </ul>
+  </nav>
+
+
+</header>

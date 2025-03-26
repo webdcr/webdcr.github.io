@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link
+      rel="stylesheet"
+      href="{{ '/assets/css/style.css' | relative_url }}"
+    />
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ site.title }} - {{ page.title }}</title>
+    <style>
+      .pagetitle {
+        font-size: 32px;
+        font-weight: 600;
+        margin-bottom: 16px;
+      }
+      .h1 {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 16px;
+      }
+      main {
+        margin-left: 24%;
+        margin-right: 24%;
+      }
+      body {
+        /* Slightly off white might look nice? */
+        /* background: #f8f8f8; */
+        background: #fdfdfd;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+      #cont {
+        flex: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <div id="cont">
+      {% include header.html %}
+      <!-- Include header -->
+
+      <main>
+        {{ content }}
+        <!-- Where page/post content will be rendered -->
+      </main>
+    </div>
+    {% include footer.html %}
+  </body>
+</html>

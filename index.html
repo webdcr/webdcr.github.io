@@ -1,0 +1,237 @@
+---
+layout: default
+---
+
+<style>
+  #content {
+    text-align: center;
+  }
+
+  #listenButton {
+    display: inline-block;
+    padding: 15px 30px;
+    font-family: "Comic Sans MS", cursive;
+    font-size: 24px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #fff;
+    background: linear-gradient(to right, #ff00ff, #00ffff);
+    border: 4px ridge #00ffff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #ff00ff, 0 0 20px rgba(255, 0, 255, 0.4);
+    text-shadow: 0 0 10px #fff, 0 0 5px #fff;
+    cursor: pointer;
+    transition: all 0.3s;
+    transform-style: preserve-3d;
+    transform: perspective(500px) rotateX(10deg);
+
+    margin-top: 20px;
+    margin-bottom: 60px;
+  }
+
+  #listenButton:hover {
+    transform: perspective(500px) rotateX(10deg) scale(1.05);
+    box-shadow: 0 0 15px #ff00ff, 0 0 30px rgba(255, 0, 255, 0.6);
+  }
+
+  #listenButton:active {
+    transform: perspective(500px) rotateX(10deg) scale(0.95);
+  }
+
+  #shirtsimage {
+    margin-top: 60px;
+    border-radius: 50%;
+  }
+  .showRow {
+  }
+  .showRowInfo {
+    text-align: left;
+  }
+  .showRowName {
+    font-size: 24px;
+    font-weight: 600;
+  }
+  .showRowHost {
+    font-size: 12px;
+    font-weight: normal;
+    margin-left: 4px;
+  }
+
+  .showRowDescription {
+    font-weight: normal;
+    font-size: ;
+  }
+  .showRowImage {
+    text-align: left;
+    width: 100px;
+  }
+  .schedulecontainer {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+  }
+  .showRowTime {
+    font-size: 12px;
+    font-weight: normal;
+    text-align: right;
+    vertical-align: top;
+    width: 80px;
+    padding-right: 12px;
+  }
+  .sidebar {
+    text-align: left;
+    padding: 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    display: relative;
+  }
+  .sidebar-item {
+    padding: 10px;
+    background: lightgray;
+    border-radius: 5px;
+  }
+
+  .schedule-table {
+    width: 100%;
+  }
+
+  .selectDay {
+    text-decoration: underline;
+  }
+  .selectDay:hover {
+    cursor: pointer;
+  }
+
+  .selectDay:not(:last-child)::after {
+    content: " | ";
+    color: black; /* Make sure it's distinct from the links */
+    text-decoration: none;
+    font-weight: normal;
+  }
+
+  .selectedSelectDay {
+    font-weight: bold;
+  }
+
+  .daydiv {
+    display: none;
+  }
+</style>
+
+<div id="content">
+  <img
+    src="/assets/images/wdcr-fish.gif"
+    alt="WebDCR fish"
+    style="width: 150px"
+  />
+  <h1>Radio of, by, and for the students.</h1>
+  <button class="cool-button" id="listenButton">LISTEN LIVE</button>
+
+  <h2>Show Schedule</h2>
+  <p>
+    <span class="selectDay" id="selectDay_Sunday" data-day="Sunday"
+      >sunday</span
+    >
+    <span class="selectDay" id="selectDay_Monday" data-day="Monday"
+      >monday</span
+    >
+    <span class="selectDay" id="selectDay_Tuesday" data-day="Tuesday"
+      >tuesday</span
+    >
+    <span class="selectDay" id="selectDay_Wednesday" data-day="Wednesday"
+      >wednesday</span
+    >
+    <span class="selectDay" id="selectDay_Thursday" data-day="Thursday"
+      >thursday</span
+    >
+    <span class="selectDay" id="selectDay_Friday" data-day="Friday"
+      >friday</span
+    >
+    <span class="selectDay" id="selectDay_Saturday" data-day="Saturday"
+      >saturday</span
+    >
+  </p>
+
+  <!-- <div class="schedulecontainer">
+    <div class="sidebar">
+      <div class="sidebar-item">Sunday</div>
+      <div class="sidebar-item">Monday</div>
+      <div class="sidebar-item">Tuesday</div>
+      <div class="sidebar-item">Wednesday</div>
+      <div class="sidebar-item">Thursday</div>
+      <div class="sidebar-item">Friday</div>
+      <div class="sidebar-item">Saturday</div>
+    </div>
+
+    <div class="scheduleshows"></div>
+  </div> -->
+
+  {% assign days = "Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday" |
+  split: "," %} {% for day in days %} {% assign showsThisDay = site.data.shows |
+  where: "Day", day %}
+  <div class="daydiv" id="daydiv_{{ day }}">
+    <h2>{{ day }}</h2>
+    {% if showsThisDay.size > 0 %}
+    <table class="schedule-table">
+      {% for row in showsThisDay %}
+      <tr class="showRow">
+        <td class="showRowImage">
+          {% if row["Image name"] %} <img src="/assets/images/showalbums/{{
+          row['Image name'] }}" alt="{{ row["Name"] }}"
+          style="width:90px;border:1px solid black;"> {% endif %}
+        </td>
+        <td class="showRowInfo">
+          <span class="showRowName">{{ row["Name"] }}</span>
+          <span class="showRowHost">with {{ row["Host(s)"] }}</span>
+          <p class="showRowDescription">{{ row["Description"] }}</p>
+        </td>
+        <td class="showRowTime">{{ row["Time"] }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% else %}
+    <p>No shows scheduled.</p>
+    {% endif %}
+  </div>
+  {% endfor %}
+
+  <img id="shirtsimage" src="/assets/images/shirts.jpg" />
+</div>
+
+<script>
+  let previousDay = "";
+
+  document.querySelectorAll(".selectDay").forEach((element) => {
+    element.addEventListener("click", (event) => {
+      const day = event.target.getAttribute("data-day");
+      if (day != previousDay) {
+        document.getElementById("daydiv_" + day).style.display = "block";
+
+        document
+          .getElementById("selectDay_" + day)
+          .classList.add("selectedSelectDay");
+
+        if (previousDay) {
+          document.getElementById("daydiv_" + previousDay).style.display =
+            "none";
+
+          document
+            .getElementById("selectDay_" + previousDay)
+            .classList.remove("selectedSelectDay");
+        }
+        previousDay = day;
+      }
+    });
+  });
+
+  const d = new Date();
+  let day = d.getDay();
+  document.querySelectorAll(".selectDay")[day].click();
+
+  document.getElementById("listenButton").addEventListener("click", () => {
+    if ($(".radioPlayer").attr("data-mode") == 0) {
+      document.getElementById("radioPlayer").click();
+    }
+  });
+</script>

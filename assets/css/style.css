@@ -1,0 +1,36 @@
+body {
+	font-family:"helvetica";
+	margin-left:5%;
+	margin-right:5%;
+
+}
+  .button {
+      display: inline-block;
+      padding: 15px 30px;
+      font-family: "Comic Sans MS", cursive;
+      font-size: 24px;
+      font-weight: bold;
+      text-transform: uppercase;
+      color: #fff;
+      background: linear-gradient(to right, #ff00ff, #00ffff);
+      border: 4px ridge #00ffff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ff00ff, 0 0 20px rgba(255, 0, 255, 0.4);
+      text-shadow: 0 0 5px #fff, 0 0 10px #fff;
+      cursor: pointer;
+      transition: all 0.3s;
+      transform-style: preserve-3d;
+      transform: perspective(500px) rotateX(10deg);
+    }
+    
+    .button:hover {
+      transform: perspective(500px) rotateX(10deg) scale(1.05);
+      box-shadow: 0 0 15px #ff00ff, 0 0 30px rgba(255, 0, 255, 0.6);
+    }
+    
+    .button:active {
+      transform: perspective(500px) rotateX(10deg) scale(0.95);
+    }
+
+
+

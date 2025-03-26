@@ -123,7 +123,7 @@ layout: default
   <img
     src="/assets/images/wdcr-fish.gif"
     alt="WebDCR fish"
-    style="width: 150px"
+    style="width: 215px"
   />
   <h1>Radio of, by, and for the students.</h1>
   <button class="cool-button" id="listenButton">LISTEN LIVE</button>
@@ -179,7 +179,9 @@ layout: default
         <td class="showRowImage">
           {% if row["Image name"] %} <img src="/assets/images/showalbums/{{
           row['Image name'] }}" alt="{{ row["Name"] }}"
-          style="width:90px;border:1px solid black;"> {% endif %}
+          style="width:90px;border:1px solid black;"> {% else %} <img
+          src="/assets/images/showalbums/placeholder.png" alt="{{ row["Name"]
+          }}" style="width:90px;border:1px solid black;"> {% endif %}
         </td>
         <td class="showRowInfo">
           <span class="showRowName">{{ row["Name"] }}</span>

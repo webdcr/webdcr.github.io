@@ -51,6 +51,33 @@
     height:100px;
   }
 
+  .logo {
+
+  }
+
+  @media (max-width: 1300px) {
+    .nowplaying {
+      border: 0px;
+      border-bottom: 2.25px solid gray;
+      background-color: lightgray;
+      right: 0px;
+      position: absolute;
+      left:0px;
+      padding:0px;
+      width: 100%;
+      margin-right:200px;
+    }
+    header{
+      padding-top: 0px;
+    }
+    .navbar {
+      padding-top: 120px;
+    }
+    .logo {
+      padding-top: 120px;
+    }
+  }
+
   .showPlaying {
     font-weight: 600;
   }
@@ -76,7 +103,7 @@
       <source src="{{ site.liveradio_url | escape }}" type="audio/mpeg" />
     </audio> -->
     <div style="display: inline-block;margin-right:10px;">
-      <img src="" style="width: 100px; height: 100px; border-right: 2.25px solid black" id="nowplayingImage" />
+      <img src="" style="width: 100px; height: 100px; border-right: 2.25px solid gray" id="nowplayingImage" />
     </div>
     <div style="display: inline-block; vertical-align: top;padding-top:15px;width:200px">
       <p style="margin: 0; margin-bottom: 5px; font-weight: 600; font-size: 10px">ON AIR NOW</p>
@@ -87,7 +114,7 @@
   </div>
 
 
-  <div style="display: inline-block">
+  <div class="logo container" style="display: inline-block">
     <h1 id="wordmark" style="color: #407c4c">WEBDCR</h1>
     <h5
       style="
@@ -101,7 +128,7 @@
       Dartmouth College Radio
     </h5>
   </div>
-  <nav class="navbar">
+  <nav class="navbar container">
     <div class="nav-row">
       <a class="navitem" id="nav_home" href="/">home</a>
       <a class="navitem" id="nav_news" href="/news">news & reports</a>

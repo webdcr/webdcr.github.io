@@ -1,0 +1,17 @@
+---
+layout: default
+---
+
+<h1 class="pagetitle">Music Blog</h1>
+
+<p>
+  Dartmouth College Radio has opinions -- lots of opinions! Explore our blog to find
+  out what we think about music, arts, and culture.
+</p>
+
+{% for post in site.posts %} {% if post.type == "blog" %}
+<h2>{{ post.title }}</h2>
+<p>{{ post.date | date: "%B %d, %Y" }}</p>
+<p>{{ post.excerpt }}</p>
+<a href="{{ post.url }}">Read more</a>
+{% endif %} {% endfor %}

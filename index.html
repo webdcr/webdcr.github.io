@@ -59,7 +59,7 @@ layout: default
 
   .showRowDescription {
     font-weight: normal;
-    font-size: ;
+    font-size: normal;
   }
   .showRowImage {
     text-align: left;
@@ -179,9 +179,9 @@ layout: default
       <tr class="showRow">
         <td class="showRowImage">
           {% if row["Image name"] %} <img src="/assets/images/showalbums/{{
-          row['Image name'] }}" alt="{{ row["Name"] }}"
+          row['Image name'] }}" alt="{{ row['Name'] }}"
           style="width:140px;border:1px solid black;"> {% else %} <img
-          src="/assets/images/showalbums/placeholder.png" alt="{{ row["Name"]
+          src="/assets/images/showalbums/placeholder.png" alt="{{ row['Name']
           }}" style="width:140px;border:1px solid black;"> {% endif %}
         </td>
         <td class="showRowInfo">

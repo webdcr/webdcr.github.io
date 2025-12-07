@@ -1,0 +1,16 @@
+---
+layout: default
+title: Blog
+permalink: /musicblog/
+---
+
+<h1>Music Blog</h1>
+
+{% assign posts = site.musicblog | sort: "date" | reverse %} {% for post in
+posts %}
+<div class="post">
+  <h2><a href="{{ post.url }}">{{ post.title }}</a></h2>
+  <p><small>{{ post.date | date: "%B %d, %Y" }}</small></p>
+  <p><a href="{{ post.url }}">Read More...</a></p>
+</div>
+{% endfor %}

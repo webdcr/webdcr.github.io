@@ -27,11 +27,12 @@ url: "" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: jekyllrb
 github_username: jekyll
 liveradio_url: https://17653.live.streamtheworld.com/DC_RADIOAAC.aac?pname=StandardPlayerV4&pversion=4.19.2-044&dist=triton-web&tdsdk=js-2.9&swm=false&banners=300x250&burst-time=15
+term: "summer 2025"
 
 # Build settings
-theme: minima
-plugins:
-  - jekyll-feed
+# theme: minima
+# plugins:
+# - jekyll-feed
 
 primaryColor: green
 # Exclude from processing.
@@ -53,3 +54,11 @@ primaryColor: green
 #   - vendor/cache/
 #   - vendor/gems/
 #   - vendor/ruby/
+
+collections:
+  news:
+    output: true
+    permalink: /news/:year/:month/:day/:title/
+  musicblog:
+    output: true
+    permalink: /musicblog/:year/:month/:day/:title/

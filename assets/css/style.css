@@ -66,11 +66,12 @@ a:not(.navitem):not(.author-link):active {
   margin-bottom: 8px;
 }
 
-.h1 {
-  font-size: 1.1rem;
+.section-label {
+  font-size: 1.05rem;
   font-weight: 600;
   text-transform: uppercase;
-  margin-top: 32px;
+  letter-spacing: 0.8px;
+  margin: 32px 0 12px;
 }
 
 .site-header {
@@ -175,17 +176,22 @@ a:not(.navitem):not(.author-link):active {
 .nowplaying-copy p {
   margin: 4px 0;
 }
+.nowplaying-copy {
+  min-width: 0;
+}
 
 .nowplaying-eyebrow {
   font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
+  margin-bottom: 4px;
 }
 
 .nowplaying-title {
   font-size: 1.05rem;
   font-weight: 600;
+  margin: 0;
 }
 
 .nowplaying-host {
@@ -288,6 +294,11 @@ footer {
   margin-top: auto;
   padding: 32px 0;
   border-top: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
 }
 
 .saucer {
@@ -296,8 +307,16 @@ footer {
 }
 
 .footerContent {
-  display: inline-block;
-  margin: 0 20px;
+  max-width: 260px;
+}
+
+@media (max-width: 700px) {
+  footer {
+    gap: 12px;
+  }
+  .saucer {
+    width: 55px;
+  }
 }
 
 .button {
@@ -442,19 +461,63 @@ footer {
 }
 
 .directoratePerson {
-  flex: 1 1 280px;
+  flex: 1 1 320px;
   border: 1px solid #000;
   border-radius: 0;
-  padding: 16px;
+  padding: 16px 20px;
   background: #fff;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
 }
 
-.directorate-role {
-  font-size: 0.85rem;
-  color: var(--color-muted);
+.directorate-photo {
+  width: 96px;
+  flex: 0 0 auto;
+}
+
+.directorate-photo img {
+  width: 100%;
+  height: 96px;
+  object-fit: cover;
+  border: 1px solid #000;
+}
+
+.directorate-content {
+  flex: 1 1 auto;
+}
+
+.directorate-label {
+  margin: 0 0 4px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin: 4px 0 10px;
+  font-size: 0.7rem;
+  letter-spacing: 0.4px;
+  color: #000;
+}
+
+.directorate-name {
+  margin: 0 0 8px;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.directorate-description {
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .directoratePerson {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .directorate-photo {
+    width: 80%;
+    max-width: 220px;
+  }
+  .directorate-photo img {
+    width: 100%;
+    height: auto;
+  }
 }
 
 .post-grid {
@@ -503,8 +566,9 @@ footer {
 }
 
 .musicblog-sun {
-  width: 140px;
-  max-width: 40vw;
+  width: 120px;
+  max-width: 32vw;
+  margin-top: -6px;
 }
 
 @media (max-width: 600px) {
@@ -548,6 +612,11 @@ footer {
   color: #000;
   font-weight: 600;
   margin: 0 0 6px;
+}
+
+.post-byline .post-date {
+  font-weight: 500;
+  color: var(--color-muted);
 }
 
 .post-section-label {
@@ -802,22 +871,28 @@ article img {
     grid-template-columns: auto 1fr auto;
     align-items: center;
     text-align: left;
-    gap: 10px;
-    padding: 10px 12px;
+    gap: 8px;
+    padding: 8px 12px;
     overflow: hidden;
   }
   .nowplaying-cover {
     justify-self: start;
-    width: 64px;
-    height: 64px;
+    width: 58px;
+    height: 58px;
   }
   .nowplaying-copy {
     text-align: left;
   }
+  .nowplaying-copy p {
+    margin: 2px 0;
+  }
+  .nowplaying-eyebrow {
+    margin-bottom: 2px;
+  }
   .radioPlayer {
     justify-self: end;
-    width: 48px;
-    height: 48px;
+    width: 52px;
+    height: 52px;
   }
   .showRowImage,
   .showRowTime {
@@ -825,29 +900,15 @@ article img {
   }
   .nowplaying-description-track {
     padding-left: 0;
-    display: block;
-    animation: none;
-  }
-  .nowplaying-description {
-    white-space: normal;
-    mask-image: none;
   }
   .nowplaying-title {
-    font-size: 1rem;
+    font-size: 0.95rem;
+    margin: 0;
   }
   .nowplaying-host,
   .nowplaying-description {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
   }
-}
-.nowplaying-description {
-  font-size: 0.82rem;
-  color: var(--color-text);
-  max-width: 520px;
-  overflow: hidden;
-  white-space: nowrap;
-  position: relative;
-  mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
 }
 .about-layout {
   display: block;

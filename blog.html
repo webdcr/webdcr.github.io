@@ -1,16 +1,22 @@
 ---
 layout: default
-title: Blog
+title: Music Blog
 permalink: /musicblog/
 ---
 
-<h1>Music Blog</h1>
+<div class="page-content">
+  <h1 class="pagetitle">Music Blog</h1>
 
-{% assign posts = site.musicblog | sort: "date" | reverse %} {% for post in
-posts %}
-<div class="post">
-  <h2><a href="{{ post.url }}">{{ post.title }}</a></h2>
-  <p><small>{{ post.date | date: "%B %d, %Y" }}</small></p>
-  <p><a href="{{ post.url }}">Read More...</a></p>
+  <div class="post-grid">
+    {% assign posts = site.musicblog | sort: "date" | reverse %} {% for post in
+    posts %}
+    <article class="post">
+      <div class="post-meta">{{ post.date | date: "%B %d, %Y" }}</div>
+      <h2><a href="{{ post.url }}">{{ post.title }}</a></h2>
+      <p class="post-excerpt">
+        {{ post.excerpt | strip_html | truncate: 180 }}
+      </p>
+    </article>
+    {% endfor %}
+  </div>
 </div>
-{% endfor %}

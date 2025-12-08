@@ -4,6 +4,9 @@ layout: default
 
 <!-- post-specific content here -->
 <article>
+  <div class="post-section-label">
+    <span>WebDCR News</span>
+  </div>
   {% assign post_year = page.date | date: "%Y" | plus: 0 %} {% assign post_month
   = page.date | date: "%m" | plus: 0 %} {% if post_year < 2025 or (post_year ==
   2025 and post_month < 7) %}
@@ -14,14 +17,20 @@ layout: default
       border: 1px solid black;
       padding: 15px;
       padding-left: 15px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
     "
   >
-    <img src="/assets/images/info.ico" />
-    <p>
-      This piece was published before the station migrated to a new website in
-      summer 2025. Please notify the news editor of any formatting errors at
-      news@webdcr.com.
-    </p>
+    <img src="/assets/images/info.ico" alt="Legacy news warning" />
+    <div>
+      <strong style="display:block; margin-bottom:4px;">Hey, read this!</strong>
+      <p style="margin: 0">
+        This piece was published before the station migrated to a new website in
+        summer 2025. Please notify the news editor of any formatting errors at
+        news@webdcr.com.
+      </p>
+    </div>
   </div>
   {% endif %}
 

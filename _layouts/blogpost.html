@@ -1,0 +1,61 @@
+---
+layout: default
+---
+
+<!-- post-specific content here -->
+<article class="blog-article">
+  <div class="post-section-label">
+    <span>WebDCR Music Blog</span>
+  </div>
+  {% assign post_year = page.date | date: "%Y" | plus: 0 %}
+  {% assign post_month = page.date | date: "%m" | plus: 0 %}
+  {% assign is_legacy = post_year < 2025 or (post_year == 2025 and post_month < 7) %}
+
+  {% if is_legacy %}
+  <!-- This post is before July 2025 -->
+  <div
+    style="
+      background: #ededed;
+      border: 1px solid black;
+      padding: 15px;
+      padding-left: 15px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    "
+  >
+    <img src="/assets/images/info.ico" alt="Legacy post warning" />
+    <div>
+      <strong style="display:block; margin-bottom:4px;">Hey, read this!</strong>
+      <p style="margin: 0">
+        This piece was published before the station migrated to a new website in
+        summer 2025. Please notify the blog editor of any formatting errors at
+        blogeditor@webdcr.com.
+      </p>
+    </div>
+  </div>
+  {% endif %}
+
+  <h1>{{ page.title }}</h1>
+  {% assign author_id = page.author | default: '' %}
+  {% assign author_data = site.data.authors[author_id] %}
+  {% if author_data %}
+  {% assign author_name = author_data.name | default: author_id %}
+  {% elsif author_id %}
+  {% assign author_name = author_id %}
+  {% endif %}
+  {% if author_name %}
+    {% if author_data %}
+    <p class="post-byline">
+      By
+      <a class="author-link" href="{{ '/musicblog/author/' | append: author_id | append: '/' | relative_url }}">
+        {{ author_name }}
+      </a>
+    </p>
+    {% else %}
+    <p class="post-byline">By {{ author_name }}</p>
+    {% endif %}
+  {% endif %}
+  <p><small>{{ page.date | date: "%B %d, %Y" }}</small></p>
+  {{ content }}
+</article>

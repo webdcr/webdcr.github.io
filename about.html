@@ -4,50 +4,41 @@ title: About
 permalink: /about/
 ---
 
-<style>
-  .directorateContainer {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-left: 30px;
-    margin-right: 30px;
-  }
-  .directoratePerson {
-    margin-bottom: 16px;
-    flex: 1 0 42%;
-  }
-</style>
+<div class="page-content about-page">
+  <div class="about-layout">
+    <div class="about-copy">
+      <h1 class="pagetitle">About WebDCR</h1>
+      <p>
+        WebDCR is Dartmouth’s freeform online radio, produced by and for
+        students!
+      </p>
 
-<h1 class="pagetitle">About WebDCR</h1>
-<p>
-  WebDCR is Dartmouth’s freeform online radio, produced by and for students!
-</p>
+      <h2>Our history</h2>
+      <p>WebDCR traces its roots to .</p>
+      <p>
+        In 20__, the College sold the FM station . Since then, WebDCR has
+        operated as an exclusively online station.
+      </p>
 
-<h2>Our history</h2>
-<p>
-  WebDCR traces its roots to 1924, when members of the college's amateur radio club began broadcasting on the AM band with a federal license.
-  The station began broadcasting as WDCR on 1340 AM in 1958 and WFRD on 99.3 FM in 1976. 
-</p>
-<p>
-  Dartmouth College Radio ceased broadcasting as WDCR in 2008, and in 2021, the College <a href="https://www.thedartmouth.com/article/2021/07/dartmouth-announces-intention-to-sell-commercial-radio-license-for-wfrd-fm">sold</a> its FM station, WFRD ("99 Rock"). Since then, WebDCR has operated as
-  an exclusively online station.
-</p>
-
-<h2>Contact</h2>
-<p>
-  Get in touch with us at hi@webdcr.com. You can also DM us on Instagram
-  @webdcr.
-</p>
-<h2>Find us</h2>
-<p>Looking for the Station? It's at</p>
-<p>
-  3rd Floor<br />
-  Robinson Hall<br />
-  6 N Main Street,<br />
-  Hanover, NH 03755
-</p>
-<p>We hope to see you there!</p>
+      <h2>Contact</h2>
+      <p>
+        Get in touch with us at hi@webdcr.com. You can also DM us on Instagram
+        @webdcr.
+      </p>
+      <h2>Find us</h2>
+      <p>Looking for the Station? It's at</p>
+      <p>
+        3rd Floor<br />
+        Robinson Hall<br />
+        6 N Main Street,<br />
+        Hanover, NH 03755
+      </p>
+      <p>We hope to see you there!</p>
+    </div>
+    <div class="about-image">
+      <img src="/assets/images/studio.jpg" alt="Inside the WebDCR studio" />
+    </div>
+  </div>
 
 <h2>Our team</h2>
 <p>
@@ -58,21 +49,10 @@ permalink: /about/
   {% assign directorate = site.data.directorate %} {% for person in directorate
   %}
   <div class="directoratePerson">
-
-    <td>
-
-      {% if person.Image %}
-      <img src="/assets/images/portraits/{{ person['Image'] }}" alt="{{ person['First'] }}" 
-      style="width:160px;border:1px solid black;">
-      {% else %}
-      <img src="/assets/images/showalbums/placeholder.png" alt="asdfa"
-          style="width:160px;border:1px solid black;"> 
-      {% endif %}
-    </td>
-
+    <!-- <img src="{{ person["Image"] }}" alt="{{ person["First"] }}" /> -->
     <h4>{{ person["First"] }} {{ person["Last"] }}</h4>
-    <p style="font-size: 12px">{{ person["Position"] }}</p>
-    <p style="flex:0 1 12%">{{ person["Description"] }}</p>
+    <p class="directorate-role">{{ person["Position"] }}</p>
+    <p>{{ person["Description"] }}</p>
   </div>
   {% endfor %}
 </div>

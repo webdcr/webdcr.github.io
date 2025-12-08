@@ -1,18 +1,26 @@
 ---
 layout: default
+title: News
+permalink: /news/
 ---
 
-<h1 class="pagetitle">Latest News</h1>
+<div class="page-content">
+  <h1 class="pagetitle">News &amp; reports</h1>
+  <p>
+    Dartmouth College Radio is more than just music—we also cover campus events,
+    student life, music, culture, and more. Check back here for our exclusive
+    coverage.
+  </p>
 
-<p>
-  Dartmouth College Radio is more than just music—we also cover campus events,
-  student life, music, culture, and more. Check back here for our exclusive
-  coverage.
-</p>
-
-{% for post in site.posts %} {% if post.type == "news" %}
-<h2>{{ post.title }}</h2>
-<p>{{ post.date | date: "%B %d, %Y" }}</p>
-<p>{{ post.excerpt }}</p>
-<a href="{{ post.url }}">Read more</a>
-{% endif %} {% endfor %}
+  <div class="post-grid">
+    {% assign posts = site.news | sort: "date" | reverse %} {% for post in posts %}
+    <article class="post">
+      <div class="post-meta">{{ post.date | date: "%B %d, %Y" }}</div>
+      <h2><a href="{{ post.url }}">{{ post.title }}</a></h2>
+      <p class="post-excerpt">
+        {{ post.excerpt | strip_html | truncate: 180 }}
+      </p>
+    </article>
+    {% endfor %}
+  </div>
+</div>

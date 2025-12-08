@@ -5,12 +5,15 @@ permalink: /news/
 ---
 
 <div class="page-content">
-  <h1 class="pagetitle">News &amp; reports</h1>
-  <p>
-    Dartmouth College Radio is more than just music—we also cover campus events,
-    student life, music, culture, and more. Check back here for our exclusive
-    coverage.
-  </p>
+  <div class="news-header">
+    <div class="news-header-copy">
+      <h1 class="pagetitle">News &amp; Reports</h1>
+      <p class="news-intro">
+        Daily stories, special reports, and exclusive interviews from the
+        student journalists at WebDCR News.
+      </p>
+    </div>
+  </div>
 
   <div class="post-grid">
     {% assign posts = site.news | sort: "date" | reverse %} {% for post in posts %}

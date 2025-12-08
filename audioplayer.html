@@ -1,0 +1,43 @@
+---
+layout: default
+title: Audio Player Gallery
+permalink: /audioplayer/
+---
+
+<div class="page-content audio-lab">
+  <h1 class="pagetitle">Audio Player Sandbox</h1>
+  <p>
+    Quick playground to test how various audio embeds look/behave before we
+    ship them to other pages. Feel free to duplicate any of the blocks below and
+    swap out the source.
+  </p>
+
+  <section class="audio-card">
+    <h2>Standard controls</h2>
+    <p class="audio-note">Pulled directly from the News archive.</p>
+    <audio controls preload="none" src="/assets/audio/news/Herron_Veronica_2020_Interview-2.mp3">
+      Your browser does not support the audio element.
+    </audio>
+  </section>
+
+  <section class="audio-card">
+    <h2>Compact player</h2>
+    <p class="audio-note">Same file, shrunk via CSS for tighter layouts.</p>
+    <div class="audio-compact">
+      <audio controls preload="none" src="/assets/audio/news/Weekly_Update_04_22_21.mp3">
+        Your browser does not support the audio element.
+      </audio>
+    </div>
+  </section>
+
+  <section class="audio-card">
+    <h2>Wide player with caption</h2>
+    <p class="audio-note">Good for longer specials/interviews.</p>
+    <audio controls preload="none" src="/assets/audio/news/Election-Night-Broadcast-Full.mp3">
+      Your browser does not support the audio element.
+    </audio>
+    <figcaption class="audio-caption">
+      Election Night Broadcast (2020) — full-length recording.
+    </figcaption>
+  </section>
+</div>

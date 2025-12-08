@@ -24,30 +24,5 @@
       </main>
     </div>
     {% include footer.html %}
-    <script>
-      (function () {
-        const article = document.querySelector('article.blog-article');
-        if (!article) return;
-        const paragraphs = Array.from(article.querySelectorAll('p'));
-        const target = paragraphs.find(function (p) {
-          return !p.classList.contains('legacy-warning') && !p.classList.contains('post-section-label');
-        });
-        if (!target) return;
-        let firstNode = target.firstChild;
-        while (firstNode && firstNode.nodeType !== Node.TEXT_NODE) {
-          firstNode = firstNode.nextSibling;
-        }
-        if (!firstNode) return;
-        const text = firstNode.textContent || '';
-        const trimmed = text.trim();
-        if (!trimmed) return;
-        const letter = trimmed.charAt(0);
-        const span = document.createElement('span');
-        span.className = 'dropcap';
-        span.textContent = letter;
-        firstNode.textContent = firstNode.textContent.replace(letter, '');
-        target.insertBefore(span, target.firstChild);
-      })();
-    </script>
   </body>
 </html>

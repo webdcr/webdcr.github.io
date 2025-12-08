@@ -25,7 +25,7 @@ description: >- # this means to ignore newlines until "baseurl:"
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 liveradio_url: https://17653.live.streamtheworld.com/DC_RADIOAAC.aac?pname=StandardPlayerV4&pversion=4.19.2-044&dist=triton-web&tdsdk=js-2.9&swm=false&banners=300x250&burst-time=15
-term: "summer 2025"
+term: "the start of 2026"
 
 # Build settings
 # theme: minima

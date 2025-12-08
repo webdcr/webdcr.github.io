@@ -16,19 +16,19 @@ permalink: /about/
         students!
       </p>
 
-      <h2>Our history</h2>
+      <h2 class="section-label">Our history</h2>
       <p>WebDCR traces its roots to .</p>
       <p>
         In 20__, the College sold the FM station . Since then, WebDCR has
         operated as an exclusively online station.
       </p>
 
-      <h2>Contact</h2>
+      <h2 class="section-label">Contact</h2>
       <p>
         Get in touch with us at hi@webdcr.com. You can also DM us on Instagram
         @webdcr.
       </p>
-      <h2>Find us</h2>
+      <h2 class="section-label">Find us</h2>
       <p>Looking for the Station? It's at</p>
       <p>
         3rd Floor<br />
@@ -40,19 +40,26 @@ permalink: /about/
     </div>
   </div>
 
-<h2>Our team</h2>
-<p>
-  gap to know the super funny, always clever, and eternally hot team behind
-  webdcr B)
-</p>
-<div class="directorateContainer">
-  {% assign directorate = site.data.directorate %} {% for person in directorate
-  %}
-  <div class="directoratePerson">
-    <!-- <img src="{{ person["Image"] }}" alt="{{ person["First"] }}" /> -->
-    <h4>{{ person["First"] }} {{ person["Last"] }}</h4>
-    <p class="directorate-role">{{ person["Position"] }}</p>
-    <p>{{ person["Description"] }}</p>
+  <h2 class="section-label">Our team</h2>
+  <p>
+    Gap to know the super funny, always clever, and eternally hot team behind
+    WebDCR B)
+  </p>
+  <div class="directorateContainer">
+    {% assign directorate = site.data.directorate %} {% for person in directorate %}
+    <div class="directoratePerson">
+      <div class="directorate-photo">
+        {% if person["Image"] %}
+        <img src="{{ person["Image"] }}" alt="{{ person["First"] }} {{ person["Last"] }}" />
+        {% else %}
+        <img src="/assets/images/showalbums/placeholder.png" alt="{{ person["First"] }} {{ person["Last"] }}" />
+        {% endif %}
+      </div>
+      <div class="directorate-content">
+        <p class="directorate-label">{{ person["Position"] }}</p>
+        <p class="directorate-name">{{ person["First"] }} {{ person["Last"] }}</p>
+        <p class="directorate-description">{{ person["Description"] }}</p>
+      </div>
+    </div>
+    {% endfor %}
   </div>
-  {% endfor %}
-</div>

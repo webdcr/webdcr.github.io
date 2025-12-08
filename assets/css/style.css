@@ -640,35 +640,136 @@ article img {
 }
 
 .audio-lab {
-  max-width: 720px;
+  max-width: 840px;
 }
 
 .audio-card {
   border: 1px solid #000;
-  padding: 16px;
-  margin: 0 0 24px;
+  padding: 20px 24px;
+  margin: 0 0 28px;
+  background: #fff;
+  box-shadow: 6px 6px 0 #000;
+}
+
+.audio-card--classic {
+  background: #fffdf6;
+}
+
+.audio-card--split {
+  background: #f0f4ff;
+}
+
+.audio-card--playlist {
+  background: #f7f7f7;
+}
+
+.audio-intro {
+  font-size: 1rem;
+  color: var(--color-muted);
+  max-width: 620px;
+}
+
+.audio-eyebrow {
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.6px;
+  margin: 0 0 6px;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.audio-description {
+  margin: 0 0 14px;
+  color: var(--color-text);
+}
+
+.audio-player {
+  width: 100%;
+  border: 1px solid #000;
+  border-radius: 0;
+  background-color: #fff;
+}
+
+.audio-player--slim {
+  max-width: 520px;
+}
+
+.audio-track {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.audio-cover {
+  width: 96px;
+  height: 96px;
+  border: 1px solid #000;
+  object-fit: cover;
+}
+
+.audio-track-meta h3 {
+  margin: 0 0 6px;
+  font-size: 1.1rem;
+}
+
+.audio-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.audio-play-toggle {
+  border: 1px solid #000;
+  background: #000;
+  color: #fff;
+  padding: 6px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.audio-play-toggle:hover,
+.audio-play-toggle:focus-visible {
+  background: var(--color-primary);
+}
+
+.audio-progress {
+  flex: 1;
+  height: 6px;
+  background: #d9d9d9;
+  position: relative;
+  overflow: hidden;
+}
+
+.audio-progress-bar {
+  display: block;
+  height: 100%;
+  background: #000;
+  width: 0;
+}
+
+.audio-time {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.85rem;
+}
+
+.audio-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.audio-stack-item {
+  padding: 12px 16px;
+  border: 1px dashed #000;
   background: #fff;
 }
 
-.audio-card audio {
-  width: 100%;
-  margin-top: 8px;
-}
-
-.audio-note {
-  margin: 0;
-  font-size: 0.9rem;
-  color: var(--color-muted);
-}
-
-.audio-compact audio {
-  width: 260px;
-}
-
-.audio-caption {
-  margin-top: 8px;
-  font-size: 0.85rem;
-  color: var(--color-muted);
+.audio-stack-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
 }
 
 .author-page-header {

@@ -6,38 +6,145 @@ permalink: /audioplayer/
 
 <div class="page-content audio-lab">
   <h1 class="pagetitle">Audio Player Sandbox</h1>
-  <p>
-    Quick playground to test how various audio embeds look/behave before we
-    ship them to other pages. Feel free to duplicate any of the blocks below and
-    swap out the source.
+  <p class="audio-intro">
+    Explore a few different player layouts before we embed them elsewhere. These
+    blocks use the same locally hosted files that power the News archive, just
+    dressed up a bit for experimentation.
   </p>
 
-  <section class="audio-card">
-    <h2>Standard controls</h2>
-    <p class="audio-note">Pulled directly from the News archive.</p>
-    <audio controls preload="none" src="/assets/audio/news/Herron_Veronica_2020_Interview-2.mp3">
+  <section class="audio-card audio-card--classic">
+    <p class="audio-eyebrow">Full-width native controls</p>
+    <h2>Mail-In Ballot Explosion</h2>
+    <p class="audio-description">
+      Straightforward treatment with generous padding and a bold card frame.
+    </p>
+    <audio
+      class="audio-player"
+      controls
+      preload="none"
+      src="/assets/audio/news/Herron_Veronica_2020_Interview-2.mp3"
+    >
       Your browser does not support the audio element.
     </audio>
   </section>
 
-  <section class="audio-card">
-    <h2>Compact player</h2>
-    <p class="audio-note">Same file, shrunk via CSS for tighter layouts.</p>
-    <div class="audio-compact">
-      <audio controls preload="none" src="/assets/audio/news/Weekly_Update_04_22_21.mp3">
-        Your browser does not support the audio element.
-      </audio>
+  <section class="audio-card audio-card--split">
+    <div class="audio-track">
+      <img
+        src="/assets/images/showalbums/placeholder.png"
+        alt="Generic show artwork"
+        class="audio-cover"
+      />
+      <div class="audio-track-meta">
+        <p class="audio-eyebrow">Custom compact controller</p>
+        <h3>Weekly Update — April 22, 2021</h3>
+        <p class="audio-description">
+          Uses our own play/pause button, progress indicator, and timestamp while
+          keeping the audio element hidden.
+        </p>
+        <div class="audio-controls">
+          <button
+            class="audio-play-toggle"
+            type="button"
+            data-audio-target="custom-audio-1"
+            aria-label="Toggle Weekly Update audio"
+          >
+            Play
+          </button>
+          <div class="audio-progress" aria-hidden="true">
+            <span class="audio-progress-bar" data-progress-for="custom-audio-1"></span>
+          </div>
+          <span class="audio-time" data-time-for="custom-audio-1">0:00</span>
+        </div>
+      </div>
+    </div>
+    <audio id="custom-audio-1" preload="none" src="/assets/audio/news/Weekly_Update_04_22_21.mp3"></audio>
+  </section>
+
+  <section class="audio-card audio-card--playlist">
+    <p class="audio-eyebrow">Stacked playlist look</p>
+    <h2>Election Night Special</h2>
+    <p class="audio-description">
+      Two tracks in a faux playlist column. Great for long-form coverage where
+      we want a clear hierarchy.
+    </p>
+    <div class="audio-stack">
+      <div class="audio-stack-item">
+        <span class="audio-stack-label">Opening segment</span>
+        <audio
+          class="audio-player audio-player--slim"
+          controls
+          preload="none"
+          src="/assets/audio/news/Nov-7-2020-Special-Report.mp3"
+        ></audio>
+      </div>
+      <div class="audio-stack-item">
+        <span class="audio-stack-label">Full broadcast</span>
+        <audio
+          class="audio-player audio-player--slim"
+          controls
+          preload="none"
+          src="/assets/audio/news/Election-Night-Broadcast-Full.mp3"
+        ></audio>
+      </div>
     </div>
   </section>
-
-  <section class="audio-card">
-    <h2>Wide player with caption</h2>
-    <p class="audio-note">Good for longer specials/interviews.</p>
-    <audio controls preload="none" src="/assets/audio/news/Election-Night-Broadcast-Full.mp3">
-      Your browser does not support the audio element.
-    </audio>
-    <figcaption class="audio-caption">
-      Election Night Broadcast (2020) — full-length recording.
-    </figcaption>
-  </section>
 </div>
+
+<script>
+  (function () {
+    const toggles = document.querySelectorAll(".audio-play-toggle");
+
+    toggles.forEach((button) => {
+      const targetId = button.dataset.audioTarget;
+      const audio = document.getElementById(targetId);
+      if (!audio) return;
+
+      const progressBar = document.querySelector(
+        `[data-progress-for="${targetId}"]`
+      );
+      const timeLabel = document.querySelector(
+        `[data-time-for="${targetId}"]`
+      );
+
+      function formatTime(seconds) {
+        if (!Number.isFinite(seconds)) return "0:00";
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60)
+          .toString()
+          .padStart(2, "0");
+        return `${mins}:${secs}`;
+      }
+
+      function updateUI() {
+        button.textContent = audio.paused ? "Play" : "Pause";
+        if (progressBar) {
+          const percent = audio.duration
+            ? (audio.currentTime / audio.duration) * 100
+            : 0;
+          progressBar.style.width = `${percent}%`;
+        }
+        if (timeLabel) {
+          timeLabel.textContent = formatTime(audio.currentTime);
+        }
+      }
+
+      button.addEventListener("click", () => {
+        if (audio.paused) {
+          audio.play().catch(() => {});
+        } else {
+          audio.pause();
+        }
+        updateUI();
+      });
+
+      audio.addEventListener("play", updateUI);
+      audio.addEventListener("pause", updateUI);
+      audio.addEventListener("timeupdate", updateUI);
+      audio.addEventListener("ended", () => {
+        audio.currentTime = 0;
+        updateUI();
+      });
+    });
+  })();
+</script>

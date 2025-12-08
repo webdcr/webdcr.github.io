@@ -1,110 +1,50 @@
-<style>
-  header {
-    padding-top: 30px;
-    width: 100%;
-    position: relative; /* Ensures the image's positioning is relative to the header */
-    margin-bottom: 40px;
-    display: flex;
-    flex-direction: row;
-    align-content: space-evenly;
-    gap: 50px;
-  }
-  #wordmark {
-    margin: 0;
-    font-size: 64px;
-    user-select: none;
-  }
-
-  .nav-content {
-    display: flex;
-  }
-  .navbar {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .nav-row {
-    display: flex;
-    gap: 16px;
-  }
-
-  .navitem {
-    text-decoration: none;
-    color: #333;
-    font-size: 16px;
-    font-weight: 600;
-    padding: 6px 9px;
-    border-radius: 4px;
-  }
-
-  .navitem:hover {
-    background-color: #f0f0f0;
-  }
-
-  .nowplaying {
-    border: 2.25px solid black;
-    display: inline-block;
-    padding: 0px;
-    position: fixed;
-    right: 40px;
-    width:320px;
-    height:100px;
-  }
-
-  .showPlaying {
-    font-weight: 600;
-  }
-
-  .radioPlayer:hover {
-    cursor: pointer;
-    margin-bottom:1px;
-}
-.radioPlayer:active {
-    cursor: pointer;
-    margin-bottom:-1px;
-    
-}
-
-
-
-</style>
-
-<header>
-  <div class="nowplaying">
-    <input type="image" src="/assets/images/play.png" alt="Play" id="radioPlayer" class="radioPlayer" onclick="radioClick()" style="width:56px;position:absolute;bottom:-28px;left:22px" data-mode="0">
-    <!-- <audio id="audioStream" controls style="display:none">
-      <source src="{{ site.liveradio_url | escape }}" type="audio/mpeg" />
-    </audio> -->
-    <div style="display: inline-block;margin-right:10px;">
-      <img src="" style="width: 100px; height: 100px; border-right: 2.25px solid black" id="nowplayingImage" />
+<div class="nowplaying-banner" role="region" aria-live="polite">
+  <div class="nowplaying-inner">
+    <div class="nowplaying-cover">
+      <img
+        src="/assets/images/showalbums/placeholder.png"
+        alt="Artwork for the show that is currently live"
+        id="nowplayingImage"
+      />
     </div>
-    <div style="display: inline-block; vertical-align: top;padding-top:15px;width:200px">
-      <p style="margin: 0; margin-bottom: 5px; font-weight: 600; font-size: 10px">ON AIR NOW</p>
-      <p style="margin: 0; margin-bottom: 5px; font-size: 20px;" id="nowplayingTitle"">Everyone I've Never</p>
-      <p style="margin:0;margin-top:2px; font-size:11px;" id="nowplayingHost">No shows are currently scheduled</p>
-      <!-- <a href="" style="border:1px solid black;background:silver;color:black;padding:2px;">listen live</a> -->
+    <div class="nowplaying-copy">
+      <p class="nowplaying-eyebrow">On air now</p>
+      <p class="nowplaying-title" id="nowplayingTitle">WebDCR Music</p>
+      <p class="nowplaying-host" id="nowplayingHost">No show is currently playing</p>
+      <p class="nowplaying-description" style="display:none">
+        <span class="nowplaying-description-track">
+          <span class="nowplaying-description-segment">
+            <span class="nowplaying-description-text" id="nowplayingDescription"></span>
+            <span class="nowplaying-description-divider" aria-hidden="true">•</span>
+          </span>
+          <span class="nowplaying-description-segment" aria-hidden="true">
+            <span class="nowplaying-description-text" id="nowplayingDescriptionClone"></span>
+            <span class="nowplaying-description-divider" aria-hidden="true">•</span>
+          </span>
+        </span>
+      </p>
     </div>
+    <button
+      type="button"
+      id="radioPlayer"
+      class="radioPlayer"
+      data-mode="stopped"
+      aria-label="Toggle the live stream"
+      aria-pressed="false"
+    ></button>
+  </div>
+</div>
+
+<header class="site-header">
+  <div class="wordmark-group">
+    <h1 id="wordmark">WEBDCR</h1>
+    <p class="tagline">Dartmouth College Radio</p>
   </div>
 
-
-  <div style="display: inline-block">
-    <h1 id="wordmark" style="color: #407c4c">WEBDCR</h1>
-    <h5
-      style="
-        letter-spacing: 5px;
-        text-align: center;
-        margin: 0;
-        margin-bottom: 10px;
-        user-select: none;
-      "
-    >
-      Dartmouth College Radio
-    </h5>
-  </div>
-  <nav class="navbar">
+  <nav class="navbar" aria-label="Primary">
     <div class="nav-row">
       <a class="navitem" id="nav_home" href="/">home</a>
-      <a class="navitem" id="nav_news" href="/news">news & reports</a>
+      <a class="navitem" id="nav_news" href="/news">news &amp; reports</a>
       <a class="navitem" id="nav_blog" href="/musicblog">music blog</a>
       <a class="navitem" id="nav_about" href="/about">about</a>
     </div>
@@ -117,111 +57,143 @@
 </header>
 
 <script>
+  (function () {
+    const radioURL = "{{ site.liveradio_url | escape }}";
+    const playerButton = document.getElementById("radioPlayer");
+    const nowPlayingTitle = document.getElementById("nowplayingTitle");
+    const nowPlayingHost = document.getElementById("nowplayingHost");
+    const nowPlayingImage = document.getElementById("nowplayingImage");
+    const nowPlayingDescription = document.getElementById("nowplayingDescription");
+    const nowPlayingDescriptionClone = document.getElementById("nowplayingDescriptionClone");
 
+    let radioAud;
+    let playerState = "stopped";
 
-const radioURL = "{{ site.liveradio_url | escape }}";
+    function setPlayerState(state) {
+      playerState = state;
+      if (!playerButton) return;
+      playerButton.setAttribute("data-mode", state);
+      playerButton.setAttribute("aria-pressed", state === "playing");
+    }
 
-var playing = 0 // track state of audio player (0=paused,1=loading,2=playing)
-var radioAud; // initializing an audio object (to be filled when audio player starts)
+    function ensureAudio() {
+      if (radioAud) {
+        return;
+      }
+      radioAud = new Audio(radioURL);
+      radioAud.preload = "none";
+      radioAud.addEventListener("waiting", () => setPlayerState("loading"));
+      radioAud.addEventListener("playing", () => setPlayerState("playing"));
+      radioAud.addEventListener("pause", () => setPlayerState("stopped"));
+      radioAud.addEventListener("ended", () => setPlayerState("stopped"));
+      radioAud.addEventListener("error", () => setPlayerState("stopped"));
+    }
 
-var playImage = '/assets/images/play.png';
-var pauseImage = '/assets/images/pause.png';
-var loadingImage = '/assets/images/loading.png';
-function radioClick() {
-	if (radioAud === undefined) {
-		radioAud = new Audio(radioURL);
-		radioAud.addEventListener("waiting", radioLoadingActions);	
-		radioAud.addEventListener("playing", radioPlayActions);
-		radioAud.addEventListener("pause", radioPauseActions);
-	}
-	if (playing == 2 || playing == 1) {
-		radioAud.pause()
-	} else {
-		radioAud.load(); // update to latest music
-		radioAud.play() // play it!
-	}
-}
+    function toggleRadio() {
+      ensureAudio();
+      if (!radioAud) {
+        return;
+      }
 
-function radioLoadingActions() {
-	playing = 1;
-  $( ".radioPlayer" ).attr("data-mode",1);
+      if (playerState === "playing" || playerState === "loading") {
+        radioAud.pause();
+        return;
+      }
 
-	$( ".radioPlayer" ).attr("src",loadingImage);
-	$( ".radioPlayer" ).css("animation","spin 2s linear infinite");
-}
-
-function radioPlayActions() {
-	playing = 2;
-	$( ".radioPlayer" ).attr("src",pauseImage);
-  $( ".radioPlayer" ).attr("data-mode",2);
-
-	$( ".radioPlayer" ).css("animation","")
-}
-
-function radioPauseActions() {
-	playing = 0;
-  $( ".radioPlayer" ).attr("data-mode",0);
-
-	$( ".radioPlayer" ).attr("src",playImage);
-	$( ".radioPlayer" ).css("animation","");
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  function loadCurShow() {
-    const showsData = {{ site.data.shows | jsonify }};
-
-    const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const to24Hour = t => ((h = +t.split(/[:\s]/)[0]) % 12 + (t.includes("PM") ? 12 : 0));
-
-    console.log(showsData);
-    const currentDate = new Date();
-    const currentDay = daysOfWeek[currentDate.getDay()];
-    const currentHour = currentDate.getHours();
-
-    let matchingShowName = "WebDCR Music";
-    let matchingShowHost = "No show is currently playing";
-    let matchingShowImage = "/assets/images/showalbums/placeholder.png";
-
-    for (let i = 0; i < showsData.length; i++) {
-      const show = showsData[i];
-      const showDay = show.Day;
-      console.log(showDay);
-      console.log(currentDay);
-      const showHour = to24Hour(show.Time);
-      console.log(showHour);
-      console.log(currentHour);
-
-      if (showDay === currentDay && showHour === currentHour) {
-        matchingShowName = show["Name"];
-        matchingShowHost = "With " + show["Host(s)"];
-        matchingShowImage = "/assets/images/showalbums/" + show["Image name"];
-        break;
+      try {
+        radioAud.load();
+        const playPromise = radioAud.play();
+        if (playPromise && typeof playPromise.catch === "function") {
+          playPromise.catch(() => setPlayerState("stopped"));
+        }
+      } catch (err) {
+        setPlayerState("stopped");
       }
     }
 
-    // console.log(matchingShow);
-      document.getElementById("nowplayingTitle").innerText = matchingShowName;
-      document.getElementById("nowplayingHost").innerText = matchingShowHost;
-      document.getElementById("nowplayingImage").src = matchingShowImage;
+    if (playerButton) {
+      playerButton.addEventListener("click", toggleRadio);
+    }
 
+    function to24Hour(timeString) {
+      if (!timeString) {
+        return NaN;
+      }
+      const parts = timeString.trim().split(/[:\s]/);
+      const hours = parseInt(parts[0], 10);
+      if (Number.isNaN(hours)) {
+        return NaN;
+      }
+      const isPM = timeString.toUpperCase().includes("PM");
+      return (hours % 12) + (isPM ? 12 : 0);
+    }
 
+    function sanitizeImagePath(name) {
+      if (!name) {
+        return "/assets/images/showalbums/placeholder.png";
+      }
+      const trimmed = name.trim();
+      if (!trimmed) {
+        return "/assets/images/showalbums/placeholder.png";
+      }
+      const sanitized = encodeURIComponent(trimmed).replace(/%2F/g, "/");
+      return `/assets/images/showalbums/${sanitized}`;
+    }
 
-  }
+    function loadCurShow() {
+      const showsData = {{ site.data.shows | jsonify }};
+      const daysOfWeek = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday"
+      ];
+      const currentDate = new Date();
+      const currentDay = daysOfWeek[currentDate.getDay()];
+      const currentHour = currentDate.getHours();
 
+      let matchingShow = null;
 
-  loadCurShow();
-  play();
+      for (let i = 0; i < showsData.length; i++) {
+        const show = showsData[i];
+        if (show && show.Day === currentDay && to24Hour(show.Time) === currentHour) {
+          matchingShow = show;
+          break;
+        }
+      }
 
+      const title = matchingShow && matchingShow["Name"] ? matchingShow["Name"] : "WebDCR Music";
+      const host = matchingShow && matchingShow["Host(s)"]
+        ? `with ${matchingShow["Host(s)"]}`
+        : "No show is currently playing";
+      const description = matchingShow && matchingShow["Description"] ? matchingShow["Description"] : '';
+      const art = sanitizeImagePath(matchingShow && matchingShow["Image name"]);
+
+      if (nowPlayingTitle) {
+        nowPlayingTitle.innerText = title;
+      }
+      if (nowPlayingHost) {
+        nowPlayingHost.innerText = host;
+      }
+      if (nowPlayingImage) {
+        nowPlayingImage.src = art;
+      }
+      const marqueeWrapper = document.querySelector('.nowplaying-description');
+      if (marqueeWrapper && nowPlayingDescription && nowPlayingDescriptionClone) {
+        if (description) {
+          nowPlayingDescription.textContent = description;
+          nowPlayingDescriptionClone.textContent = description;
+          marqueeWrapper.style.display = '';
+        } else {
+          marqueeWrapper.style.display = 'none';
+        }
+      }
+    }
+
+    loadCurShow();
+    setInterval(loadCurShow, 30 * 60 * 1000);
+  })();
 </script>

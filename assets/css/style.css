@@ -639,6 +639,38 @@ article img {
   text-align: left;
 }
 
+.audio-lab {
+  max-width: 720px;
+}
+
+.audio-card {
+  border: 1px solid #000;
+  padding: 16px;
+  margin: 0 0 24px;
+  background: #fff;
+}
+
+.audio-card audio {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.audio-note {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-muted);
+}
+
+.audio-compact audio {
+  width: 260px;
+}
+
+.audio-caption {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
 .author-page-header {
   margin-bottom: 24px;
 }

@@ -5,7 +5,19 @@ permalink: /musicblog/
 ---
 
 <div class="page-content">
-  <h1 class="pagetitle">Music Blog</h1>
+  <div class="musicblog-header">
+    <div class="musicblog-header-copy">
+      <h1 class="pagetitle">Music Blog</h1>
+      <p class="musicblog-intro">
+        Fresh picks, deep dives, and Dartmouth discoveries.
+      </p>
+    </div>
+    <img
+      src="/assets/images/sun.gif"
+      alt="Smiling sun animation"
+      class="musicblog-sun"
+    />
+  </div>
 
   <div class="post-grid">
     {% assign posts = site.musicblog | sort: "date" | reverse %} {% for post in

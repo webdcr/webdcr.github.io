@@ -863,9 +863,16 @@ article img {
   .site-header {
     justify-content: center;
   }
+  .alumni-content {
+    display: flex;
+    flex-direction: column;
+  }
   .alumni-contact-card {
     float: none;
     margin: 16px 0;
+    order: 1;
+    max-width: none;
+    width: 100%;
   }
   .nowplaying-inner {
     grid-template-columns: auto 1fr auto;

@@ -4,147 +4,740 @@ title: Audio Player Gallery
 permalink: /audioplayer/
 ---
 
+<style>
+/* Player 1: Vinyl Record Style */
+.player-vinyl {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: none;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+.player-vinyl .audio-eyebrow {
+  color: #e94560;
+}
+.player-vinyl h2 {
+  color: #fff;
+  margin: 0 0 8px;
+}
+.player-vinyl .audio-description {
+  color: rgba(255,255,255,0.6);
+}
+.vinyl-container {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: 20px;
+}
+.vinyl-disc {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, #111 0%, #333 25%, #111 50%, #333 75%, #111 100%);
+  position: relative;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px #444, 0 0 0 6px #222;
+}
+.vinyl-disc::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e94560, #ff6b6b);
+}
+.vinyl-disc::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #111;
+}
+.vinyl-disc.spinning {
+  animation: vinyl-spin 2s linear infinite;
+}
+@keyframes vinyl-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.vinyl-controls {
+  flex: 1;
+}
+.vinyl-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #e94560, #ff6b6b);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgba(233,69,96,0.4);
+}
+.vinyl-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 30px rgba(233,69,96,0.6);
+}
+.vinyl-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: #fff;
+}
+.vinyl-progress-wrap {
+  margin-top: 16px;
+}
+.vinyl-progress {
+  height: 6px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 3px;
+  overflow: hidden;
+  cursor: pointer;
+}
+.vinyl-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #e94560, #ff6b6b);
+  width: 0;
+  border-radius: 3px;
+  transition: width 0.1s;
+}
+.vinyl-time {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.5);
+  font-family: monospace;
+}
+
+/* Player 2: Waveform Cassette Style */
+.player-cassette {
+  background: linear-gradient(180deg, #f5e6d3 0%, #e8d5c4 100%);
+  border: 3px solid #333;
+  border-radius: 8px;
+  padding: 24px;
+  position: relative;
+  box-shadow: 4px 4px 0 #333;
+}
+.player-cassette::before {
+  content: 'STEREO';
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #666;
+}
+.player-cassette .audio-eyebrow {
+  color: #b8860b;
+}
+.player-cassette h2 {
+  color: #333;
+  margin: 0 0 4px;
+  font-size: 1.1rem;
+}
+.player-cassette .audio-description {
+  color: #666;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+}
+.cassette-window {
+  background: #222;
+  border-radius: 4px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.cassette-reel {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #444;
+  border: 3px solid #666;
+  position: relative;
+  flex-shrink: 0;
+}
+.cassette-reel::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  background: #222;
+  border-radius: 50%;
+}
+.cassette-reel.spinning {
+  animation: reel-spin 0.8s linear infinite;
+}
+@keyframes reel-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.cassette-bars {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 40px;
+}
+.cassette-bar {
+  flex: 1;
+  background: #4ade80;
+  min-height: 4px;
+  transition: height 0.1s;
+}
+.cassette-bar:nth-child(even) { background: #22c55e; }
+.cassette-btns {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  justify-content: center;
+}
+.cassette-btn {
+  width: 44px;
+  height: 32px;
+  border: 2px solid #333;
+  background: #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  box-shadow: 0 2px 0 #333;
+}
+.cassette-btn:hover {
+  background: #ccc;
+}
+.cassette-btn:active {
+  box-shadow: none;
+  transform: translateY(2px);
+}
+.cassette-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: #333;
+}
+.cassette-btn.playing {
+  background: #4ade80;
+}
+.cassette-time {
+  text-align: center;
+  margin-top: 12px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  color: #333;
+  font-weight: 600;
+}
+
+/* Player 3: Minimal Wave */
+.player-minimal {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 20px 24px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.player-minimal .audio-eyebrow {
+  color: #9ca3af;
+}
+.player-minimal h2 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  color: #111;
+}
+.player-minimal .audio-description {
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+}
+.minimal-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.minimal-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid #111;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.minimal-btn:hover {
+  background: #111;
+}
+.minimal-btn:hover svg {
+  fill: #fff;
+}
+.minimal-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: #111;
+  transition: fill 0.2s;
+}
+.minimal-wave {
+  flex: 1;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+  position: relative;
+}
+.minimal-wave-bar {
+  width: 3px;
+  background: #e5e5e5;
+  border-radius: 2px;
+  transition: background 0.15s;
+}
+.minimal-wave-bar.active {
+  background: #111;
+}
+.minimal-time {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: #9ca3af;
+  min-width: 80px;
+  text-align: right;
+}
+
+/* Player 4: Brutalist */
+.player-brutalist {
+  background: #ffff00;
+  border: 4px solid #000;
+  padding: 20px;
+}
+.player-brutalist .audio-eyebrow {
+  color: #000;
+  font-size: 0.8rem;
+}
+.player-brutalist h2 {
+  margin: 0 0 8px;
+  font-size: 1.4rem;
+  text-transform: uppercase;
+  letter-spacing: -1px;
+}
+.player-brutalist .audio-description {
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+}
+.brutalist-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brutalist-btn {
+  width: 60px;
+  height: 60px;
+  border: 4px solid #000;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s;
+  flex-shrink: 0;
+}
+.brutalist-btn:hover {
+  background: #000;
+}
+.brutalist-btn:hover svg {
+  fill: #ffff00;
+}
+.brutalist-btn:active {
+  transform: translate(2px, 2px);
+}
+.brutalist-btn svg {
+  width: 28px;
+  height: 28px;
+  fill: #000;
+}
+.brutalist-progress-wrap {
+  flex: 1;
+}
+.brutalist-progress {
+  height: 20px;
+  background: #fff;
+  border: 3px solid #000;
+  position: relative;
+  cursor: pointer;
+}
+.brutalist-progress-bar {
+  height: 100%;
+  background: #000;
+  width: 0;
+}
+.brutalist-info {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-family: monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+</style>
+
 <div class="page-content audio-lab">
   <h1 class="pagetitle">Audio Player Sandbox</h1>
   <p class="audio-intro">
-    Explore a few different player layouts before we embed them elsewhere. These
-    blocks use the same locally hosted files that power the News archive, just
-    dressed up a bit for experimentation.
+    Custom-styled audio players for the site. Each has a distinct visual identity
+    while maintaining full playback controls.
   </p>
 
-  <section class="audio-card audio-card--classic">
-    <p class="audio-eyebrow">Full-width native controls</p>
+  <!-- Player 1: Vinyl Record -->
+  <section class="audio-card player-vinyl">
+    <p class="audio-eyebrow">Vinyl Record Player</p>
     <h2>Mail-In Ballot Explosion</h2>
     <p class="audio-description">
-      Straightforward treatment with generous padding and a bold card frame.
+      Retro vinyl aesthetic with spinning record animation and gradient accents.
     </p>
-    <audio
-      class="audio-player"
-      controls
-      preload="none"
-      src="/assets/audio/news/Herron_Veronica_2020_Interview-2.mp3"
-    >
-      Your browser does not support the audio element.
-    </audio>
-  </section>
-
-  <section class="audio-card audio-card--split">
-    <div class="audio-track">
-      <img
-        src="/assets/images/showalbums/placeholder.png"
-        alt="Generic show artwork"
-        class="audio-cover"
-      />
-      <div class="audio-track-meta">
-        <p class="audio-eyebrow">Custom compact controller</p>
-        <h3>Weekly Update — April 22, 2021</h3>
-        <p class="audio-description">
-          Uses our own play/pause button, progress indicator, and timestamp while
-          keeping the audio element hidden.
-        </p>
-        <div class="audio-controls">
-          <button
-            class="audio-play-toggle"
-            type="button"
-            data-audio-target="custom-audio-1"
-            aria-label="Toggle Weekly Update audio"
-          >
-            Play
-          </button>
-          <div class="audio-progress" aria-hidden="true">
-            <span class="audio-progress-bar" data-progress-for="custom-audio-1"></span>
+    <div class="vinyl-container">
+      <div class="vinyl-disc" data-vinyl="vinyl-audio-1"></div>
+      <div class="vinyl-controls">
+        <button class="vinyl-btn" type="button" data-play="vinyl-audio-1" aria-label="Play">
+          <svg class="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          <svg class="icon-pause" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+        </button>
+        <div class="vinyl-progress-wrap">
+          <div class="vinyl-progress" data-seek="vinyl-audio-1">
+            <div class="vinyl-progress-bar" data-progress="vinyl-audio-1"></div>
           </div>
-          <span class="audio-time" data-time-for="custom-audio-1">0:00</span>
+          <div class="vinyl-time">
+            <span data-current="vinyl-audio-1">0:00</span>
+            <span data-duration="vinyl-audio-1">0:00</span>
+          </div>
         </div>
       </div>
     </div>
-    <audio id="custom-audio-1" preload="none" src="/assets/audio/news/Weekly_Update_04_22_21.mp3"></audio>
+    <audio id="vinyl-audio-1" preload="none" src="/assets/audio/news/Herron_Veronica_2020_Interview-2.mp3"></audio>
   </section>
 
-  <section class="audio-card audio-card--playlist">
-    <p class="audio-eyebrow">Stacked playlist look</p>
-    <h2>Election Night Special</h2>
+  <!-- Player 2: Cassette -->
+  <section class="audio-card player-cassette">
+    <p class="audio-eyebrow">Cassette Deck</p>
+    <h2>Weekly Update — April 22, 2021</h2>
     <p class="audio-description">
-      Two tracks in a faux playlist column. Great for long-form coverage where
-      we want a clear hierarchy.
+      Nostalgic tape deck with animated reels and equalizer bars.
     </p>
-    <div class="audio-stack">
-      <div class="audio-stack-item">
-        <span class="audio-stack-label">Opening segment</span>
-        <audio
-          class="audio-player audio-player--slim"
-          controls
-          preload="none"
-          src="/assets/audio/news/Nov-7-2020-Special-Report.mp3"
-        ></audio>
+    <div class="cassette-window">
+      <div class="cassette-reel" data-reel-l="cassette-audio-1"></div>
+      <div class="cassette-bars" data-bars="cassette-audio-1">
+        <div class="cassette-bar"></div>
+        <div class="cassette-bar"></div>
+        <div class="cassette-bar"></div>
+        <div class="cassette-bar"></div>
+        <div class="cassette-bar"></div>
+        <div class="cassette-bar"></div>
+        <div class="cassette-bar"></div>
+        <div class="cassette-bar"></div>
+        <div class="cassette-bar"></div>
+        <div class="cassette-bar"></div>
+        <div class="cassette-bar"></div>
+        <div class="cassette-bar"></div>
       </div>
-      <div class="audio-stack-item">
-        <span class="audio-stack-label">Full broadcast</span>
-        <audio
-          class="audio-player audio-player--slim"
-          controls
-          preload="none"
-          src="/assets/audio/news/Election-Night-Broadcast-Full.mp3"
-        ></audio>
+      <div class="cassette-reel" data-reel-r="cassette-audio-1"></div>
+    </div>
+    <div class="cassette-btns">
+      <button class="cassette-btn" type="button" data-rewind="cassette-audio-1" aria-label="Rewind">
+        <svg viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>
+      </button>
+      <button class="cassette-btn" type="button" data-play="cassette-audio-1" aria-label="Play">
+        <svg class="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <svg class="icon-pause" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+      </button>
+      <button class="cassette-btn" type="button" data-forward="cassette-audio-1" aria-label="Forward">
+        <svg viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
+      </button>
+    </div>
+    <div class="cassette-time" data-time="cassette-audio-1">00:00 / 00:00</div>
+    <audio id="cassette-audio-1" preload="none" src="/assets/audio/news/Weekly_Update_04_22_21.mp3"></audio>
+  </section>
+
+  <!-- Player 3: Minimal Waveform -->
+  <section class="audio-card player-minimal">
+    <p class="audio-eyebrow">Minimal Waveform</p>
+    <h2>Election Night Special — Opening</h2>
+    <p class="audio-description">
+      Clean, modern design with a faux waveform visualization and subtle animations.
+    </p>
+    <div class="minimal-row">
+      <button class="minimal-btn" type="button" data-play="minimal-audio-1" aria-label="Play">
+        <svg class="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <svg class="icon-pause" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+      </button>
+      <div class="minimal-wave" data-wave="minimal-audio-1"></div>
+      <div class="minimal-time">
+        <span data-current="minimal-audio-1">0:00</span> / <span data-duration="minimal-audio-1">0:00</span>
       </div>
     </div>
+    <audio id="minimal-audio-1" preload="none" src="/assets/audio/news/Nov-7-2020-Special-Report.mp3"></audio>
+  </section>
+
+  <!-- Player 4: Brutalist -->
+  <section class="audio-card player-brutalist">
+    <p class="audio-eyebrow">Brutalist Player</p>
+    <h2>Full Election Night Broadcast</h2>
+    <p class="audio-description">
+      Bold, raw aesthetic with stark colors and heavy borders.
+    </p>
+    <div class="brutalist-controls">
+      <button class="brutalist-btn" type="button" data-play="brutalist-audio-1" aria-label="Play">
+        <svg class="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <svg class="icon-pause" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+      </button>
+      <div class="brutalist-progress-wrap">
+        <div class="brutalist-progress" data-seek="brutalist-audio-1">
+          <div class="brutalist-progress-bar" data-progress="brutalist-audio-1"></div>
+        </div>
+        <div class="brutalist-info">
+          <span data-current="brutalist-audio-1">0:00</span>
+          <span data-duration="brutalist-audio-1">0:00</span>
+        </div>
+      </div>
+    </div>
+    <audio id="brutalist-audio-1" preload="none" src="/assets/audio/news/Election-Night-Broadcast-Full.mp3"></audio>
   </section>
 </div>
 
 <script>
-  (function () {
-    const toggles = document.querySelectorAll(".audio-play-toggle");
+(function() {
+  function formatTime(sec) {
+    if (!Number.isFinite(sec)) return '0:00';
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  }
 
-    toggles.forEach((button) => {
-      const targetId = button.dataset.audioTarget;
-      const audio = document.getElementById(targetId);
-      if (!audio) return;
-
-      const progressBar = document.querySelector(
-        `[data-progress-for="${targetId}"]`
-      );
-      const timeLabel = document.querySelector(
-        `[data-time-for="${targetId}"]`
-      );
-
-      function formatTime(seconds) {
-        if (!Number.isFinite(seconds)) return "0:00";
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60)
-          .toString()
-          .padStart(2, "0");
-        return `${mins}:${secs}`;
-      }
-
-      function updateUI() {
-        button.textContent = audio.paused ? "Play" : "Pause";
-        if (progressBar) {
-          const percent = audio.duration
-            ? (audio.currentTime / audio.duration) * 100
-            : 0;
-          progressBar.style.width = `${percent}%`;
-        }
-        if (timeLabel) {
-          timeLabel.textContent = formatTime(audio.currentTime);
-        }
-      }
-
-      button.addEventListener("click", () => {
-        if (audio.paused) {
-          audio.play().catch(() => {});
-        } else {
-          audio.pause();
-        }
-        updateUI();
-      });
-
-      audio.addEventListener("play", updateUI);
-      audio.addEventListener("pause", updateUI);
-      audio.addEventListener("timeupdate", updateUI);
-      audio.addEventListener("ended", () => {
-        audio.currentTime = 0;
-        updateUI();
+  // Pause all other audio when one plays
+  const allAudio = document.querySelectorAll('audio');
+  allAudio.forEach(a => {
+    a.addEventListener('play', () => {
+      allAudio.forEach(other => {
+        if (other !== a && !other.paused) other.pause();
       });
     });
-  })();
+  });
+
+  // Generic play button handler
+  document.querySelectorAll('[data-play]').forEach(btn => {
+    const audioId = btn.dataset.play;
+    const audio = document.getElementById(audioId);
+    if (!audio) return;
+
+    const iconPlay = btn.querySelector('.icon-play');
+    const iconPause = btn.querySelector('.icon-pause');
+
+    function updateIcon() {
+      if (audio.paused) {
+        iconPlay.style.display = '';
+        iconPause.style.display = 'none';
+        btn.classList.remove('playing');
+      } else {
+        iconPlay.style.display = 'none';
+        iconPause.style.display = '';
+        btn.classList.add('playing');
+      }
+    }
+
+    btn.addEventListener('click', () => {
+      if (audio.paused) {
+        audio.play().catch(() => {});
+      } else {
+        audio.pause();
+      }
+    });
+
+    audio.addEventListener('play', updateIcon);
+    audio.addEventListener('pause', updateIcon);
+    audio.addEventListener('ended', () => { audio.currentTime = 0; updateIcon(); });
+  });
+
+  // Progress bars
+  document.querySelectorAll('[data-progress]').forEach(bar => {
+    const audioId = bar.dataset.progress;
+    const audio = document.getElementById(audioId);
+    if (!audio) return;
+
+    audio.addEventListener('timeupdate', () => {
+      const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+      bar.style.width = pct + '%';
+    });
+  });
+
+  // Seek on progress click
+  document.querySelectorAll('[data-seek]').forEach(track => {
+    const audioId = track.dataset.seek;
+    const audio = document.getElementById(audioId);
+    if (!audio) return;
+
+    track.addEventListener('click', e => {
+      const rect = track.getBoundingClientRect();
+      const pct = (e.clientX - rect.left) / rect.width;
+      if (audio.duration) {
+        audio.currentTime = pct * audio.duration;
+      }
+    });
+  });
+
+  // Time displays
+  document.querySelectorAll('[data-current]').forEach(el => {
+    const audioId = el.dataset.current;
+    const audio = document.getElementById(audioId);
+    if (!audio) return;
+
+    audio.addEventListener('timeupdate', () => {
+      el.textContent = formatTime(audio.currentTime);
+    });
+  });
+
+  document.querySelectorAll('[data-duration]').forEach(el => {
+    const audioId = el.dataset.duration;
+    const audio = document.getElementById(audioId);
+    if (!audio) return;
+
+    audio.addEventListener('loadedmetadata', () => {
+      el.textContent = formatTime(audio.duration);
+    });
+    audio.addEventListener('durationchange', () => {
+      el.textContent = formatTime(audio.duration);
+    });
+  });
+
+  // Vinyl disc spinning
+  document.querySelectorAll('[data-vinyl]').forEach(disc => {
+    const audioId = disc.dataset.vinyl;
+    const audio = document.getElementById(audioId);
+    if (!audio) return;
+
+    audio.addEventListener('play', () => disc.classList.add('spinning'));
+    audio.addEventListener('pause', () => disc.classList.remove('spinning'));
+    audio.addEventListener('ended', () => disc.classList.remove('spinning'));
+  });
+
+  // Cassette reels spinning
+  document.querySelectorAll('[data-reel-l], [data-reel-r]').forEach(reel => {
+    const audioId = reel.dataset.reelL || reel.dataset.reelR;
+    const audio = document.getElementById(audioId);
+    if (!audio) return;
+
+    audio.addEventListener('play', () => reel.classList.add('spinning'));
+    audio.addEventListener('pause', () => reel.classList.remove('spinning'));
+    audio.addEventListener('ended', () => reel.classList.remove('spinning'));
+  });
+
+  // Cassette equalizer bars
+  document.querySelectorAll('[data-bars]').forEach(container => {
+    const audioId = container.dataset.bars;
+    const audio = document.getElementById(audioId);
+    if (!audio) return;
+
+    const bars = container.querySelectorAll('.cassette-bar');
+    let animFrame;
+
+    function animateBars() {
+      bars.forEach(bar => {
+        const h = Math.random() * 36 + 4;
+        bar.style.height = h + 'px';
+      });
+      animFrame = requestAnimationFrame(animateBars);
+    }
+
+    audio.addEventListener('play', () => animateBars());
+    audio.addEventListener('pause', () => cancelAnimationFrame(animFrame));
+    audio.addEventListener('ended', () => cancelAnimationFrame(animFrame));
+  });
+
+  // Cassette time display
+  document.querySelectorAll('[data-time]').forEach(el => {
+    const audioId = el.dataset.time;
+    const audio = document.getElementById(audioId);
+    if (!audio) return;
+
+    function updateTime() {
+      const cur = formatTime(audio.currentTime).padStart(5, '0');
+      const dur = formatTime(audio.duration || 0).padStart(5, '0');
+      el.textContent = `${cur} / ${dur}`;
+    }
+    audio.addEventListener('timeupdate', updateTime);
+    audio.addEventListener('loadedmetadata', updateTime);
+  });
+
+  // Cassette rewind/forward
+  document.querySelectorAll('[data-rewind]').forEach(btn => {
+    const audioId = btn.dataset.rewind;
+    const audio = document.getElementById(audioId);
+    if (!audio) return;
+    btn.addEventListener('click', () => {
+      audio.currentTime = Math.max(0, audio.currentTime - 10);
+    });
+  });
+
+  document.querySelectorAll('[data-forward]').forEach(btn => {
+    const audioId = btn.dataset.forward;
+    const audio = document.getElementById(audioId);
+    if (!audio) return;
+    btn.addEventListener('click', () => {
+      audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 10);
+    });
+  });
+
+  // Minimal waveform
+  document.querySelectorAll('[data-wave]').forEach(container => {
+    const audioId = container.dataset.wave;
+    const audio = document.getElementById(audioId);
+    if (!audio) return;
+
+    // Generate random bar heights for faux waveform
+    const barCount = 60;
+    const heights = [];
+    for (let i = 0; i < barCount; i++) {
+      const h = Math.sin(i * 0.3) * 15 + Math.random() * 20 + 8;
+      heights.push(h);
+    }
+
+    heights.forEach(h => {
+      const bar = document.createElement('div');
+      bar.className = 'minimal-wave-bar';
+      bar.style.height = h + 'px';
+      container.appendChild(bar);
+    });
+
+    const bars = container.querySelectorAll('.minimal-wave-bar');
+
+    audio.addEventListener('timeupdate', () => {
+      const pct = audio.duration ? audio.currentTime / audio.duration : 0;
+      const activeCount = Math.floor(pct * bars.length);
+      bars.forEach((bar, i) => {
+        bar.classList.toggle('active', i < activeCount);
+      });
+    });
+
+    // Seek by clicking waveform
+    container.addEventListener('click', e => {
+      const rect = container.getBoundingClientRect();
+      const pct = (e.clientX - rect.left) / rect.width;
+      if (audio.duration) {
+        audio.currentTime = pct * audio.duration;
+      }
+    });
+  });
+})();
 </script>

@@ -64,6 +64,7 @@
     const nowPlayingImage = document.getElementById("nowplayingImage");
     const nowPlayingDescription = document.getElementById("nowplayingDescription");
     const nowPlayingDescriptionClone = document.getElementById("nowplayingDescriptionClone");
+    const STORAGE_KEY = 'webdcr.radio.playing';
 
     let radioAud;
     let playerState = "stopped";
@@ -82,10 +83,22 @@
       radioAud = new Audio(radioURL);
       radioAud.preload = "none";
       radioAud.addEventListener("waiting", () => setPlayerState("loading"));
-      radioAud.addEventListener("playing", () => setPlayerState("playing"));
-      radioAud.addEventListener("pause", () => setPlayerState("stopped"));
-      radioAud.addEventListener("ended", () => setPlayerState("stopped"));
-      radioAud.addEventListener("error", () => setPlayerState("stopped"));
+      radioAud.addEventListener("playing", () => {
+        setPlayerState("playing");
+        try { localStorage.setItem(STORAGE_KEY, '1'); } catch (e) {}
+      });
+      radioAud.addEventListener("pause", () => {
+        setPlayerState("stopped");
+        try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+      });
+      radioAud.addEventListener("ended", () => {
+        setPlayerState("stopped");
+        try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+      });
+      radioAud.addEventListener("error", () => {
+        setPlayerState("stopped");
+        try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+      });
     }
 
     function toggleRadio() {
@@ -113,6 +126,28 @@
     if (playerButton) {
       playerButton.addEventListener("click", toggleRadio);
     }
+
+    try {
+      if (localStorage.getItem(STORAGE_KEY) === '1') {
+        ensureAudio();
+        if (radioAud) {
+          setPlayerState("loading");
+          try {
+            radioAud.load();
+            const p = radioAud.play();
+            if (p && typeof p.catch === 'function') {
+              p.catch(() => {
+                setPlayerState("stopped");
+                try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+              });
+            }
+          } catch (e) {
+            setPlayerState("stopped");
+            try { localStorage.removeItem(STORAGE_KEY); } catch (err) {}
+          }
+        }
+      }
+    } catch (e) {}
 
     function to24Hour(timeString) {
       if (!timeString) {

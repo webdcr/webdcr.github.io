@@ -406,22 +406,27 @@ footer {
   opacity: 0.6;
 }
 
+.listen-button-content {
+  position: relative;
+  display: inline-block;
+}
+
 .listen-button-icon {
   width: 48px;
   height: 48px;
   object-fit: contain;
   position: absolute;
-  right: 62px;
-  top: 66%;
-  transform: translateY(-50%) rotate(12deg);
+  left: 100%;
+  top: 100%;
+  margin-left: 4px;
+  margin-top: -20px;
+  transform: rotate(12deg);
   transform-origin: center;
   pointer-events: none;
 }
 
-
-
 .listen-button-label {
-  display: inline-block;
+  display: block;
   text-align: center;
 }
 
@@ -1044,10 +1049,6 @@ article img {
     justify-self: end;
     width: 52px;
     height: 52px;
-  }
-  .showRowImage,
-  .showRowTime {
-    display: none;
   }
   .nowplaying-description-track {
     padding-left: 0;

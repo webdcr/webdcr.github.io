@@ -1061,6 +1061,37 @@ article img {
   .nowplaying-description {
     font-size: 0.72rem;
   }
+  .schedule-table {
+    display: block;
+  }
+  .showRow {
+    display: flex;
+    flex-direction: column;
+    padding: 16px 0;
+  }
+  .showRowImage {
+    width: 100%;
+    padding: 0 0 12px;
+  }
+  .showRowImage img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+  }
+  .showRowInfo {
+    padding: 0;
+  }
+  .showRowTime {
+    width: auto;
+    text-align: left;
+    padding: 8px 0 0;
+    font-weight: 600;
+  }
+  .showRow--live::after {
+    position: static;
+    display: inline-block;
+    margin-left: 8px;
+  }
 }
 .about-layout {
   display: block;

@@ -7,6 +7,13 @@
       href="{{ '/assets/css/style.css' | relative_url }}"
       id="site-stylesheet"
     />
+    {% if page.preload_listen_icon_hover %}
+    <link
+      rel="preload"
+      href="{{ '/assets/images/hand2.png' | relative_url }}"
+      as="image"
+    />
+    {% endif %}
 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

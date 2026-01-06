@@ -472,9 +472,13 @@ footer {
   margin-right: auto;
 }
 
-.schedule-term {
-  color: var(--color-muted);
-  margin-top: 0;
+.schedule-header {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.schedule-header h2 {
+  margin: 0;
 }
 
 .day-selector-group {
@@ -710,6 +714,43 @@ footer {
   width: 120px;
   max-width: 32vw;
   margin-top: -6px;
+}
+
+.musicblog-authors {
+  margin: 24px 0;
+}
+
+.author-pill-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.author-pill {
+  border: 1px solid #000;
+  border-radius: 999px;
+  padding: 6px 14px;
+  text-decoration: none;
+  color: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: #fff;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.author-pill:hover,
+.author-pill:focus-visible {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+@media (max-width: 600px) {
+  .musicblog-authors {
+    text-align: center;
+  }
+  .author-pill-group {
+    justify-content: center;
+  }
 }
 
 @media (max-width: 600px) {

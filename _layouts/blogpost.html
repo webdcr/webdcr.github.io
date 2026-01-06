@@ -7,9 +7,9 @@ layout: default
   <div class="post-section-label">
     <span>WebDCR Music Blog</span>
   </div>
-  {% assign post_year = page.date | date: "%Y" | plus: 0 %} {% assign post_month
-  = page.date | date: "%m" | plus: 0 %} {% assign is_legacy = post_year < 2025
-  or (post_year == 2025 and post_month < 7) %} {% if is_legacy %}
+  {% assign post_timestamp = page.date | date: "%s" | plus: 0 %}
+  {% assign migration_timestamp = '2026-01-16 00:00:00 UTC' | date: "%s" | plus: 0 %}
+  {% assign is_legacy = post_timestamp < migration_timestamp %} {% if is_legacy %}
   <!-- This post is before July 2025 -->
   <div
     style="
@@ -29,7 +29,7 @@ layout: default
       >
       <p style="margin: 0">
         This piece was published before the station migrated to a new website on
-        January 1, 2026. Please notify the blog editor of any formatting errors
+        January 16, 2026. Please notify the blog editor of any formatting errors
         at hi@webdcr.com.
       </p>
     </div>

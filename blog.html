@@ -19,6 +19,23 @@ permalink: /musicblog/
     />
   </div>
 
+  {% assign author_pages = site.authors | sort: 'title' %}
+  {% if author_pages.size > 0 %}
+  <section class="musicblog-authors">
+    <h2 class="section-label">Our Contributors</h2>
+    <div class="author-pill-group">
+      {% for author_page in author_pages %}
+        {% assign author_key = author_page.author_id | default: author_page.slug %}
+        {% assign author_data = site.data.authors[author_key] %}
+        {% assign author_name = author_data.name | default: author_page.title %}
+        <a class="author-pill" href="{{ author_page.url | relative_url }}">
+          {{ author_name }}
+        </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
   <div class="post-grid">
     {% assign posts = site.musicblog | sort: "date" | reverse %} {% for post in
     posts %}

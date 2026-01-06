@@ -24,6 +24,13 @@ preload_listen_icon_hover: true
       />
     </span>
   </button>
+  <img
+    src="/assets/images/hand1.png"
+    alt=""
+    class="listen-button-cursor"
+    id="listenButtonCursor"
+    aria-hidden="true"
+  />
 
   <h2>Show Schedule</h2>
   <p class="schedule-term">({{ site.term }})</p>
@@ -86,7 +93,11 @@ preload_listen_icon_hover: true
         </td>
         {% assign timeString = '2000-01-01 ' | append: row['Time'] %}
         {% assign displayTime = timeString | date: '%-I:%M %p' %}
-        <td class="showRowTime">{{ displayTime }}</td>
+        <td class="showRowTime">
+          <span class="showRowTimeContent">
+            <span class="showRowTimeText">{{ displayTime }}</span>
+          </span>
+        </td>
       </tr>
       {% endfor %}
     </table>
@@ -174,11 +185,10 @@ preload_listen_icon_hover: true
           if (!src) {
             return;
           }
-          if (
-            listenButton.classList.contains("listen-button--active") &&
-            src === hoverSrc
-          ) {
-            return;
+          if (listenButton.classList.contains("listen-button--active")) {
+            if (src === hoverSrc || src === defaultSrc) {
+              return;
+            }
           }
           listenIcon.setAttribute("src", src);
         };
@@ -238,17 +248,32 @@ preload_listen_icon_hover: true
         }
       }
 
+      const cursorEl = document.getElementById("listenButtonCursor");
+      const buttonIcon = listenButton.querySelector(".listen-button-icon");
+      const updateCursorStyle = () => {
+        const isActive = listenButton.classList.contains("listen-button--active");
+        const handSrc = isActive ? "/assets/images/hand1-gray.png" : "/assets/images/hand1.png";
+        if (cursorEl) {
+          cursorEl.src = handSrc;
+        }
+        if (buttonIcon) {
+          buttonIcon.src = handSrc;
+        }
+      };
+
       const updateListenButtonVisualState = () => {
         if (!radioPlayerButton) {
           listenButton.classList.remove("listen-button--active");
+          updateCursorStyle();
           return;
         }
         const mode = radioPlayerButton.getAttribute("data-mode");
-        if (mode === "playing") {
+        if (mode === "playing" || mode === "loading") {
           listenButton.classList.add("listen-button--active");
         } else {
           listenButton.classList.remove("listen-button--active");
         }
+        updateCursorStyle();
       };
 
       if (radioPlayerButton) {
@@ -270,6 +295,86 @@ preload_listen_icon_hover: true
         }
 
         updateListenButtonVisualState();
+      }
+
+      if (cursorEl) {
+        const moveCursorTo = (x, y) => {
+          cursorEl.style.left = x + "px";
+          cursorEl.style.top = y + "px";
+        };
+
+        const setCursorPosition = (x, y, instant = false) => {
+          if (instant) {
+            cursorEl.classList.add("listen-button-cursor--no-transition");
+            moveCursorTo(x, y);
+            void cursorEl.offsetWidth;
+            cursorEl.classList.remove("listen-button-cursor--no-transition");
+          } else {
+            moveCursorTo(x, y);
+          }
+        };
+
+        const getCursorAnchorPosition = () => {
+          const target = buttonIcon || listenButton;
+          const rect = target.getBoundingClientRect();
+          return {
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2
+          };
+        };
+
+        const moveCursorToAnchor = (instant = false) => {
+          const { x, y } = getCursorAnchorPosition();
+          setCursorPosition(x, y, instant);
+        };
+
+        moveCursorToAnchor(true);
+
+        let cursorHideTimeout;
+
+        listenButton.addEventListener("mouseenter", (event) => {
+          if (cursorHideTimeout) {
+            clearTimeout(cursorHideTimeout);
+            cursorHideTimeout = undefined;
+          }
+          moveCursorToAnchor(true);
+          cursorEl.classList.add("visible");
+          requestAnimationFrame(() => {
+            setCursorPosition(event.clientX, event.clientY);
+          });
+          updateCursorStyle();
+        });
+
+        listenButton.addEventListener("mouseleave", () => {
+          moveCursorToAnchor();
+          cursorHideTimeout = setTimeout(() => {
+            cursorEl.classList.remove("visible");
+            cursorEl.src = "/assets/images/hand1.png";
+          }, 80);
+        });
+
+        listenButton.addEventListener("mousemove", (e) => {
+          setCursorPosition(e.clientX, e.clientY);
+        });
+
+        listenButton.addEventListener("mousedown", () => {
+          if (!listenButton.classList.contains("listen-button--active")) {
+            cursorEl.src = "/assets/images/hand2.png";
+          }
+        });
+
+        listenButton.addEventListener("mouseup", () => {
+          const handSrc = listenButton.classList.contains("listen-button--active")
+            ? "/assets/images/hand1-gray.png"
+            : "/assets/images/hand1.png";
+          cursorEl.src = handSrc;
+        });
+
+        window.addEventListener("resize", () => {
+          if (!cursorEl.classList.contains("visible")) {
+            moveCursorToAnchor(true);
+          }
+        });
       }
     }
 

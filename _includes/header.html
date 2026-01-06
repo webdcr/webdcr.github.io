@@ -68,6 +68,29 @@
 
     let radioAud;
     let playerState = "stopped";
+    let isPageUnloading = false;
+
+    const rememberPlaybackPreference = () => {
+      try {
+        localStorage.setItem(STORAGE_KEY, '1');
+      } catch (e) {}
+    };
+
+    const clearPlaybackPreference = () => {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (e) {}
+    };
+
+    const handlePageExit = () => {
+      if (playerState === "playing" || playerState === "loading") {
+        isPageUnloading = true;
+        rememberPlaybackPreference();
+      }
+    };
+
+    window.addEventListener("pagehide", handlePageExit);
+    window.addEventListener("beforeunload", handlePageExit);
 
     function setPlayerState(state) {
       playerState = state;
@@ -84,20 +107,24 @@
       radioAud.preload = "none";
       radioAud.addEventListener("waiting", () => setPlayerState("loading"));
       radioAud.addEventListener("playing", () => {
+        isPageUnloading = false;
         setPlayerState("playing");
-        try { localStorage.setItem(STORAGE_KEY, '1'); } catch (e) {}
+        rememberPlaybackPreference();
       });
       radioAud.addEventListener("pause", () => {
         setPlayerState("stopped");
-        try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+        if (isPageUnloading) {
+          return;
+        }
+        clearPlaybackPreference();
       });
       radioAud.addEventListener("ended", () => {
         setPlayerState("stopped");
-        try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+        clearPlaybackPreference();
       });
       radioAud.addEventListener("error", () => {
         setPlayerState("stopped");
-        try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+        clearPlaybackPreference();
       });
     }
 
@@ -132,22 +159,22 @@
         ensureAudio();
         if (radioAud) {
           setPlayerState("loading");
-          try {
-            radioAud.load();
-            const p = radioAud.play();
-            if (p && typeof p.catch === 'function') {
-              p.catch(() => {
-                setPlayerState("stopped");
-                try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
-              });
-            }
-          } catch (e) {
-            setPlayerState("stopped");
-            try { localStorage.removeItem(STORAGE_KEY); } catch (err) {}
+        try {
+          radioAud.load();
+          const p = radioAud.play();
+          if (p && typeof p.catch === 'function') {
+            p.catch(() => {
+              setPlayerState("stopped");
+              clearPlaybackPreference();
+            });
           }
+        } catch (e) {
+          setPlayerState("stopped");
+          clearPlaybackPreference();
         }
       }
-    } catch (e) {}
+    }
+  } catch (e) {}
 
     function to24Hour(timeString) {
       if (!timeString) {

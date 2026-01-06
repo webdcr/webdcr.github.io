@@ -28,9 +28,11 @@
       type="button"
       id="radioPlayer"
       class="radioPlayer"
-      data-mode="stopped"
+      x-data
+      :data-mode="$store.radioPlayer ? $store.radioPlayer.state : 'stopped'"
       aria-label="Toggle the live stream"
-      aria-pressed="false"
+      :aria-pressed="$store.radioPlayer ? ($store.radioPlayer.state === 'playing').toString() : 'false'"
+      @click="$store.radioPlayer && $store.radioPlayer.toggle()"
     ></button>
   </div>
 </div>
@@ -56,145 +58,162 @@
 </header>
 
 <script>
-  (function () {
+  window.WEBDCR_SHOWS = window.WEBDCR_SHOWS || {{ site.data.shows | jsonify }};
+  window.webdcr = window.webdcr || {};
+  window.webdcr.parseTimeToMinutes = function (timeString) {
+    if (!timeString) {
+      return NaN;
+    }
+    const trimmed = String(timeString).trim();
+    const match = trimmed.match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$/i);
+    if (!match) {
+      return NaN;
+    }
+    let hours = parseInt(match[1], 10);
+    const minutes = match[2] ? parseInt(match[2], 10) : 0;
+    const meridiem = match[3] ? match[3].toUpperCase() : null;
+    if (meridiem === "PM" && hours < 12) {
+      hours += 12;
+    }
+    if (meridiem === "AM" && hours === 12) {
+      hours = 0;
+    }
+    if (!meridiem && (hours < 0 || hours >= 24)) {
+      return NaN;
+    }
+    if (minutes < 0 || minutes >= 60) {
+      return NaN;
+    }
+    return hours * 60 + minutes;
+  };
+</script>
+
+<script>
+  document.addEventListener('alpine:init', () => {
     const radioURL = "{{ site.liveradio_url | escape }}";
-    const playerButton = document.getElementById("radioPlayer");
+    const STORAGE_KEY = 'webdcr.radio.playing';
+
+    Alpine.store('radioPlayer', {
+      state: 'stopped',
+      audio: null,
+      isPageUnloading: false,
+      init() {
+        this.registerLifecycleHandlers();
+        this.resumeIfNeeded();
+      },
+      isActive() {
+        return this.state === 'playing' || this.state === 'loading';
+      },
+      registerLifecycleHandlers() {
+        const exitHandler = () => this.handlePageExit();
+        window.addEventListener('pagehide', exitHandler);
+        window.addEventListener('beforeunload', exitHandler);
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'hidden') {
+            this.handlePageExit();
+          } else {
+            this.isPageUnloading = false;
+          }
+        });
+      },
+      ensureAudio() {
+        if (this.audio) {
+          return;
+        }
+        this.audio = new Audio(radioURL);
+        this.audio.preload = 'none';
+        this.audio.addEventListener('waiting', () => this.setState('loading'));
+        this.audio.addEventListener('playing', () => {
+          this.isPageUnloading = false;
+          this.setState('playing');
+          this.rememberPlaybackPreference();
+        });
+        this.audio.addEventListener('pause', () => {
+          this.setState('stopped');
+          if (!this.isPageUnloading) {
+            this.clearPlaybackPreference();
+          }
+        });
+        ['ended', 'error'].forEach((eventName) => {
+          this.audio.addEventListener(eventName, () => {
+            this.setState('stopped');
+            this.clearPlaybackPreference();
+          });
+        });
+      },
+      setState(state) {
+        this.state = state;
+      },
+      toggle() {
+        if (this.state === 'playing' || this.state === 'loading') {
+          this.pause();
+        } else {
+          this.play();
+        }
+      },
+      play() {
+        this.ensureAudio();
+        if (!this.audio) {
+          return;
+        }
+        this.setState('loading');
+        try {
+          this.audio.load();
+          const playPromise = this.audio.play();
+          if (playPromise && typeof playPromise.catch === 'function') {
+            playPromise.catch(() => {
+              this.setState('stopped');
+              this.clearPlaybackPreference();
+            });
+          }
+        } catch (err) {
+          this.setState('stopped');
+          this.clearPlaybackPreference();
+        }
+      },
+      pause() {
+        if (this.audio) {
+          this.audio.pause();
+        } else {
+          this.setState('stopped');
+        }
+      },
+      rememberPlaybackPreference() {
+        try {
+          localStorage.setItem(STORAGE_KEY, '1');
+        } catch (e) {}
+      },
+      clearPlaybackPreference() {
+        try {
+          localStorage.removeItem(STORAGE_KEY);
+        } catch (e) {}
+      },
+      handlePageExit() {
+        if (this.isActive()) {
+          this.isPageUnloading = true;
+          this.rememberPlaybackPreference();
+        }
+      },
+      resumeIfNeeded() {
+        try {
+          if (localStorage.getItem(STORAGE_KEY) === '1') {
+            this.play();
+          }
+        } catch (e) {}
+      }
+    });
+
+    Alpine.store('radioPlayer').init();
+  });
+</script>
+
+<script>
+  (function () {
     const nowPlayingTitle = document.getElementById("nowplayingTitle");
     const nowPlayingHost = document.getElementById("nowplayingHost");
     const nowPlayingImage = document.getElementById("nowplayingImage");
     const nowPlayingDescription = document.getElementById("nowplayingDescription");
     const nowPlayingDescriptionClone = document.getElementById("nowplayingDescriptionClone");
-    const STORAGE_KEY = 'webdcr.radio.playing';
-
-    let radioAud;
-    let playerState = "stopped";
-    let isPageUnloading = false;
-
-    const rememberPlaybackPreference = () => {
-      try {
-        localStorage.setItem(STORAGE_KEY, '1');
-      } catch (e) {}
-    };
-
-    const clearPlaybackPreference = () => {
-      try {
-        localStorage.removeItem(STORAGE_KEY);
-      } catch (e) {}
-    };
-
-    const handlePageExit = () => {
-      if (playerState === "playing" || playerState === "loading") {
-        isPageUnloading = true;
-        rememberPlaybackPreference();
-      }
-    };
-
-    window.addEventListener("pagehide", handlePageExit);
-    window.addEventListener("beforeunload", handlePageExit);
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "hidden") {
-        handlePageExit();
-      } else {
-        isPageUnloading = false;
-      }
-    });
-
-    function setPlayerState(state) {
-      playerState = state;
-      if (!playerButton) return;
-      playerButton.setAttribute("data-mode", state);
-      playerButton.setAttribute("aria-pressed", state === "playing");
-    }
-
-    function ensureAudio() {
-      if (radioAud) {
-        return;
-      }
-      radioAud = new Audio(radioURL);
-      radioAud.preload = "none";
-      radioAud.addEventListener("waiting", () => setPlayerState("loading"));
-      radioAud.addEventListener("playing", () => {
-        isPageUnloading = false;
-        setPlayerState("playing");
-        rememberPlaybackPreference();
-      });
-      radioAud.addEventListener("pause", () => {
-        setPlayerState("stopped");
-        if (isPageUnloading) {
-          return;
-        }
-        clearPlaybackPreference();
-      });
-      radioAud.addEventListener("ended", () => {
-        setPlayerState("stopped");
-        clearPlaybackPreference();
-      });
-      radioAud.addEventListener("error", () => {
-        setPlayerState("stopped");
-        clearPlaybackPreference();
-      });
-    }
-
-    function toggleRadio() {
-      ensureAudio();
-      if (!radioAud) {
-        return;
-      }
-
-      if (playerState === "playing" || playerState === "loading") {
-        radioAud.pause();
-        return;
-      }
-
-      try {
-        radioAud.load();
-        const playPromise = radioAud.play();
-        if (playPromise && typeof playPromise.catch === "function") {
-          playPromise.catch(() => setPlayerState("stopped"));
-        }
-      } catch (err) {
-        setPlayerState("stopped");
-      }
-    }
-
-    if (playerButton) {
-      playerButton.addEventListener("click", toggleRadio);
-    }
-
-    try {
-      if (localStorage.getItem(STORAGE_KEY) === '1') {
-        ensureAudio();
-        if (radioAud) {
-          setPlayerState("loading");
-        try {
-          radioAud.load();
-          const p = radioAud.play();
-          if (p && typeof p.catch === 'function') {
-            p.catch(() => {
-              setPlayerState("stopped");
-              clearPlaybackPreference();
-            });
-          }
-        } catch (e) {
-          setPlayerState("stopped");
-          clearPlaybackPreference();
-        }
-      }
-    }
-  } catch (e) {}
-
-    function to24Hour(timeString) {
-      if (!timeString) {
-        return NaN;
-      }
-      const parts = timeString.trim().split(/[:\s]/);
-      const hours = parseInt(parts[0], 10);
-      if (Number.isNaN(hours)) {
-        return NaN;
-      }
-      const isPM = timeString.toUpperCase().includes("PM");
-      return (hours % 12) + (isPM ? 12 : 0);
-    }
 
     function sanitizeImagePath(name) {
       if (!name) {
@@ -209,7 +228,7 @@
     }
 
     function loadCurShow() {
-      const showsData = {{ site.data.shows | jsonify }};
+      const showsData = window.WEBDCR_SHOWS || [];
       const daysOfWeek = [
         "Sunday",
         "Monday",
@@ -221,13 +240,23 @@
       ];
       const currentDate = new Date();
       const currentDay = daysOfWeek[currentDate.getDay()];
-      const currentHour = currentDate.getHours();
+      const nowMinutes = currentDate.getHours() * 60 + currentDate.getMinutes();
 
       let matchingShow = null;
 
       for (let i = 0; i < showsData.length; i++) {
         const show = showsData[i];
-        if (show && show.Day === currentDay && to24Hour(show.Time) === currentHour) {
+        if (!show || show.Day !== currentDay) {
+          continue;
+        }
+        const parser = window.webdcr && typeof window.webdcr.parseTimeToMinutes === 'function'
+          ? window.webdcr.parseTimeToMinutes
+          : null;
+        const showStart = parser ? parser(show.Time) : NaN;
+        if (Number.isNaN(showStart)) {
+          continue;
+        }
+        if (nowMinutes >= showStart && nowMinutes < showStart + 60) {
           matchingShow = show;
           break;
         }
@@ -261,7 +290,25 @@
       }
     }
 
+    function scheduleShowUpdates() {
+      const now = new Date();
+      const nextMinute = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        now.getHours(),
+        now.getMinutes() + 1,
+        0,
+        0
+      );
+      const delay = Math.max(nextMinute.getTime() - now.getTime(), 250);
+      setTimeout(() => {
+        loadCurShow();
+        scheduleShowUpdates();
+      }, delay);
+    }
+
     loadCurShow();
-    setInterval(loadCurShow, 30 * 60 * 1000);
+    scheduleShowUpdates();
   })();
 </script>

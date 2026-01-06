@@ -336,6 +336,7 @@ preload_listen_icon_hover: true
         if (!hasFinePointer) {
           moveCursorToAnchor(true);
           cursorEl.classList.add("visible");
+          listenButton.addEventListener("click", () => moveCursorToAnchor(true));
           window.addEventListener("resize", () => moveCursorToAnchor(true));
         } else {
           moveCursorToAnchor(true);

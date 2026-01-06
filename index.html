@@ -166,6 +166,7 @@ preload_listen_icon_hover: true
     const listenButton = document.getElementById("listenButton");
     const radioPlayerButton = document.getElementById("radioPlayer");
     if (listenButton) {
+      listenButton.setAttribute("aria-disabled", "false");
       listenButton.addEventListener("click", () => {
         if (!radioPlayerButton) {
           return;
@@ -248,7 +249,15 @@ preload_listen_icon_hover: true
         }
       }
 
-      const cursorEl = document.getElementById("listenButtonCursor");
+      const rawCursorEl = document.getElementById("listenButtonCursor");
+      const hasFinePointer =
+        typeof window.matchMedia === "function"
+          ? window.matchMedia("(pointer: fine)").matches
+          : true;
+      const cursorEl = hasFinePointer ? rawCursorEl : null;
+      if (rawCursorEl && !cursorEl) {
+        rawCursorEl.style.display = "none";
+      }
       const buttonIcon = listenButton.querySelector(".listen-button-icon");
       const updateCursorStyle = () => {
         const isActive = listenButton.classList.contains("listen-button--active");
@@ -264,15 +273,14 @@ preload_listen_icon_hover: true
       const updateListenButtonVisualState = () => {
         if (!radioPlayerButton) {
           listenButton.classList.remove("listen-button--active");
+          listenButton.setAttribute("aria-disabled", "false");
           updateCursorStyle();
           return;
         }
         const mode = radioPlayerButton.getAttribute("data-mode");
-        if (mode === "playing" || mode === "loading") {
-          listenButton.classList.add("listen-button--active");
-        } else {
-          listenButton.classList.remove("listen-button--active");
-        }
+        const isActive = mode === "playing" || mode === "loading";
+        listenButton.classList.toggle("listen-button--active", isActive);
+        listenButton.setAttribute("aria-disabled", isActive ? "true" : "false");
         updateCursorStyle();
       };
 

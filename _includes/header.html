@@ -91,6 +91,13 @@
 
     window.addEventListener("pagehide", handlePageExit);
     window.addEventListener("beforeunload", handlePageExit);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") {
+        handlePageExit();
+      } else {
+        isPageUnloading = false;
+      }
+    });
 
     function setPlayerState(state) {
       playerState = state;

@@ -410,7 +410,7 @@ footer {
   visibility: hidden;
   left: 0;
   top: 0;
-  transition: left 0.06s linear, top 0.06s linear, opacity 0.08s linear;
+  transition: left 0.07s linear, top 0.07s linear, opacity 0.08s linear;
   will-change: left, top;
 }
 

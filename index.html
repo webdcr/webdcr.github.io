@@ -280,6 +280,7 @@ preload_listen_icon_hover: true
         const mode = radioPlayerButton.getAttribute("data-mode");
         const isActive = mode === "playing" || mode === "loading";
         listenButton.classList.toggle("listen-button--active", isActive);
+        listenButton.disabled = !!isActive;
         listenButton.setAttribute("aria-disabled", isActive ? "true" : "false");
         updateCursorStyle();
       };

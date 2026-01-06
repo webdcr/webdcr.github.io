@@ -652,8 +652,8 @@ footer {
     align-items: flex-start;
   }
   .directorate-photo {
-    width: 80%;
-    max-width: 220px;
+    width: 60%;
+    max-width: 160px;
   }
   .directorate-photo img {
     width: 100%;

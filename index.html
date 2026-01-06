@@ -249,15 +249,11 @@ preload_listen_icon_hover: true
         }
       }
 
-      const rawCursorEl = document.getElementById("listenButtonCursor");
+      const cursorEl = document.getElementById("listenButtonCursor");
       const hasFinePointer =
         typeof window.matchMedia === "function"
           ? window.matchMedia("(pointer: fine)").matches
           : true;
-      const cursorEl = hasFinePointer ? rawCursorEl : null;
-      if (rawCursorEl && !cursorEl) {
-        rawCursorEl.style.display = "none";
-      }
       const buttonIcon = listenButton.querySelector(".listen-button-icon");
       const updateCursorStyle = () => {
         const isActive = listenButton.classList.contains("listen-button--active");
@@ -337,53 +333,60 @@ preload_listen_icon_hover: true
           setCursorPosition(x, y, instant);
         };
 
-        moveCursorToAnchor(true);
-
-        let cursorHideTimeout;
-
-        listenButton.addEventListener("mouseenter", (event) => {
-          if (cursorHideTimeout) {
-            clearTimeout(cursorHideTimeout);
-            cursorHideTimeout = undefined;
-          }
+        if (!hasFinePointer) {
           moveCursorToAnchor(true);
           cursorEl.classList.add("visible");
-          requestAnimationFrame(() => {
-            setCursorPosition(event.clientX, event.clientY);
-          });
-          updateCursorStyle();
-        });
+          listenButton.addEventListener("click", () => moveCursorToAnchor(true));
+          window.addEventListener("resize", () => moveCursorToAnchor(true));
+        } else {
+          moveCursorToAnchor(true);
 
-        listenButton.addEventListener("mouseleave", () => {
-          moveCursorToAnchor();
-          cursorHideTimeout = setTimeout(() => {
-            cursorEl.classList.remove("visible");
-            cursorEl.src = "/assets/images/hand1.png";
-          }, 80);
-        });
+          let cursorHideTimeout;
 
-        listenButton.addEventListener("mousemove", (e) => {
-          setCursorPosition(e.clientX, e.clientY);
-        });
-
-        listenButton.addEventListener("mousedown", () => {
-          if (!listenButton.classList.contains("listen-button--active")) {
-            cursorEl.src = "/assets/images/hand2.png";
-          }
-        });
-
-        listenButton.addEventListener("mouseup", () => {
-          const handSrc = listenButton.classList.contains("listen-button--active")
-            ? "/assets/images/hand1-gray.png"
-            : "/assets/images/hand1.png";
-          cursorEl.src = handSrc;
-        });
-
-        window.addEventListener("resize", () => {
-          if (!cursorEl.classList.contains("visible")) {
+          listenButton.addEventListener("mouseenter", (event) => {
+            if (cursorHideTimeout) {
+              clearTimeout(cursorHideTimeout);
+              cursorHideTimeout = undefined;
+            }
             moveCursorToAnchor(true);
-          }
-        });
+            cursorEl.classList.add("visible");
+            requestAnimationFrame(() => {
+              setCursorPosition(event.clientX, event.clientY);
+            });
+            updateCursorStyle();
+          });
+
+          listenButton.addEventListener("mouseleave", () => {
+            moveCursorToAnchor();
+            cursorHideTimeout = setTimeout(() => {
+              cursorEl.classList.remove("visible");
+              cursorEl.src = "/assets/images/hand1.png";
+            }, 80);
+          });
+
+          listenButton.addEventListener("mousemove", (e) => {
+            setCursorPosition(e.clientX, e.clientY);
+          });
+
+          listenButton.addEventListener("mousedown", () => {
+            if (!listenButton.classList.contains("listen-button--active")) {
+              cursorEl.src = "/assets/images/hand2.png";
+            }
+          });
+
+          listenButton.addEventListener("mouseup", () => {
+            const handSrc = listenButton.classList.contains("listen-button--active")
+              ? "/assets/images/hand1-gray.png"
+              : "/assets/images/hand1.png";
+            cursorEl.src = handSrc;
+          });
+
+          window.addEventListener("resize", () => {
+            if (!cursorEl.classList.contains("visible")) {
+              moveCursorToAnchor(true);
+            }
+          });
+        }
       }
     }
 

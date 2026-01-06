@@ -12,443 +12,437 @@ preload_listen_icon_hover: true
     class="home-logo"
   />
   <h1>Radio of, by, and for the students.</h1>
-  <button class="button listen-button" id="listenButton" type="button">
-    <span class="listen-button-content">
-      <span class="listen-button-label">Listen live</span>
-      <img
-        src="/assets/images/hand1.png"
-        alt=""
-        class="listen-button-icon"
-        aria-hidden="true"
-        data-hover-src="/assets/images/hand2.png"
-      />
-    </span>
-  </button>
-  <img
-    src="/assets/images/hand1.png"
-    alt=""
-    class="listen-button-cursor"
-    id="listenButtonCursor"
-    aria-hidden="true"
-  />
-
-  <h2>Show Schedule</h2>
-  <p class="schedule-term">({{ site.term }})</p>
-  <div class="day-selector-group">
-    <button class="selectDay" id="selectDay_Sunday" data-day="Sunday" type="button">
-      sunday
+  <div class="listen-button-wrapper" x-data="listenButtonApp()" x-init="init()">
+    <button
+      class="button listen-button"
+      id="listenButton"
+      type="button"
+      x-ref="button"
+      :class="{ 'listen-button--active': isActive() }"
+      :aria-disabled="isActive().toString()"
+      :disabled="isActive()"
+      @click.prevent="handleClick"
+      @pointerdown="onPointerDown($event)"
+      @pointerup="onPointerUp($event)"
+      @pointercancel="onPointerUp($event)"
+      @pointerleave="onPointerLeave($event)"
+      @keydown.enter.prevent="onKeyDown()"
+      @keydown.space.prevent="onKeyDown()"
+      @keyup.enter.prevent="onKeyUp()"
+      @keyup.space.prevent="onKeyUp()"
+      @blur="onBlur($event)"
+      @mouseenter="onMouseEnter($event)"
+      @mouseleave="onMouseLeave($event)"
+      @mousemove="onMouseMove($event)"
+      @mousedown="onMouseDown()"
+      @mouseup="onMouseUp()"
+    >
+      <span class="listen-button-content">
+        <span class="listen-button-label">Listen live</span>
+        <img
+          x-ref="icon"
+          :src="iconSrc"
+          alt=""
+          class="listen-button-icon"
+          aria-hidden="true"
+        />
+      </span>
     </button>
-    <button class="selectDay" id="selectDay_Monday" data-day="Monday" type="button">
-      monday
-    </button>
-    <button class="selectDay" id="selectDay_Tuesday" data-day="Tuesday" type="button">
-      tuesday
-    </button>
-    <button class="selectDay" id="selectDay_Wednesday" data-day="Wednesday" type="button">
-      wednesday
-    </button>
-    <button class="selectDay" id="selectDay_Thursday" data-day="Thursday" type="button">
-      thursday
-    </button>
-    <button class="selectDay" id="selectDay_Friday" data-day="Friday" type="button">
-      friday
-    </button>
-    <button class="selectDay" id="selectDay_Saturday" data-day="Saturday" type="button">
-      saturday
-    </button>
+    <img
+      x-ref="cursor"
+      :src="cursorSrc"
+      alt=""
+      class="listen-button-cursor"
+      id="listenButtonCursor"
+      aria-hidden="true"
+      :class="{ visible: cursorVisible, 'listen-button-cursor--no-transition': disableCursorTransition }"
+      :style="cursorStyle()"
+    />
   </div>
 
-  {% assign days = "Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday" |
-  split: "," %} {% for day in days %} {% assign showsThisDay = site.data.shows |
-  where: "Day", day %} {% assign showsThisDay = showsThisDay | sort: 'Time' %}
-  <div class="daydiv" id="daydiv_{{ day }}">
-    <h2>{{ day }}</h2>
-    {% if showsThisDay.size > 0 %}
-    <table class="schedule-table">
-      {% for row in showsThisDay %}
-      <tr
-        class="showRow"
-        data-day="{{ day }}"
-        data-time="{{ row['Time'] | strip | escape }}"
-      >
-        <td class="showRowImage">
-          {% if row["Image name"] %}
-          <img
-            src="/assets/images/showalbums/{{ row['Image name'] | strip | uri_escape }}"
-            alt="{{ row["Name"] }} artwork"
-          />
-          {% else %}
-          <img
-            src="/assets/images/showalbums/placeholder.png"
-            alt="{{ row["Name"] }} placeholder artwork"
-          />
-          {% endif %}
-        </td>
-        <td class="showRowInfo">
-          <span class="showRowName">{{ row["Name"] }}</span>
-          {% if row["Host(s)"] %}
-          <span class="showRowHost">with {{ row["Host(s)"] }}</span>
-          {% endif %}
-          <p class="showRowDescription">{{ row["Description"] }}</p>
-        </td>
-        {% assign timeString = '2000-01-01 ' | append: row['Time'] %}
-        {% assign displayTime = timeString | date: '%-I:%M %p' %}
-        <td class="showRowTime">
-          <span class="showRowTimeContent">
-            <span class="showRowTimeText">{{ displayTime }}</span>
-          </span>
-        </td>
-      </tr>
-      {% endfor %}
-    </table>
-    {% else %}
-    <p>No shows scheduled.</p>
-    {% endif %}
-  </div>
-  {% endfor %}
+  <section x-data="scheduleApp()" x-init="init()" x-cloak>
+    <h2>Show Schedule</h2>
+    <p class="schedule-term">({{ site.term }})</p>
+    <div class="day-selector-group">
+      <template x-for="day in daysOfWeek" :key="day">
+        <button
+          class="selectDay"
+          type="button"
+          :class="{ selectedSelectDay: activeDay === day }"
+          @click="selectDay(day)"
+          x-text="day.toLowerCase()"
+        ></button>
+      </template>
+    </div>
+
+    <template x-for="day in daysOfWeek" :key="`panel-${day}`">
+      <div class="daydiv" x-show="activeDay === day" x-transition.opacity>
+        <h2 x-text="day"></h2>
+        <template x-if="hasShows(day)">
+          <table class="schedule-table">
+            <template x-for="show in groupedShows[day]" :key="show.uid">
+              <tr class="showRow" :class="{ 'showRow--live': isLive(show) }">
+                <td class="showRowImage">
+                  <img :src="show.imageSrc" :alt="show.imageAlt" />
+                </td>
+                <td class="showRowInfo">
+                  <span class="showRowName" x-text="show.Name"></span>
+                  <template x-if="show.hostLabel">
+                    <span class="showRowHost" x-text="show.hostLabel"></span>
+                  </template>
+                  <p class="showRowDescription" x-text="show.Description"></p>
+                </td>
+                <td class="showRowTime">
+                  <span class="showRowTimeContent">
+                    <span class="showRowTimeText" x-text="show.displayTime"></span>
+                  </span>
+                </td>
+              </tr>
+            </template>
+          </table>
+        </template>
+        <template x-if="!hasShows(day)">
+          <p>No shows scheduled.</p>
+        </template>
+      </div>
+    </template>
+  </section>
 
   <img class="circle-image" src="/assets/images/shirts.jpg" alt="WebDCR merchandise" />
 </div>
-
 <script>
-  (function () {
-    const daySelectors = document.querySelectorAll(".selectDay");
-    const daysOfWeek = [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday"
-    ];
-    let activeDay = "";
+  const HAND_NORMAL = '/assets/images/hand1.png';
+  const HAND_ACTIVE = '/assets/images/hand2.png';
+  const HAND_GRAYED = '/assets/images/hand1-gray.png';
 
-    function showDay(day) {
-      if (!day || day === activeDay) {
-        return;
-      }
-
-      const nextPanel = document.getElementById(`daydiv_${day}`);
-      const nextButton = document.getElementById(`selectDay_${day}`);
-
-      if (!nextPanel || !nextButton) {
-        return;
-      }
-
-      nextPanel.style.display = "block";
-      nextButton.classList.add("selectedSelectDay");
-
-      if (activeDay) {
-        const prevPanel = document.getElementById(`daydiv_${activeDay}`);
-        const prevButton = document.getElementById(`selectDay_${activeDay}`);
-        if (prevPanel) {
-          prevPanel.style.display = "none";
+  document.addEventListener('alpine:init', () => {
+    Alpine.data('listenButtonApp', () => ({
+      iconSrc: HAND_NORMAL,
+      cursorSrc: HAND_NORMAL,
+      cursorVisible: false,
+      cursorPosition: { x: 0, y: 0 },
+      disableCursorTransition: false,
+      hasFinePointer:
+        typeof window.matchMedia === 'function'
+          ? window.matchMedia('(pointer: fine)').matches
+          : true,
+      hideTimeout: null,
+      isPointerDown: false,
+      init() {
+        this.$nextTick(() => {
+          this.moveCursorToAnchor(true);
+        });
+        if (!this.hasFinePointer) {
+          this.cursorVisible = true;
         }
-        if (prevButton) {
-          prevButton.classList.remove("selectedSelectDay");
-        }
-      }
-
-      activeDay = day;
-    }
-
-    daySelectors.forEach((button) => {
-      button.addEventListener("click", () => {
-        showDay(button.dataset.day);
-      });
-    });
-
-    const todayIndex = new Date().getDay();
-    const todayName = daysOfWeek[todayIndex] || daysOfWeek[0];
-    showDay(todayName);
-
-    const listenButton = document.getElementById("listenButton");
-    const radioPlayerButton = document.getElementById("radioPlayer");
-    if (listenButton) {
-      listenButton.setAttribute("aria-disabled", "false");
-      listenButton.addEventListener("click", () => {
-        if (!radioPlayerButton) {
-          return;
-        }
-        if (radioPlayerButton.getAttribute("data-mode") === "stopped") {
-          radioPlayerButton.click();
-        } else {
-          radioPlayerButton.focus();
-        }
-      });
-
-      const listenIcon = listenButton.querySelector(".listen-button-icon");
-      if (listenIcon) {
-        const defaultSrc = listenIcon.getAttribute("src");
-        const hoverSrc = listenIcon.dataset.hoverSrc;
-        const setIcon = (src) => {
-          if (!src) {
-            return;
-          }
-          if (listenButton.classList.contains("listen-button--active")) {
-            if (src === hoverSrc || src === defaultSrc) {
-              return;
-            }
-          }
-          listenIcon.setAttribute("src", src);
-        };
-
-        if (hoverSrc) {
-          const releasePointerCapture = (event) => {
-            if (
-              event &&
-              typeof listenButton.releasePointerCapture === "function" &&
-              event.pointerId !== undefined
-            ) {
-              try {
-                listenButton.releasePointerCapture(event.pointerId);
-              } catch (err) {}
-            }
-          };
-
-          const resetIcon = (event) => {
-            setIcon(defaultSrc);
-            releasePointerCapture(event);
-          };
-
-          listenButton.addEventListener("pointerdown", (event) => {
-            if (event.pointerType === "mouse" && event.button !== 0) {
-              return;
-            }
-            if (
-              typeof listenButton.setPointerCapture === "function" &&
-              event.pointerId !== undefined
-            ) {
-              try {
-                listenButton.setPointerCapture(event.pointerId);
-              } catch (err) {}
-            }
-            setIcon(hoverSrc);
-          });
-
-          ["pointerup", "pointercancel", "pointerleave"].forEach((evt) => {
-            listenButton.addEventListener(evt, resetIcon);
-          });
-
-          listenButton.addEventListener("mouseleave", resetIcon);
-
-          listenButton.addEventListener("keydown", (event) => {
-            if (event.key === "Enter" || event.key === " ") {
-              setIcon(hoverSrc);
-            }
-          });
-
-          listenButton.addEventListener("keyup", (event) => {
-            if (event.key === "Enter" || event.key === " ") {
-              setIcon(defaultSrc);
-            }
-          });
-
-          listenButton.addEventListener("blur", resetIcon);
-        }
-      }
-
-      const cursorEl = document.getElementById("listenButtonCursor");
-      const hasFinePointer =
-        typeof window.matchMedia === "function"
-          ? window.matchMedia("(pointer: fine)").matches
-          : true;
-      const buttonIcon = listenButton.querySelector(".listen-button-icon");
-      const updateCursorStyle = () => {
-        const isActive = listenButton.classList.contains("listen-button--active");
-        const handSrc = isActive ? "/assets/images/hand1-gray.png" : "/assets/images/hand1.png";
-        if (cursorEl) {
-          cursorEl.src = handSrc;
-        }
-        if (buttonIcon) {
-          buttonIcon.src = handSrc;
-        }
-      };
-
-      const updateListenButtonVisualState = () => {
-        if (!radioPlayerButton) {
-          listenButton.classList.remove("listen-button--active");
-          listenButton.setAttribute("aria-disabled", "false");
-          updateCursorStyle();
-          return;
-        }
-        const mode = radioPlayerButton.getAttribute("data-mode");
-        const isActive = mode === "playing" || mode === "loading";
-        listenButton.classList.toggle("listen-button--active", isActive);
-        listenButton.disabled = !!isActive;
-        listenButton.setAttribute("aria-disabled", isActive ? "true" : "false");
-        updateCursorStyle();
-      };
-
-      if (radioPlayerButton) {
-        if (typeof MutationObserver !== "undefined") {
-          const observer = new MutationObserver((mutations) => {
-            for (const mutation of mutations) {
-              if (mutation.type === "attributes" && mutation.attributeName === "data-mode") {
-                updateListenButtonVisualState();
-                break;
-              }
-            }
-          });
-          observer.observe(radioPlayerButton, {
-            attributes: true,
-            attributeFilter: ["data-mode"]
-          });
-        } else {
-          setInterval(updateListenButtonVisualState, 1000);
-        }
-
-        updateListenButtonVisualState();
-      }
-
-      if (cursorEl) {
-        const moveCursorTo = (x, y) => {
-          cursorEl.style.left = x + "px";
-          cursorEl.style.top = y + "px";
-        };
-
-        const setCursorPosition = (x, y, instant = false) => {
-          if (instant) {
-            cursorEl.classList.add("listen-button-cursor--no-transition");
-            moveCursorTo(x, y);
-            void cursorEl.offsetWidth;
-            cursorEl.classList.remove("listen-button-cursor--no-transition");
-          } else {
-            moveCursorTo(x, y);
-          }
-        };
-
-        const getCursorAnchorPosition = () => {
-          const target = buttonIcon || listenButton;
-          const rect = target.getBoundingClientRect();
-          return {
-            x: rect.left + rect.width / 2,
-            y: rect.top + rect.height / 2
-          };
-        };
-
-        const moveCursorToAnchor = (instant = false) => {
-          const { x, y } = getCursorAnchorPosition();
-          setCursorPosition(x, y, instant);
-        };
-
-        if (!hasFinePointer) {
-          moveCursorToAnchor(true);
-          cursorEl.classList.add("visible");
-          listenButton.addEventListener("click", () => moveCursorToAnchor(true));
-          window.addEventListener("resize", () => moveCursorToAnchor(true));
-        } else {
-          moveCursorToAnchor(true);
-
-          let cursorHideTimeout;
-
-          listenButton.addEventListener("mouseenter", (event) => {
-            if (cursorHideTimeout) {
-              clearTimeout(cursorHideTimeout);
-              cursorHideTimeout = undefined;
-            }
-            moveCursorToAnchor(true);
-            cursorEl.classList.add("visible");
-            requestAnimationFrame(() => {
-              setCursorPosition(event.clientX, event.clientY);
-            });
-            updateCursorStyle();
-          });
-
-          listenButton.addEventListener("mouseleave", () => {
-            moveCursorToAnchor();
-            cursorHideTimeout = setTimeout(() => {
-              cursorEl.classList.remove("visible");
-              cursorEl.src = "/assets/images/hand1.png";
-            }, 80);
-          });
-
-          listenButton.addEventListener("mousemove", (e) => {
-            setCursorPosition(e.clientX, e.clientY);
-          });
-
-          listenButton.addEventListener("mousedown", () => {
-            if (!listenButton.classList.contains("listen-button--active")) {
-              cursorEl.src = "/assets/images/hand2.png";
-            }
-          });
-
-          listenButton.addEventListener("mouseup", () => {
-            const handSrc = listenButton.classList.contains("listen-button--active")
-              ? "/assets/images/hand1-gray.png"
-              : "/assets/images/hand1.png";
-            cursorEl.src = handSrc;
-          });
-
-          window.addEventListener("resize", () => {
-            if (!cursorEl.classList.contains("visible")) {
-              moveCursorToAnchor(true);
-            }
-          });
-        }
-      }
-    }
-
-    function parseTimeToDecimal(timeString) {
-      if (!timeString) {
-        return NaN;
-      }
-
-      const trimmed = timeString.trim();
-      const twentyFourHourMatch = trimmed.match(/^(\d{1,2}):(\d{2})$/);
-      if (twentyFourHourMatch) {
-        const hours = parseInt(twentyFourHourMatch[1], 10);
-        const minutes = parseInt(twentyFourHourMatch[2], 10);
-        if (hours < 24 && minutes < 60) {
-          return hours + minutes / 60;
-        }
-      }
-
-      const twelveHourMatch = trimmed.match(/(\d{1,2})(?::(\d{2}))?\s*(AM|PM)/i);
-      if (!twelveHourMatch) {
-        return NaN;
-      }
-      let hours = parseInt(twelveHourMatch[1], 10);
-      const minutes = twelveHourMatch[2]
-        ? parseInt(twelveHourMatch[2], 10)
-        : 0;
-      const meridiem = twelveHourMatch[3].toUpperCase();
-      if (meridiem === "PM" && hours < 12) {
-        hours += 12;
-      }
-      if (meridiem === "AM" && hours === 12) {
-        hours = 0;
-      }
-      return hours + minutes / 60;
-    }
-
-    function highlightCurrentShow() {
-      const now = new Date();
-      const currentDay = daysOfWeek[now.getDay()];
-      const nowDecimal = now.getHours() + now.getMinutes() / 60;
-      let foundLiveShow = false;
-
-      document.querySelectorAll(".showRow--live").forEach((row) => {
-        row.classList.remove("showRow--live");
-      });
-
-      document
-        .querySelectorAll(`.showRow[data-day="${currentDay}"]`)
-        .forEach((row) => {
-          const showStart = parseTimeToDecimal(row.dataset.time);
-          if (Number.isNaN(showStart)) {
-            return;
-          }
-          if (nowDecimal >= showStart && nowDecimal < showStart + 1) {
-            row.classList.add("showRow--live");
-            foundLiveShow = true;
+        this.updateVisualState();
+        this.$watch('$store.radioPlayer.state', () => {
+          this.updateVisualState();
+          if (!this.hasFinePointer) {
+            this.moveCursorToAnchor(true);
           }
         });
+        window.addEventListener('resize', () => {
+          if (!this.hasFinePointer || !this.cursorVisible) {
+            this.moveCursorToAnchor(true);
+          }
+        });
+      },
+      cursorStyle() {
+        return `left: ${this.cursorPosition.x}px; top: ${this.cursorPosition.y}px;`;
+      },
+      isActive() {
+        const state = this.$store.radioPlayer ? this.$store.radioPlayer.state : 'stopped';
+        return state === 'playing' || state === 'loading';
+      },
+      handSrc() {
+        return this.isActive() ? HAND_GRAYED : HAND_NORMAL;
+      },
+      updateVisualState() {
+        const src = this.handSrc();
+        this.iconSrc = src;
+        if (!this.isPointerDown || !this.hasFinePointer) {
+          this.cursorSrc = src;
+        }
+      },
+      handleClick() {
+        if (this.isActive()) {
+          const playerBtn = document.getElementById('radioPlayer');
+          if (playerBtn) {
+            playerBtn.focus();
+          }
+        } else if (this.$store.radioPlayer) {
+          this.$store.radioPlayer.toggle();
+        }
+        if (!this.hasFinePointer) {
+          this.moveCursorToAnchor(true);
+        }
+      },
+      onPointerDown(event) {
+        if (!this.hasFinePointer) {
+          return;
+        }
+        if (event.pointerType === 'mouse' && event.button !== 0) {
+          return;
+        }
+        this.isPointerDown = true;
+        this.capturePointer(event);
+        if (!this.isActive()) {
+          this.iconSrc = HAND_ACTIVE;
+          this.cursorSrc = HAND_ACTIVE;
+        }
+      },
+      onPointerUp(event) {
+        if (!this.hasFinePointer) {
+          return;
+        }
+        this.isPointerDown = false;
+        this.resetIconState();
+        this.releasePointer(event);
+      },
+      onPointerLeave(event) {
+        if (!this.hasFinePointer) {
+          return;
+        }
+        this.isPointerDown = false;
+        this.resetIconState();
+        this.releasePointer(event);
+      },
+      capturePointer(event) {
+        if (
+          event &&
+          this.$refs.button &&
+          typeof this.$refs.button.setPointerCapture === 'function' &&
+          event.pointerId !== undefined
+        ) {
+          try {
+            this.$refs.button.setPointerCapture(event.pointerId);
+          } catch (err) {}
+        }
+      },
+      releasePointer(event) {
+        if (
+          event &&
+          this.$refs.button &&
+          typeof this.$refs.button.releasePointerCapture === 'function' &&
+          event.pointerId !== undefined
+        ) {
+          try {
+            this.$refs.button.releasePointerCapture(event.pointerId);
+          } catch (err) {}
+        }
+      },
+      onKeyDown() {
+        if (this.isActive()) {
+          return;
+        }
+        this.iconSrc = HAND_ACTIVE;
+      },
+      onKeyUp() {
+        this.resetIconState();
+      },
+      onBlur(event) {
+        this.isPointerDown = false;
+        this.resetIconState();
+        this.releasePointer(event);
+      },
+      onMouseEnter(event) {
+        if (!this.hasFinePointer) {
+          return;
+        }
+        if (this.hideTimeout) {
+          clearTimeout(this.hideTimeout);
+          this.hideTimeout = null;
+        }
+        this.cursorVisible = true;
+        this.moveCursorToAnchor(true);
+        requestAnimationFrame(() => {
+          this.setCursorPosition(event.clientX, event.clientY);
+        });
+      },
+      onMouseLeave(event) {
+        if (!this.hasFinePointer) {
+          return;
+        }
+        this.isPointerDown = false;
+        this.moveCursorToAnchor();
+        this.hideTimeout = setTimeout(() => {
+          this.cursorVisible = false;
+          this.cursorSrc = this.handSrc();
+        }, 80);
+        this.releasePointer(event);
+      },
+      onMouseMove(event) {
+        if (!this.hasFinePointer || !this.cursorVisible) {
+          return;
+        }
+        this.setCursorPosition(event.clientX, event.clientY);
+      },
+      onMouseDown() {
+        if (!this.hasFinePointer || this.isActive()) {
+          return;
+        }
+        this.cursorSrc = HAND_ACTIVE;
+      },
+      onMouseUp() {
+        if (!this.hasFinePointer) {
+          return;
+        }
+        this.cursorSrc = this.handSrc();
+      },
+      resetIconState() {
+        const src = this.handSrc();
+        this.iconSrc = src;
+        this.cursorSrc = src;
+      },
+      moveCursorToAnchor(instant = false) {
+        const target = this.$refs.icon || this.$refs.button;
+        if (!target) {
+          return;
+        }
+        const rect = target.getBoundingClientRect();
+        this.setCursorPosition(rect.left + rect.width / 2, rect.top + rect.height / 2, instant);
+      },
+      setCursorPosition(x, y, instant = false) {
+        if (Number.isNaN(x) || Number.isNaN(y)) {
+          return;
+        }
+        if (instant) {
+          this.disableCursorTransition = true;
+          this.cursorPosition = { x, y };
+          requestAnimationFrame(() => {
+            this.disableCursorTransition = false;
+          });
+        } else {
+          this.cursorPosition = { x, y };
+        }
+      }
+    }));
 
-    }
-
-    highlightCurrentShow();
-    setInterval(highlightCurrentShow, 300000);
-  })();
+    Alpine.data('scheduleApp', () => ({
+      daysOfWeek: [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday'
+      ],
+      shows: window.WEBDCR_SHOWS || [],
+      timeParser:
+        window.webdcr && typeof window.webdcr.parseTimeToMinutes === 'function'
+          ? window.webdcr.parseTimeToMinutes
+          : () => NaN,
+      groupedShows: {},
+      activeDay: 'Sunday',
+      nowMinutes: 0,
+      currentDayName: 'Sunday',
+      init() {
+        this.prepareShows();
+        this.setActiveDayToToday();
+        this.updateCurrentTime();
+        this.scheduleTicker();
+      },
+      prepareShows() {
+        const base = {};
+        this.daysOfWeek.forEach((day) => {
+          base[day] = [];
+        });
+        this.groupedShows = base;
+        (this.shows || []).forEach((show, index) => {
+          const day = show && show['Day'] ? show['Day'].trim() : '';
+          if (!day || !this.groupedShows[day]) {
+            return;
+          }
+          const startMinutes = this.timeParser(show['Time']);
+          if (Number.isNaN(startMinutes)) {
+            return;
+          }
+          const normalized = {
+            ...show,
+            Day: day,
+            Description: show['Description'] || '',
+            hostLabel: show['Host(s)'] ? `with ${show['Host(s)']}` : '',
+            imageSrc: this.sanitizeImagePath(show['Image name']),
+            imageAlt: show['Name'] ? `${show['Name']} artwork` : 'Show artwork',
+            displayTime: this.formatDisplayTime(startMinutes),
+            startMinutes,
+            uid: `${day}-${show['Name'] || 'show'}-${show['Time'] || 'time'}-${index}`
+          };
+          this.groupedShows[day].push(normalized);
+        });
+        Object.keys(this.groupedShows).forEach((day) => {
+          this.groupedShows[day].sort((a, b) => a.startMinutes - b.startMinutes);
+        });
+      },
+      selectDay(day) {
+        if (this.daysOfWeek.includes(day)) {
+          this.activeDay = day;
+        }
+      },
+      hasShows(day) {
+        return Array.isArray(this.groupedShows[day]) && this.groupedShows[day].length > 0;
+      },
+      isLive(show) {
+        if (!show || typeof show.startMinutes !== 'number') {
+          return false;
+        }
+        if (this.currentDayName !== show.Day) {
+          return false;
+        }
+        return this.nowMinutes >= show.startMinutes && this.nowMinutes < show.startMinutes + 60;
+      },
+      formatDisplayTime(startMinutes) {
+        if (typeof startMinutes !== 'number' || Number.isNaN(startMinutes)) {
+          return '';
+        }
+        let hours = Math.floor(startMinutes / 60);
+        const minutes = startMinutes % 60;
+        const meridiem = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        if (hours === 0) {
+          hours = 12;
+        }
+        return `${hours}:${minutes.toString().padStart(2, '0')} ${meridiem}`;
+      },
+      sanitizeImagePath(name) {
+        if (!name) {
+          return '/assets/images/showalbums/placeholder.png';
+        }
+        const trimmed = String(name).trim();
+        if (!trimmed) {
+          return '/assets/images/showalbums/placeholder.png';
+        }
+        const sanitized = encodeURIComponent(trimmed).replace(/%2F/g, '/');
+        return `/assets/images/showalbums/${sanitized}`;
+      },
+      updateCurrentTime() {
+        const now = new Date();
+        this.nowMinutes = now.getHours() * 60 + now.getMinutes();
+        this.currentDayName = this.daysOfWeek[now.getDay()] || this.daysOfWeek[0];
+      },
+      scheduleTicker() {
+        const now = new Date();
+        const nextMinute = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+          now.getHours(),
+          now.getMinutes() + 1,
+          0,
+          0
+        );
+        const delay = Math.max(nextMinute.getTime() - now.getTime(), 250);
+        setTimeout(() => {
+          this.updateCurrentTime();
+          this.scheduleTicker();
+        }, delay);
+      },
+      setActiveDayToToday() {
+        const todayIndex = new Date().getDay();
+        this.activeDay = this.daysOfWeek[todayIndex] || this.daysOfWeek[0];
+      }
+    }));
+  });
 </script>

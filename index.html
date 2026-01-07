@@ -330,7 +330,7 @@ preload_listen_icon_hover: true
         const inView = rect.bottom >= 0 && rect.top <= window.innerHeight;
         this.cursorVisible = inView;
         if (inView) {
-          this.setCursorPosition(rect.left + rect.width / 2, rect.top + rect.height / 2, instant);
+          this.setCursorPosition(rect.left + rect.width / 2, rect.top + rect.height / 2, true);
         }
       },
       setCursorPosition(x, y, instant = false) {

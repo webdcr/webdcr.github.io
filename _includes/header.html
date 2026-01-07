@@ -97,6 +97,7 @@
       state: 'stopped',
       audio: null,
       isPageUnloading: false,
+      resumeInteractionHandler: null,
       init() {
         this.registerLifecycleHandlers();
         this.resumeIfNeeded();
@@ -126,17 +127,20 @@
         this.audio.addEventListener('playing', () => {
           this.isPageUnloading = false;
           this.setState('playing');
+          this.cancelResumeOnInteraction();
           this.rememberPlaybackPreference();
         });
         this.audio.addEventListener('pause', () => {
           this.setState('stopped');
           if (!this.isPageUnloading) {
+            this.cancelResumeOnInteraction();
             this.clearPlaybackPreference();
           }
         });
         ['ended', 'error'].forEach((eventName) => {
           this.audio.addEventListener(eventName, () => {
             this.setState('stopped');
+            this.cancelResumeOnInteraction();
             this.clearPlaybackPreference();
           });
         });
@@ -151,24 +155,24 @@
           this.play();
         }
       },
-      play() {
+      play(options = {}) {
+        const initiatedByResume = !!options.initiatedByResume;
         this.ensureAudio();
         if (!this.audio) {
           return;
         }
+        this.cancelResumeOnInteraction();
         this.setState('loading');
         try {
           this.audio.load();
           const playPromise = this.audio.play();
           if (playPromise && typeof playPromise.catch === 'function') {
-            playPromise.catch(() => {
-              this.setState('stopped');
-              this.clearPlaybackPreference();
+            playPromise.catch((err) => {
+              this.handlePlayError(err, initiatedByResume);
             });
           }
         } catch (err) {
-          this.setState('stopped');
-          this.clearPlaybackPreference();
+          this.handlePlayError(err, initiatedByResume);
         }
       },
       pause() {
@@ -197,9 +201,60 @@
       resumeIfNeeded() {
         try {
           if (localStorage.getItem(STORAGE_KEY) === '1') {
-            this.play();
+            this.play({ initiatedByResume: true });
           }
         } catch (e) {}
+      },
+      handlePlayError(err, initiatedByResume) {
+        if (initiatedByResume && this.isAutoplayBlockedError(err)) {
+          // Autoplay gets rejected until a user interacts with the page again.
+          this.setState('stopped');
+          this.scheduleResumeOnInteraction();
+          return;
+        }
+        this.setState('stopped');
+        this.clearPlaybackPreference();
+      },
+      isAutoplayBlockedError(err) {
+        if (!err) {
+          return false;
+        }
+        const name = err.name || '';
+        if (name === 'NotAllowedError' || name === 'SecurityError') {
+          return true;
+        }
+        if (typeof err.message === 'string') {
+          const lowercase = err.message.toLowerCase();
+          return (
+            lowercase.includes('gesture') ||
+            lowercase.includes('interaction') ||
+            lowercase.includes('autoplay') ||
+            lowercase.includes('not allowed')
+          );
+        }
+        return false;
+      },
+      scheduleResumeOnInteraction() {
+        if (this.resumeInteractionHandler) {
+          return;
+        }
+        // Resume immediately on the next user gesture.
+        this.resumeInteractionHandler = () => {
+          this.cancelResumeOnInteraction();
+          this.play({ initiatedByResume: true });
+        };
+        ['pointerdown', 'keydown', 'touchstart'].forEach((eventName) => {
+          window.addEventListener(eventName, this.resumeInteractionHandler, { once: true });
+        });
+      },
+      cancelResumeOnInteraction() {
+        if (!this.resumeInteractionHandler) {
+          return;
+        }
+        ['pointerdown', 'keydown', 'touchstart'].forEach((eventName) => {
+          window.removeEventListener(eventName, this.resumeInteractionHandler);
+        });
+        this.resumeInteractionHandler = null;
       }
     });
 

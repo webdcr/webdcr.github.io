@@ -123,37 +123,31 @@ preload_listen_icon_hover: true
       cursorVisible: false,
       cursorPosition: { x: 0, y: 0 },
       disableCursorTransition: false,
-      hasFinePointer:
-        typeof window.matchMedia === 'function'
-          ? window.matchMedia('(pointer: fine)').matches
-          : true,
       hideTimeout: null,
       isPointerDown: false,
+      isHovering: false,
       init() {
         this.$nextTick(() => {
-          if (this.hasFinePointer) {
-            this.moveCursorToAnchor(true);
-          } else {
-            this.syncCoarseCursor(true);
-          }
+          this.moveCursorToAnchor(true);
         });
         this.updateVisualState();
         this.$watch('$store.radioPlayer.state', () => {
           this.updateVisualState();
-          if (!this.hasFinePointer) {
-            this.syncCoarseCursor(true);
-          }
-        });
-        window.addEventListener('resize', () => {
-          if (!this.hasFinePointer) {
-            this.syncCoarseCursor(true);
-          } else if (!this.cursorVisible) {
+          if (!this.cursorVisible) {
             this.moveCursorToAnchor(true);
           }
         });
-        if (!this.hasFinePointer) {
-          window.addEventListener('scroll', () => this.syncCoarseCursor(false));
-        }
+        window.addEventListener('resize', () => {
+          if (!this.cursorVisible) {
+            this.moveCursorToAnchor(true);
+          }
+        });
+        window.addEventListener('scroll', () => {
+          if (!this.isHovering) {
+            this.cursorVisible = false;
+            this.cursorSrc = this.handSrc();
+          }
+        });
       },
       cursorStyle() {
         return `left: ${this.cursorPosition.x}px; top: ${this.cursorPosition.y}px;`;
@@ -168,7 +162,7 @@ preload_listen_icon_hover: true
       updateVisualState() {
         const src = this.handSrc();
         this.iconSrc = src;
-        if (!this.isPointerDown || !this.hasFinePointer) {
+        if (!this.isPointerDown) {
           this.cursorSrc = src;
         }
       },
@@ -181,22 +175,14 @@ preload_listen_icon_hover: true
         } else if (this.$store.radioPlayer) {
           this.$store.radioPlayer.toggle();
         }
-        if (!this.hasFinePointer) {
-          this.syncCoarseCursor(true);
-        }
       },
       onPointerDown(event) {
         if (event.pointerType === 'mouse' && event.button !== 0) {
           return;
         }
         this.isPointerDown = true;
-        if (this.hasFinePointer) {
-          this.capturePointer(event);
-          if (!this.isActive()) {
-            this.iconSrc = HAND_ACTIVE;
-            this.cursorSrc = HAND_ACTIVE;
-          }
-        } else if (!this.isActive()) {
+        this.capturePointer(event);
+        if (!this.isActive()) {
           this.iconSrc = HAND_ACTIVE;
           this.cursorSrc = HAND_ACTIVE;
         }
@@ -204,24 +190,15 @@ preload_listen_icon_hover: true
       onPointerUp(event) {
         this.isPointerDown = false;
         this.resetIconState();
-        if (this.hasFinePointer) {
-          this.releasePointer(event);
-        } else {
-          this.syncCoarseCursor(true);
-        }
+        this.releasePointer(event);
       },
       onPointerLeave(event) {
         this.isPointerDown = false;
         this.resetIconState();
-        if (this.hasFinePointer) {
-          this.releasePointer(event);
-        } else {
-          this.syncCoarseCursor(false);
-        }
+        this.releasePointer(event);
       },
       capturePointer(event) {
         if (
-          !this.hasFinePointer ||
           !event ||
           !this.$refs.button ||
           typeof this.$refs.button.setPointerCapture !== 'function' ||
@@ -235,7 +212,6 @@ preload_listen_icon_hover: true
       },
       releasePointer(event) {
         if (
-          !this.hasFinePointer ||
           !event ||
           !this.$refs.button ||
           typeof this.$refs.button.releasePointerCapture !== 'function' ||
@@ -262,13 +238,11 @@ preload_listen_icon_hover: true
         this.releasePointer(event);
       },
       onMouseEnter(event) {
-        if (!this.hasFinePointer) {
-          return;
-        }
         if (this.hideTimeout) {
           clearTimeout(this.hideTimeout);
           this.hideTimeout = null;
         }
+        this.isHovering = true;
         this.cursorVisible = true;
         this.moveCursorToAnchor(true);
         requestAnimationFrame(() => {
@@ -276,10 +250,8 @@ preload_listen_icon_hover: true
         });
       },
       onMouseLeave(event) {
-        if (!this.hasFinePointer) {
-          return;
-        }
         this.isPointerDown = false;
+        this.isHovering = false;
         this.moveCursorToAnchor();
         this.hideTimeout = setTimeout(() => {
           this.cursorVisible = false;
@@ -288,21 +260,18 @@ preload_listen_icon_hover: true
         this.releasePointer(event);
       },
       onMouseMove(event) {
-        if (!this.hasFinePointer || !this.cursorVisible) {
+        if (!this.cursorVisible) {
           return;
         }
         this.setCursorPosition(event.clientX, event.clientY);
       },
       onMouseDown() {
-        if (!this.hasFinePointer || this.isActive()) {
+        if (this.isActive()) {
           return;
         }
         this.cursorSrc = HAND_ACTIVE;
       },
       onMouseUp() {
-        if (!this.hasFinePointer) {
-          return;
-        }
         this.cursorSrc = this.handSrc();
       },
       resetIconState() {
@@ -317,21 +286,6 @@ preload_listen_icon_hover: true
         }
         const rect = target.getBoundingClientRect();
         this.setCursorPosition(rect.left + rect.width / 2, rect.top + rect.height / 2, instant);
-      },
-      syncCoarseCursor(instant = false) {
-        if (this.hasFinePointer) {
-          return;
-        }
-        const target = this.$refs.icon || this.$refs.button;
-        if (!target) {
-          return;
-        }
-        const rect = target.getBoundingClientRect();
-        const inView = rect.bottom >= 0 && rect.top <= window.innerHeight;
-        this.cursorVisible = inView;
-        if (inView) {
-          this.setCursorPosition(rect.left + rect.width / 2, rect.top + rect.height / 2, true);
-        }
       },
       setCursorPosition(x, y, instant = false) {
         if (Number.isNaN(x) || Number.isNaN(y)) {

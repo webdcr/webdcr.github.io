@@ -169,6 +169,11 @@ preload_listen_icon_hover: true
         } else if (this.$store.radioPlayer) {
           this.$store.radioPlayer.toggle();
         }
+        this.$nextTick(() => {
+          if (this.$refs.button && typeof this.$refs.button.blur === 'function') {
+            this.$refs.button.blur();
+          }
+        });
       },
       onPointerDown(event) {
         if (event.pointerType === 'mouse' && event.button !== 0) {

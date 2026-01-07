@@ -395,11 +395,12 @@ footer {
   gap: 0;
 }
 
-.listen-button:hover {
+
+.listen-button.cursor-hidden {
   cursor: none;
 }
 
-.listen-button:hover .listen-button-icon {
+.listen-button.cursor-hidden .listen-button-icon {
   visibility: hidden;
 }
 

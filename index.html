@@ -183,7 +183,7 @@ preload_listen_icon_hover: true
       },
       handleTouchEnd() {
         this.isHovering = false;
-        this.cursorVisible = false;
+        this.setCursorVisible(false);
         this.blurButton();
       },
       blurButton() {
@@ -191,7 +191,26 @@ preload_listen_icon_hover: true
           this.$refs.button.blur();
         }
       },
+      setButtonCursorHidden(state) {
+        if (this.$refs.button) {
+          this.$refs.button.classList.toggle('cursor-hidden', !!state);
+        }
+      },
+      setCursorVisible(state) {
+        this.cursorVisible = !!state;
+        this.setButtonCursorHidden(this.cursorVisible);
+      },
+      isMousePointer(event) {
+        return !event || !event.pointerType || event.pointerType === 'mouse';
+      },
       onPointerDown(event) {
+        if (!this.isMousePointer(event) && event.pointerType) {
+          this.isPointerDown = true;
+          if (!this.isActive()) {
+            this.iconSrc = HAND_ACTIVE;
+          }
+          return;
+        }
         if (event.pointerType === 'mouse' && event.button !== 0) {
           return;
         }
@@ -205,15 +224,20 @@ preload_listen_icon_hover: true
       onPointerUp(event) {
         this.isPointerDown = false;
         this.resetIconState();
-        this.releasePointer(event);
+        if (this.isMousePointer(event)) {
+          this.releasePointer(event);
+        }
       },
       onPointerLeave(event) {
         this.isPointerDown = false;
         this.resetIconState();
-        this.releasePointer(event);
+        if (this.isMousePointer(event)) {
+          this.releasePointer(event);
+        }
       },
       capturePointer(event) {
         if (
+          !this.isMousePointer(event) ||
           !event ||
           !this.$refs.button ||
           typeof this.$refs.button.setPointerCapture !== 'function' ||
@@ -227,6 +251,7 @@ preload_listen_icon_hover: true
       },
       releasePointer(event) {
         if (
+          !this.isMousePointer(event) ||
           !event ||
           !this.$refs.button ||
           typeof this.$refs.button.releasePointerCapture !== 'function' ||
@@ -258,7 +283,7 @@ preload_listen_icon_hover: true
           this.hideTimeout = null;
         }
         this.isHovering = true;
-        this.cursorVisible = true;
+        this.setCursorVisible(true);
         this.moveCursorToAnchor(true);
         requestAnimationFrame(() => {
           this.setCursorPosition(event.clientX, event.clientY);
@@ -269,7 +294,7 @@ preload_listen_icon_hover: true
         this.isHovering = false;
         this.moveCursorToAnchor();
         this.hideTimeout = setTimeout(() => {
-          this.cursorVisible = false;
+          this.setCursorVisible(false);
           this.cursorSrc = this.handSrc();
         }, 80);
         this.releasePointer(event);
@@ -281,12 +306,15 @@ preload_listen_icon_hover: true
         this.setCursorPosition(event.clientX, event.clientY);
       },
       onMouseDown() {
-        if (this.isActive()) {
+        if (this.isActive() || !this.cursorVisible) {
           return;
         }
         this.cursorSrc = HAND_ACTIVE;
       },
       onMouseUp() {
+        if (!this.cursorVisible) {
+          return;
+        }
         this.cursorSrc = this.handSrc();
       },
       resetIconState() {

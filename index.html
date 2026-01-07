@@ -22,8 +22,6 @@ preload_listen_icon_hover: true
       :aria-disabled="isActive().toString()"
       :disabled="isActive()"
       @click.prevent="handleClick"
-      @touchstart="handleTouchStart"
-      @touchend="handleTouchEnd"
       @pointerdown="onPointerDown($event)"
       @pointerup="onPointerUp($event)"
       @pointercancel="onPointerUp($event)"
@@ -50,16 +48,18 @@ preload_listen_icon_hover: true
         />
       </span>
     </button>
-    <img
-      x-ref="cursor"
-      :src="cursorSrc"
-      alt=""
-      class="listen-button-cursor"
-      id="listenButtonCursor"
-      aria-hidden="true"
-      :class="{ visible: cursorVisible, 'listen-button-cursor--no-transition': disableCursorTransition }"
-      :style="cursorStyle()"
-    />
+    <template x-if="isDesktop">
+      <img
+        x-ref="cursor"
+        :src="cursorSrc"
+        alt=""
+        class="listen-button-cursor"
+        id="listenButtonCursor"
+        aria-hidden="true"
+        :class="{ visible: cursorVisible, 'listen-button-cursor--no-transition': disableCursorTransition }"
+        :style="cursorStyle()"
+      />
+    </template>
   </div>
 
   <section x-data="scheduleApp()" x-init="init()">
@@ -125,25 +125,60 @@ preload_listen_icon_hover: true
       cursorVisible: false,
       cursorPosition: { x: 0, y: 0 },
       disableCursorTransition: false,
+      isDesktop:
+        typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+          ? window.matchMedia('(hover: hover) and (pointer: fine)').matches
+          : true,
       hideTimeout: null,
       isPointerDown: false,
       isHovering: false,
       init() {
-        this.$nextTick(() => {
-          this.moveCursorToAnchor(true);
-        });
+        this.setupDesktopDetector();
+        if (this.isDesktop) {
+          this.$nextTick(() => {
+            this.moveCursorToAnchor(true);
+          });
+        }
         this.updateVisualState();
         this.$watch('$store.radioPlayer.state', () => {
           this.updateVisualState();
-          if (!this.cursorVisible) {
+          if (this.isDesktop && !this.cursorVisible) {
             this.moveCursorToAnchor(true);
           }
         });
         window.addEventListener('resize', () => {
+          if (!this.isDesktop) {
+            return;
+          }
           if (!this.cursorVisible) {
             this.moveCursorToAnchor(true);
           }
         });
+      },
+      setupDesktopDetector() {
+        if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+          this.isDesktop = true;
+          return;
+        }
+        const query = window.matchMedia('(hover: hover) and (pointer: fine)');
+        const update = () => {
+          const wasDesktop = this.isDesktop;
+          this.isDesktop = query.matches;
+          if (!this.isDesktop) {
+            this.setCursorVisible(false);
+            this.setButtonCursorHidden(false);
+          } else if (!wasDesktop) {
+            this.$nextTick(() => {
+              this.moveCursorToAnchor(true);
+            });
+          }
+        };
+        update();
+        if (typeof query.addEventListener === 'function') {
+          query.addEventListener('change', update);
+        } else if (typeof query.addListener === 'function') {
+          query.addListener(update);
+        }
       },
       cursorStyle() {
         return `left: ${this.cursorPosition.x}px; top: ${this.cursorPosition.y}px;`;
@@ -175,17 +210,6 @@ preload_listen_icon_hover: true
           this.blurButton();
         });
       },
-      handleTouchStart(event) {
-        if (event.touches && event.touches.length > 0) {
-          this.isHovering = true;
-          this.cursorVisible = false;
-        }
-      },
-      handleTouchEnd() {
-        this.isHovering = false;
-        this.setCursorVisible(false);
-        this.blurButton();
-      },
       blurButton() {
         if (this.$refs.button && typeof this.$refs.button.blur === 'function') {
           this.$refs.button.blur();
@@ -197,10 +221,18 @@ preload_listen_icon_hover: true
         }
       },
       setCursorVisible(state) {
+        if (!this.isDesktop) {
+          this.cursorVisible = false;
+          this.setButtonCursorHidden(false);
+          return;
+        }
         this.cursorVisible = !!state;
         this.setButtonCursorHidden(this.cursorVisible);
       },
       isMousePointer(event) {
+        if (!this.isDesktop) {
+          return false;
+        }
         return !event || !event.pointerType || event.pointerType === 'mouse';
       },
       onPointerDown(event) {
@@ -278,6 +310,9 @@ preload_listen_icon_hover: true
         this.releasePointer(event);
       },
       onMouseEnter(event) {
+        if (!this.isDesktop) {
+          return;
+        }
         if (this.hideTimeout) {
           clearTimeout(this.hideTimeout);
           this.hideTimeout = null;
@@ -290,6 +325,9 @@ preload_listen_icon_hover: true
         });
       },
       onMouseLeave(event) {
+        if (!this.isDesktop) {
+          return;
+        }
         this.isPointerDown = false;
         this.isHovering = false;
         this.moveCursorToAnchor();
@@ -300,19 +338,22 @@ preload_listen_icon_hover: true
         this.releasePointer(event);
       },
       onMouseMove(event) {
+        if (!this.isDesktop) {
+          return;
+        }
         if (!this.cursorVisible) {
           return;
         }
         this.setCursorPosition(event.clientX, event.clientY);
       },
       onMouseDown() {
-        if (this.isActive() || !this.cursorVisible) {
+        if (!this.isDesktop || this.isActive() || !this.cursorVisible) {
           return;
         }
         this.cursorSrc = HAND_ACTIVE;
       },
       onMouseUp() {
-        if (!this.cursorVisible) {
+        if (!this.isDesktop || !this.cursorVisible) {
           return;
         }
         this.cursorSrc = this.handSrc();

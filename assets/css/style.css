@@ -544,13 +544,13 @@ footer {
 }
 
 .showRowImage {
-  width: 140px;
+  width: 160px;
   padding: 12px 0;
 }
 
 .showRowImage img {
-  width: 132px;
-  height: 132px;
+  width: 152px;
+  height: 152px;
   object-fit: cover;
   border: 1px solid #000;
   display: block;
@@ -1158,8 +1158,8 @@ article img {
     padding: 0 0 12px;
   }
   .showRowImage img {
-    width: 80px;
-    height: 80px;
+    width: 120px;
+    height: 120px;
     object-fit: cover;
   }
   .showRowInfo {

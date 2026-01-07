@@ -142,12 +142,6 @@ preload_listen_icon_hover: true
             this.moveCursorToAnchor(true);
           }
         });
-        window.addEventListener('scroll', () => {
-          if (!this.isHovering) {
-            this.cursorVisible = false;
-            this.cursorSrc = this.handSrc();
-          }
-        });
       },
       cursorStyle() {
         return `left: ${this.cursorPosition.x}px; top: ${this.cursorPosition.y}px;`;

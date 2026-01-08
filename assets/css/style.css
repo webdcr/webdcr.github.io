@@ -222,11 +222,13 @@ a:not(.navitem):not(.author-link):not(.wordmark-link):focus-visible {
 .nowplaying-description {
   font-size: 0.75rem;
   color: var(--color-text);
-  max-width: 460px;
+  max-width: clamp(180px, 60vw, 460px);
+  width: 100%;
   overflow: hidden;
   white-space: nowrap;
   position: relative;
-  mask-image: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.85) 12%, rgba(0,0,0,0.85) 88%, rgba(0,0,0,0) 100%);
+  mask-image: linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.85) 12%, rgba(0, 0, 0, 0.85) 88%, rgba(0, 0, 0, 0) 100%);
+  -webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.85) 12%, rgba(0, 0, 0, 0.85) 88%, rgba(0, 0, 0, 0) 100%);
 }
 
 .nowplaying-description-track {
@@ -1141,9 +1143,13 @@ article img {
     font-size: 0.95rem;
     margin: 0;
   }
-  .nowplaying-host,
+  .nowplaying-host {
+    font-size: 0.7rem;
+  }
   .nowplaying-description {
-    font-size: 0.72rem;
+    font-size: 0.66rem;
+    max-width: clamp(140px, 65vw, 320px);
+    line-height: 1.1;
   }
   .schedule-table {
     display: block;

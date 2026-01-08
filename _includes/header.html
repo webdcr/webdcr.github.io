@@ -92,12 +92,34 @@
   document.addEventListener('alpine:init', () => {
     const radioURL = "{{ site.liveradio_url | escape }}";
     const STORAGE_KEY = 'webdcr.radio.playing';
+    const TAB_STORAGE_KEY = 'webdcr.radio.tabid';
+    const MAX_RESUME_AGE_MS = 4000;
+    const HEARTBEAT_INTERVAL_MS = 1000;
+
+    function generateTabId() {
+      return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    const TAB_ID = (() => {
+      try {
+        const stored = sessionStorage.getItem(TAB_STORAGE_KEY);
+        if (stored) {
+          return stored;
+        }
+        const newId = generateTabId();
+        sessionStorage.setItem(TAB_STORAGE_KEY, newId);
+        return newId;
+      } catch (e) {
+        return generateTabId();
+      }
+    })();
 
     Alpine.store('radioPlayer', {
       state: 'stopped',
       audio: null,
       isPageUnloading: false,
       resumeInteractionHandler: null,
+      heartbeatId: null,
       init() {
         this.registerLifecycleHandlers();
         this.resumeIfNeeded();
@@ -166,6 +188,7 @@
           this.rememberPlaybackPreference();
         });
         this.audio.addEventListener('pause', () => {
+          this.stopHeartbeat();
           this.setState('stopped');
           if (!this.isPageUnloading) {
             this.cancelResumeOnInteraction();
@@ -174,6 +197,7 @@
         });
         ['ended', 'error'].forEach((eventName) => {
           this.audio.addEventListener(eventName, () => {
+            this.stopHeartbeat();
             this.setState('stopped');
             this.cancelResumeOnInteraction();
             this.clearPlaybackPreference();
@@ -215,15 +239,31 @@
         if (this.audio) {
           this.audio.pause();
         } else {
+          this.stopHeartbeat();
           this.setState('stopped');
+          this.clearPlaybackPreference();
         }
       },
-      rememberPlaybackPreference() {
-        try {
-          localStorage.setItem(STORAGE_KEY, '1');
-        } catch (e) {}
+      rememberPlaybackPreference(options = {}) {
+        this.writePlaybackPreference(Date.now());
+        if (!options.skipHeartbeat) {
+          this.startHeartbeat();
+        }
       },
-      clearPlaybackPreference() {
+      clearPlaybackPreference(options = {}) {
+        const force = !!options.force;
+        if (!force) {
+          const current = this.readPlaybackPreference();
+          if (
+            current &&
+            current.tabId &&
+            current.tabId !== TAB_ID &&
+            Date.now() - current.timestamp <= MAX_RESUME_AGE_MS
+          ) {
+            return;
+          }
+        }
+        this.stopHeartbeat();
         try {
           localStorage.removeItem(STORAGE_KEY);
         } catch (e) {}
@@ -232,18 +272,30 @@
         this.prepareForPageExit();
       },
       resumeIfNeeded() {
-        try {
-          if (localStorage.getItem(STORAGE_KEY) === '1') {
-            this.play({ initiatedByResume: true });
+        const record = this.readPlaybackPreference();
+        if (!record) {
+          this.clearPlaybackPreference({ force: true });
+          return;
+        }
+        const age = Date.now() - record.timestamp;
+        if (record.tabId && record.tabId !== TAB_ID) {
+          if (age > MAX_RESUME_AGE_MS) {
+            this.clearPlaybackPreference({ force: true });
           }
-        } catch (e) {}
+          return;
+        }
+        if (age <= MAX_RESUME_AGE_MS) {
+          this.play({ initiatedByResume: true });
+        } else {
+          this.clearPlaybackPreference({ force: true });
+        }
       },
       prepareForPageExit() {
         if (!this.isActive()) {
           return;
         }
         this.isPageUnloading = true;
-        this.rememberPlaybackPreference();
+        this.rememberPlaybackPreference({ skipHeartbeat: true });
       },
       handlePlayError(err, initiatedByResume) {
         if (initiatedByResume && this.isAutoplayBlockedError(err)) {
@@ -252,8 +304,60 @@
           this.scheduleResumeOnInteraction();
           return;
         }
+        this.stopHeartbeat();
         this.setState('stopped');
         this.clearPlaybackPreference();
+      },
+      startHeartbeat() {
+        if (this.heartbeatId !== null) {
+          return;
+        }
+        this.heartbeatId = window.setInterval(() => {
+          this.writePlaybackPreference(Date.now());
+        }, HEARTBEAT_INTERVAL_MS);
+      },
+      stopHeartbeat() {
+        if (this.heartbeatId !== null) {
+          window.clearInterval(this.heartbeatId);
+          this.heartbeatId = null;
+        }
+      },
+      readPlaybackPreference() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) {
+            return null;
+          }
+          let parsed;
+          try {
+            parsed = JSON.parse(raw);
+          } catch (err) {
+            parsed = null;
+          }
+          if (parsed && typeof parsed === 'object') {
+            const timestamp = Number(parsed.timestamp);
+            const tabId = typeof parsed.tabId === 'string' ? parsed.tabId : null;
+            if (!Number.isFinite(timestamp)) {
+              return null;
+            }
+            return { timestamp, tabId };
+          }
+          const legacy = Number(raw);
+          if (Number.isFinite(legacy)) {
+            return { timestamp: legacy, tabId: null };
+          }
+          return null;
+        } catch (e) {
+          return null;
+        }
+      },
+      writePlaybackPreference(timestamp) {
+        try {
+          localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify({ timestamp, tabId: TAB_ID })
+          );
+        } catch (e) {}
       },
       hasModifierKey(event) {
         return !!(event.metaKey || event.ctrlKey || event.altKey || event.shiftKey);

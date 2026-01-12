@@ -5,7 +5,7 @@ publish_mode: editorial_workflow
 local_backend: true
 media_folder: assets/uploads
 public_folder: /assets/uploads
-site_url: https://webdcr.github.io
+site_url: https://wdcr.netlify.app
 collections:
   - name: authors
     label: Authors

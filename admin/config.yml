@@ -8,7 +8,7 @@ public_folder: /assets/uploads
 site_url: https://wdcr.netlify.app
 collections:
   - name: authors
-    label: Authors
+    label: Blog Authors
     folder: _authors
     extension: md
     create: true
@@ -18,11 +18,11 @@ collections:
       - label: Name
         name: name
         widget: string
-        hint: "Format: First Last ’YY (use the smart apostrophe)"
+        hint: "Format: First Last ’YY"
       - label: Author ID
         name: author_id
         widget: string
-        hint: "Lowercase name with hyphens (e.g., first-last-25)"
+        hint: "Lowercase name with hyphens, no class year (e.g., first-last)"
   - name: musicblog
     label: Music Blog
     folder: _musicblog
@@ -37,13 +37,6 @@ collections:
       - { label: Layout, name: layout, widget: hidden, default: blogpost }
       - { label: Title, name: title, widget: string }
       - { label: Publish Date, name: date, widget: datetime, format: "YYYY-MM-DDTHH:mm:ssZ" }
-      - label: Author
-        name: author
-        widget: relation
-        collection: authors
-        value_field: author_id
-        display_fields: [name]
-        search_fields: [name, author_id]
       - label: Permalink
         name: permalink
         widget: string
@@ -64,13 +57,6 @@ collections:
       - { label: Layout, name: layout, widget: hidden, default: newspost }
       - { label: Title, name: title, widget: string }
       - { label: Publish Date, name: date, widget: datetime, format: "YYYY-MM-DDTHH:mm:ssZ" }
-      - label: Author
-        name: author
-        widget: relation
-        collection: authors
-        value_field: author_id
-        display_fields: [name]
-        search_fields: [name, author_id]
       - label: Body
         name: body
         widget: markdown

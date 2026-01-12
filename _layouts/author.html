@@ -2,7 +2,7 @@
 layout: default
 ---
 
-{% assign author_name = page.title %}
+{% assign author_name = page.name | default: page.title %}
 {% assign posts = site.musicblog | where: "author", page.author_id | sort: "date" | reverse %}
 
 <div class="page-content author-page">

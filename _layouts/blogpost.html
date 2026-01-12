@@ -44,7 +44,7 @@ layout: default
   {% endif %}
   {% assign author_name = nil %}
   {% if author_page %}
-    {% assign author_name = author_page.title %}
+    {% assign author_name = author_page.name | default: author_page.title %}
   {% elsif author_id %}
     {% assign author_name = author_id %}
   {% endif %}

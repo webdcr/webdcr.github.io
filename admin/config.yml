@@ -1,9 +1,6 @@
 backend:
-  name: github
-  repo: webdcr/webdcr.github.io
+  name: git-gateway
   branch: main
-  base_url: https://your-github-oauth-app.example.com
-  auth_endpoint: /auth
 publish_mode: editorial_workflow
 local_backend: true
 media_folder: assets/uploads

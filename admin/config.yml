@@ -62,4 +62,3 @@ collections:
       - label: Body
         name: body
         widget: markdown
-        hint: Use the Audio Player editor component to drop custom players anywhere in the story.

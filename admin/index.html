@@ -7,20 +7,22 @@
     <link rel="stylesheet" href="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.css" />
   </head>
   <body>
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <script src="/assets/js/netlify-identity-widget.js"></script>
     <script>
       if (window.netlifyIdentity) {
+        const hash = window.location.hash || ''
+        const hasInviteToken = hash.indexOf('invite_token=') !== -1
         window.netlifyIdentity.on('init', (user) => {
           if (!user) {
             window.netlifyIdentity.on('login', () => {
               document.location.href = '/admin/'
             })
+            if (hasInviteToken) {
+              window.netlifyIdentity.open('signup')
+            }
           }
         })
-        const hash = window.location.hash || ''
-        if (hash.indexOf('invite_token=') !== -1) {
-          window.netlifyIdentity.open('signup')
-        }
+        window.netlifyIdentity.init()
       }
     </script>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>

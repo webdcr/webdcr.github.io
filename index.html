@@ -514,3 +514,28 @@ preload_listen_icon_hover: true
     }));
   });
 </script>
+<script>
+  (function () {
+    const hash = window.location.hash || ''
+    if (hash.indexOf('invite_token=') === -1) {
+      return
+    }
+    const script = document.createElement('script')
+    script.src = '/assets/js/netlify-identity-widget.js'
+    script.onload = function () {
+      if (!window.netlifyIdentity) {
+        return
+      }
+      window.netlifyIdentity.on('init', function (user) {
+        if (!user) {
+          window.netlifyIdentity.open('signup')
+          window.netlifyIdentity.on('login', function () {
+            window.location.href = '/admin/'
+          })
+        }
+      })
+      window.netlifyIdentity.init()
+    }
+    document.body.appendChild(script)
+  })()
+</script>

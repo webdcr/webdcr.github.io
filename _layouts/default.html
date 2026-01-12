@@ -33,7 +33,7 @@
     </div>
     {% include footer.html %}
     <script src="{{ '/assets/js/audio-player.js' | relative_url }}"></script>
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <script src="{{ '/assets/js/netlify-identity-widget.js' | relative_url }}"></script>
     <script>
       if (window.netlifyIdentity) {
         window.netlifyIdentity.on('init', (user) => {

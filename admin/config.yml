@@ -21,7 +21,7 @@ collections:
   - name: musicblog
     label: Music Blog
     folder: _musicblog
-    extension: md
+    extension: html
     create: true
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     format: frontmatter
@@ -47,7 +47,7 @@ collections:
   - name: news
     label: News
     folder: _news
-    extension: md
+    extension: html
     create: true
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     format: frontmatter

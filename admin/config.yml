@@ -1,0 +1,80 @@
+backend:
+  name: github
+  repo: webdcr/webdcr.github.io
+  branch: main
+  base_url: https://your-github-oauth-app.example.com
+  auth_endpoint: /auth
+publish_mode: editorial_workflow
+local_backend: true
+media_folder: assets/uploads
+public_folder: /assets/uploads
+site_url: https://webdcr.github.io
+collections:
+  - name: authors
+    label: Authors
+    folder: _authors
+    extension: md
+    create: false
+    slug: "{{slug}}"
+    identifier_field: author_id
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Author ID, name: author_id, widget: string }
+      - { label: Body, name: body, widget: markdown, required: false }
+  - name: musicblog
+    label: Music Blog
+    folder: _musicblog
+    extension: md
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    format: frontmatter
+    editor:
+      preview: true
+    fields:
+      - { label: Layout, name: layout, widget: hidden, default: blogpost }
+      - { label: Title, name: title, widget: string }
+      - { label: Publish Date, name: date, widget: datetime, format: "YYYY-MM-DDTHH:mm:ssZ" }
+      - label: Author
+        name: author
+        widget: relation
+        collection: authors
+        value_field: author_id
+        display_fields: [title]
+        search_fields: [title, author_id]
+      - label: Permalink
+        name: permalink
+        widget: string
+        required: false
+        hint: Defaults to /musicblog/<slug>/ when left empty.
+      - { label: Body, name: body, widget: markdown }
+  - name: news
+    label: News
+    folder: _news
+    extension: md
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    format: frontmatter
+    editor:
+      preview: true
+    fields:
+      - { label: Layout, name: layout, widget: hidden, default: newspost }
+      - { label: Title, name: title, widget: string }
+      - { label: Publish Date, name: date, widget: datetime, format: "YYYY-MM-DDTHH:mm:ssZ" }
+      - label: Categories
+        name: categories
+        widget: list
+        required: false
+        label_singular: Category
+        allow_add: true
+        hint: Leave empty if the story should not be grouped.
+      - label: Author
+        name: author
+        widget: relation
+        collection: authors
+        value_field: author_id
+        display_fields: [title]
+        search_fields: [title, author_id]
+      - label: Body
+        name: body
+        widget: markdown
+        hint: Use the Audio Player editor component to drop custom players anywhere in the story.

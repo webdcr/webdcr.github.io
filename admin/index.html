@@ -10,12 +10,8 @@
     <script src="/assets/js/netlify-identity-widget.js"></script>
     <script>
       if (window.netlifyIdentity) {
-        const hash = window.location.hash || ''
-        const hasInviteToken = hash.indexOf('invite_token=') !== -1
-        window.netlifyIdentity.on('init', (user) => {
-          if (!user && hasInviteToken) {
-            window.netlifyIdentity.open('signup')
-          }
+        window.netlifyIdentity.on('login', () => {
+          window.location.reload()
         })
         window.netlifyIdentity.init()
       }

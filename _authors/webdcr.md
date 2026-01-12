@@ -1,6 +1,5 @@
 ---
 layout: author
-title: WebDCR
+name: WebDCR
 author_id: webdcr
-bio: Station staff
 ---

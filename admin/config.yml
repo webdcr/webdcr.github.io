@@ -15,18 +15,21 @@ collections:
     slug: "{{slug}}"
     identifier_field: author_id
     fields:
-      - { label: Title, name: title, widget: string }
-      - { label: Author ID, name: author_id, widget: string }
-      - label: Bio
-        name: bio
-        widget: text
-        required: false
+      - label: Name
+        name: name
+        widget: string
+        hint: "Format: First Last ’YY (use the smart apostrophe)"
+      - label: Author ID
+        name: author_id
+        widget: string
+        hint: "Lowercase name with hyphens (e.g., first-last-25)"
   - name: musicblog
     label: Music Blog
     folder: _musicblog
     extension: html
     create: true
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    sort: date:desc
     format: frontmatter
     editor:
       preview: true
@@ -39,8 +42,8 @@ collections:
         widget: relation
         collection: authors
         value_field: author_id
-        display_fields: [title]
-        search_fields: [title, author_id]
+        display_fields: [name]
+        search_fields: [name, author_id]
       - label: Permalink
         name: permalink
         widget: string
@@ -53,6 +56,7 @@ collections:
     extension: html
     create: true
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    sort: date:desc
     format: frontmatter
     editor:
       preview: true
@@ -65,8 +69,8 @@ collections:
         widget: relation
         collection: authors
         value_field: author_id
-        display_fields: [title]
-        search_fields: [title, author_id]
+        display_fields: [name]
+        search_fields: [name, author_id]
       - label: Body
         name: body
         widget: markdown

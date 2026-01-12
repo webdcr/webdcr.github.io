@@ -40,14 +40,10 @@
           return
         }
         const hasInviteToken = (window.location.hash || '').indexOf('invite_token=') !== -1
-        window.netlifyIdentity.on('init', function (user) {
-          if (!user && hasInviteToken) {
-            window.netlifyIdentity.open('signup')
-            window.netlifyIdentity.on('login', function () {
-              window.location.href = '/admin/'
-            })
-          }
-        })
+        if (hasInviteToken && window.location.pathname !== '/admin/') {
+          window.location.href = '/admin/' + window.location.hash
+          return
+        }
         window.netlifyIdentity.init()
       })()
     </script>

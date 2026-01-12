@@ -75,7 +75,7 @@ _musicblog/2020-04-10-discover-meekly-lets-get-confessional.html: <p>
 </p>
 _musicblog/2024-12-30-joes-top-10-albums-of-2024.html: <p class="">9: Bladee - Cold Visions</p>
 
-<figure class="wp-block-image"><img src="{{site.baseurl}}/assets/uploads/oldsite/2024/12/bladee-cold-visions.png" alt=""></figure>
+<figure class="wp-block-image"><img src="{{site.baseurl}}/assets/uploads/2024/12/bladee-cold-visions.png" alt=""></figure>
 
 <p class="">If there’s anything Bladee does better than most in the underground rap world, it’s aesthetic; outside of how cool one may think the Drain Gang cohort is, it’s undeniable that both Bladee’s musical output and popstar status share a wintery, slightly depressed but hopeful aesthetic. He’s one of the coolest figures in the underground for that reason. <em>Cold Visions</em> capitalizes on this aesthetic in a very consistent and focused manner. The beats are more directly rage-influenced, but Bladee doesn’t compromise on his signature flow and vision, it all feels as composed and intentional as the production on favorites like <em>Icedancer</em>, probably my favorite Bladee project. Bladee delivers some of his more intense and emotional lines on this record, relating a lot of his anxieties as he enters his thirties and becomes distant from friends on songs like “DONT WANNA HANG OUT” and “I DONT LIKE PEOPLE.” On “YUNG SHERMAN” and others you hear more of Bladee’s intense vocal inflections, more lovely melodies that click perfectly with the feelings related in his lyrics. Being an hour long cloud rap endeavor, growing bored of the tedium may happen,  but Bladee finds ways to keep things interesting on this record. This is probably his best, most consistent and listenable release since 2020, again because it all feels so cohesive and aesthetic-driven. I highly recommend this album if you enjoy underground rap in any way, definitely one of the best rage albums I’ve heard in a while.</p>
 
@@ -128,7 +128,7 @@ _musicblog/2024-07-10-maggie-rogers-dont-forget-me-tour.html: <p class="">I</spa
 
 
 
-<figure class="wp-block-image aligncenter is-resized"><img src="{{site.baseurl}}/assets/uploads/oldsite/2024/07/845c096e-4875-4abd-8888-ebde4e489991" alt="" style="width:372px;height:auto"></figure>
+<figure class="wp-block-image aligncenter is-resized"><img src="{{site.baseurl}}/assets/uploads/2024/07/845c096e-4875-4abd-8888-ebde4e489991" alt="" style="width:372px;height:auto"></figure>
 
 <p class="">Maggie continued to sing while recounting how she had grown up going to the very venue I was watching her play in. The singer wistfully recalled saving up money to see Mumford and Sons, and how she was named godmother to the pianist’s daughter. I felt chills listening to her emotionally charged version of “Overnight,” one of my favorite songs on her first album. This performance, along with the stripped back version of her hit “Alaska,” represented the growth she has experienced as an artist. </p>
 

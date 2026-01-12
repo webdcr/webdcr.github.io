@@ -17,9 +17,6 @@
             window.netlifyIdentity.open('signup')
           }
         })
-        window.netlifyIdentity.on('login', () => {
-          document.location.href = '/admin/'
-        })
         window.netlifyIdentity.init()
       }
     </script>

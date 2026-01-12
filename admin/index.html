@@ -13,14 +13,12 @@
         const hash = window.location.hash || ''
         const hasInviteToken = hash.indexOf('invite_token=') !== -1
         window.netlifyIdentity.on('init', (user) => {
-          if (!user) {
-            window.netlifyIdentity.on('login', () => {
-              document.location.href = '/admin/'
-            })
-            if (hasInviteToken) {
-              window.netlifyIdentity.open('signup')
-            }
+          if (!user && hasInviteToken) {
+            window.netlifyIdentity.open('signup')
           }
+        })
+        window.netlifyIdentity.on('login', () => {
+          document.location.href = '/admin/'
         })
         window.netlifyIdentity.init()
       }

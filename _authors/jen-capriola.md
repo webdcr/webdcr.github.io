@@ -1,5 +1,5 @@
 ---
 layout: author
-title: Jen Capriola
+title: "Jen Capriola '23"
 author_id: jen-capriola
 ---

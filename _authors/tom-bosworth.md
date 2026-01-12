@@ -1,5 +1,5 @@
 ---
 layout: author
-title: Tom Bosworth
+title: "Tom Bosworth '22"
 author_id: tom-bosworth
 ---

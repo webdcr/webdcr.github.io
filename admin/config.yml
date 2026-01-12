@@ -11,13 +11,16 @@ collections:
     label: Authors
     folder: _authors
     extension: md
-    create: false
+    create: true
     slug: "{{slug}}"
     identifier_field: author_id
     fields:
       - { label: Title, name: title, widget: string }
       - { label: Author ID, name: author_id, widget: string }
-      - { label: Body, name: body, widget: markdown, required: false }
+      - label: Bio
+        name: bio
+        widget: text
+        required: false
   - name: musicblog
     label: Music Blog
     folder: _musicblog
@@ -57,13 +60,6 @@ collections:
       - { label: Layout, name: layout, widget: hidden, default: newspost }
       - { label: Title, name: title, widget: string }
       - { label: Publish Date, name: date, widget: datetime, format: "YYYY-MM-DDTHH:mm:ssZ" }
-      - label: Categories
-        name: categories
-        widget: list
-        required: false
-        label_singular: Category
-        allow_add: true
-        hint: Leave empty if the story should not be grouped.
       - label: Author
         name: author
         widget: relation

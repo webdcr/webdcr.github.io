@@ -37,16 +37,21 @@ layout: default
   {% endif %}
 
   <h1>{{ page.title }}</h1>
-  {% assign author_id = page.author | default: '' %} {% assign author_data =
-  site.data.authors[author_id] %} {% if author_data %} {% assign author_name =
-  author_data.name | default: author_id %} {% elsif author_id %} {% assign
-  author_name = author_id %} {% endif %} {% if author_name %}
+  {% assign author_id = page.author | default: '' %}
+  {% assign author_page = nil %}
+  {% if author_id %}
+    {% assign author_page = site.authors | where: 'author_id', author_id | first %}
+  {% endif %}
+  {% assign author_name = nil %}
+  {% if author_page %}
+    {% assign author_name = author_page.title %}
+  {% elsif author_id %}
+    {% assign author_name = author_id %}
+  {% endif %}
+  {% if author_name %}
   <p class="post-byline">
-    By {% if author_data %}
-    <a
-      class="author-link"
-      href="{{ '/musicblog/contributor/' | append: author_id | append: '/' | relative_url }}"
-    >
+    By {% if author_page %}
+    <a class="author-link" href="{{ author_page.url | relative_url }}">
       {{ author_name }}
     </a>
     {% else %} {{ author_name }} {% endif %} ·

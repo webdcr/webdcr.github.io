@@ -33,5 +33,23 @@
     </div>
     {% include footer.html %}
     <script src="{{ '/assets/js/audio-player.js' | relative_url }}"></script>
+    <script src="{{ '/assets/js/netlify-identity-widget.js' | relative_url }}"></script>
+    <script>
+      ;(function () {
+        if (!window.netlifyIdentity) {
+          return
+        }
+        const hasInviteToken = (window.location.hash || '').indexOf('invite_token=') !== -1
+        window.netlifyIdentity.on('init', function (user) {
+          if (!user && hasInviteToken) {
+            window.netlifyIdentity.open('signup')
+            window.netlifyIdentity.on('login', function () {
+              window.location.href = '/admin/'
+            })
+          }
+        })
+        window.netlifyIdentity.init()
+      })()
+    </script>
   </body>
 </html>

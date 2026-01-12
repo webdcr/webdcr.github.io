@@ -3,8 +3,8 @@ backend:
   branch: main
 publish_mode: editorial_workflow
 local_backend: true
-media_folder: assets
-public_folder: /assets
+media_folder: assets/uploads
+public_folder: /assets/uploads
 site_url: https://wdcr.netlify.app
 collections:
   - name: authors

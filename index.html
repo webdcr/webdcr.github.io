@@ -91,18 +91,21 @@ preload_listen_icon_hover: true
                   </template>
                 </td>
                 <td class="showRowInfo">
-                  <span
-                    class="showRowName"
-                    :class="{ showRowBreakLabel: show.isBreak }"
-                    x-text="show.isBreak ? 'Programming break' : show.Name"
-                  ></span>
-                  <template x-if="!show.isBreak && show.hostLabel">
-                    <span class="showRowHost" x-text="show.hostLabel"></span>
+                  <template x-if="show.isBreak">
+                    <div class="showRowBreakContent">
+                      <span class="showRowBreakLabel">Programming break</span>
+                      <template x-if="show.breakRange">
+                        <span class="showRowBreakTime" x-text="show.breakRange"></span>
+                      </template>
+                    </div>
                   </template>
-                  <p
-                    class="showRowDescription"
-                    x-text="show.isBreak ? '' : show.Description"
-                  ></p>
+                  <template x-if="!show.isBreak">
+                    <span class="showRowName" x-text="show.Name"></span>
+                    <template x-if="show.hostLabel">
+                      <span class="showRowHost" x-text="show.hostLabel"></span>
+                    </template>
+                    <p class="showRowDescription" x-text="show.Description"></p>
+                  </template>
                 </td>
                 <td class="showRowTime" :class="{ 'showRowTime--hidden': show.isBreak }">
                   <template x-if="!show.isBreak">
@@ -473,12 +476,14 @@ preload_listen_icon_hover: true
           }
           const gap = next.startMinutes - current.startMinutes;
           if (gap > 60) {
-            result.push(this.createProgrammingBreak(day, current, i));
+            const breakStart = current.startMinutes + 60;
+            const breakEnd = next.startMinutes;
+            result.push(this.createProgrammingBreak(day, current, next, breakStart, breakEnd, i));
           }
         }
         return result;
       },
-      createProgrammingBreak(day, currentShow, index) {
+      createProgrammingBreak(day, currentShow, nextShow, breakStart, breakEnd, index) {
         return {
           isBreak: true,
           Day: day,
@@ -488,9 +493,26 @@ preload_listen_icon_hover: true
           imageSrc: '',
           imageAlt: '',
           displayTime: '',
+          breakRange: this.formatBreakRange(breakStart, breakEnd),
           startMinutes: null,
           uid: `${day}-break-${currentShow && currentShow.uid ? currentShow.uid : index}`
         };
+      },
+      formatBreakRange(startMinutes, endMinutes) {
+        if (
+          typeof startMinutes !== 'number' ||
+          Number.isNaN(startMinutes) ||
+          typeof endMinutes !== 'number' ||
+          Number.isNaN(endMinutes)
+        ) {
+          return '';
+        }
+        const startLabel = this.formatDisplayTime(startMinutes);
+        const endLabel = this.formatDisplayTime(endMinutes);
+        if (!startLabel || !endLabel) {
+          return '';
+        }
+        return `${startLabel} – ${endLabel}`;
       },
       selectDay(day) {
         if (this.daysOfWeek.includes(day)) {

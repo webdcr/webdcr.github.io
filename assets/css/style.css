@@ -535,14 +535,25 @@ footer {
 
 .showRow--break .showRowInfo {
   text-align: center;
-  font-style: italic;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  padding: 10px 8px;
 }
 
 .showRowBreakLabel {
   display: block;
   width: 100%;
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+}
+
+.showRowBreakTime {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.65rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-muted);
 }
 
 .showRow--live .showRowTimeContent::after {

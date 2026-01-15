@@ -68,17 +68,27 @@ permalink: /about/
   <h2 class="section-label">Our team</h2>
   <div class="directorateContainer">
     {% assign directorate = site.data.directorate %} {% for person in directorate %}
+    {% capture director_name %}
+      {% if person["Name"] %}
+        {{ person["Name"] }}
+      {% else %}
+        {{ person["First"] }} {{ person["Last"] }}
+      {% endif %}
+    {% endcapture %}
+    {% assign director_name = director_name | strip %}
+    {% assign photo_source = person["Image"] | default: person["image"] | default: "" %}
+    {% assign photo_source = photo_source | strip %}
     <div class="directoratePerson">
       <div class="directorate-photo">
-        {% if person["Image"] %}
-        <img src="{{ person["Image"] }}" alt="{{ person["First"] }} {{ person["Last"] }}" />
+        {% if photo_source != "" %}
+        <img src="{{ photo_source }}" alt="{{ director_name }}" />
         {% else %}
-        <img src="/assets/images/showalbums/placeholder.png" alt="{{ person["First"] }} {{ person["Last"] }}" />
+        <img src="/assets/images/showalbums/placeholder.png" alt="{{ director_name }}" />
         {% endif %}
       </div>
       <div class="directorate-content">
         <p class="directorate-label">{{ person["Position"] }}</p>
-        <p class="directorate-name">{{ person["First"] }} {{ person["Last"] }}</p>
+        <p class="directorate-name">{{ director_name }}</p>
         <p class="directorate-description">{{ person["Description"] }}</p>
       </div>
     </div>

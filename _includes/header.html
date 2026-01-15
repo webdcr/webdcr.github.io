@@ -446,6 +446,30 @@
     const nowPlayingImage = document.getElementById("nowplayingImage");
     const nowPlayingDescription = document.getElementById("nowplayingDescription");
     const nowPlayingDescriptionClone = document.getElementById("nowplayingDescriptionClone");
+    const marqueeWrapper = document.querySelector('.nowplaying-description');
+
+    function updateMarqueeState(wrapper) {
+      if (!wrapper) {
+        return;
+      }
+      const track = wrapper.querySelector('.nowplaying-description-track');
+      const firstSegment = wrapper.querySelector('.nowplaying-description-segment');
+      if (!track || !firstSegment) {
+        return;
+      }
+      const wrapperWidth = wrapper.getBoundingClientRect().width;
+      const segmentWidth = firstSegment.getBoundingClientRect().width;
+      const needsMarquee = segmentWidth > wrapperWidth + 16;
+      wrapper.classList.toggle('nowplaying-description--marquee', needsMarquee);
+      if (needsMarquee) {
+        const SCROLL_SPEED = 28;
+        const MIN_DURATION = 20;
+        const durationSeconds = Math.max(segmentWidth / SCROLL_SPEED, MIN_DURATION);
+        track.style.setProperty('--marquee-duration', `${durationSeconds}s`);
+      } else {
+        track.style.removeProperty('--marquee-duration');
+      }
+    }
 
     function sanitizeImagePath(name) {
       if (!name) {
@@ -510,14 +534,21 @@
       if (nowPlayingImage) {
         nowPlayingImage.src = art;
       }
-      const marqueeWrapper = document.querySelector('.nowplaying-description');
       if (marqueeWrapper && nowPlayingDescription && nowPlayingDescriptionClone) {
         if (description) {
           nowPlayingDescription.textContent = description;
           nowPlayingDescriptionClone.textContent = description;
           marqueeWrapper.style.display = '';
+          requestAnimationFrame(() => updateMarqueeState(marqueeWrapper));
         } else {
           marqueeWrapper.style.display = 'none';
+          nowPlayingDescription.textContent = '';
+          nowPlayingDescriptionClone.textContent = '';
+          marqueeWrapper.classList.remove('nowplaying-description--marquee');
+          const track = marqueeWrapper.querySelector('.nowplaying-description-track');
+          if (track) {
+            track.style.removeProperty('--marquee-duration');
+          }
         }
       }
     }
@@ -542,5 +573,19 @@
 
     loadCurShow();
     scheduleShowUpdates();
+
+    let resizeRaf = null;
+    window.addEventListener('resize', () => {
+      if (!marqueeWrapper || marqueeWrapper.style.display === 'none') {
+        return;
+      }
+      if (resizeRaf) {
+        cancelAnimationFrame(resizeRaf);
+      }
+      resizeRaf = requestAnimationFrame(() => {
+        updateMarqueeState(marqueeWrapper);
+        resizeRaf = null;
+      });
+    });
   })();
 </script>

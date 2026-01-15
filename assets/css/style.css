@@ -528,6 +528,23 @@ footer {
   position: relative;
 }
 
+.showRowImage--hidden,
+.showRowTime--hidden {
+  visibility: hidden;
+}
+
+.showRow--break .showRowInfo {
+  text-align: center;
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.showRowBreakLabel {
+  display: block;
+  width: 100%;
+}
+
 .showRow--live .showRowTimeContent::after {
   content: 'On air now';
   font-size: 0.7rem;

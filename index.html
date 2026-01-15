@@ -84,21 +84,32 @@ preload_listen_icon_hover: true
         <template x-if="hasShows(day)">
           <table class="schedule-table">
             <template x-for="show in groupedShows[day]" :key="show.uid">
-              <tr class="showRow" :class="{ 'showRow--live': isLive(show) }">
-                <td class="showRowImage">
-                  <img :src="show.imageSrc" :alt="show.imageAlt" />
+              <tr class="showRow" :class="{ 'showRow--live': !show.isBreak && isLive(show), 'showRow--break': show.isBreak }">
+                <td class="showRowImage" :class="{ 'showRowImage--hidden': show.isBreak }">
+                  <template x-if="!show.isBreak">
+                    <img :src="show.imageSrc" :alt="show.imageAlt" />
+                  </template>
                 </td>
                 <td class="showRowInfo">
-                  <span class="showRowName" x-text="show.Name"></span>
-                  <template x-if="show.hostLabel">
+                  <span
+                    class="showRowName"
+                    :class="{ showRowBreakLabel: show.isBreak }"
+                    x-text="show.isBreak ? 'Programming break' : show.Name"
+                  ></span>
+                  <template x-if="!show.isBreak && show.hostLabel">
                     <span class="showRowHost" x-text="show.hostLabel"></span>
                   </template>
-                  <p class="showRowDescription" x-text="show.Description"></p>
+                  <p
+                    class="showRowDescription"
+                    x-text="show.isBreak ? '' : show.Description"
+                  ></p>
                 </td>
-                <td class="showRowTime">
-                  <span class="showRowTimeContent">
-                    <span class="showRowTimeText" x-text="show.displayTime"></span>
-                  </span>
+                <td class="showRowTime" :class="{ 'showRowTime--hidden': show.isBreak }">
+                  <template x-if="!show.isBreak">
+                    <span class="showRowTimeContent">
+                      <span class="showRowTimeText" x-text="show.displayTime"></span>
+                    </span>
+                  </template>
                 </td>
               </tr>
             </template>
@@ -441,8 +452,45 @@ preload_listen_icon_hover: true
           this.groupedShows[day].push(normalized);
         });
         Object.keys(this.groupedShows).forEach((day) => {
-          this.groupedShows[day].sort((a, b) => a.startMinutes - b.startMinutes);
+          const sorted = this.groupedShows[day].sort((a, b) => a.startMinutes - b.startMinutes);
+          this.groupedShows[day] = this.insertProgrammingBreaks(sorted, day);
         });
+      },
+      insertProgrammingBreaks(shows, day) {
+        if (!Array.isArray(shows) || shows.length === 0) {
+          return [];
+        }
+        const result = [];
+        for (let i = 0; i < shows.length; i++) {
+          const current = shows[i];
+          result.push(current);
+          const next = shows[i + 1];
+          if (!next) {
+            continue;
+          }
+          if (typeof current.startMinutes !== 'number' || typeof next.startMinutes !== 'number') {
+            continue;
+          }
+          const gap = next.startMinutes - current.startMinutes;
+          if (gap > 60) {
+            result.push(this.createProgrammingBreak(day, current, i));
+          }
+        }
+        return result;
+      },
+      createProgrammingBreak(day, currentShow, index) {
+        return {
+          isBreak: true,
+          Day: day,
+          Name: 'Programming Break',
+          Description: '',
+          hostLabel: '',
+          imageSrc: '',
+          imageAlt: '',
+          displayTime: '',
+          startMinutes: null,
+          uid: `${day}-break-${currentShow && currentShow.uid ? currentShow.uid : index}`
+        };
       },
       selectDay(day) {
         if (this.daysOfWeek.includes(day)) {

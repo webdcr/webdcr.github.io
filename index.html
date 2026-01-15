@@ -91,21 +91,19 @@ preload_listen_icon_hover: true
                   </template>
                 </td>
                 <td class="showRowInfo">
-                  <template x-if="show.isBreak">
-                    <div class="showRowBreakContent">
-                      <span class="showRowBreakLabel">Programming break</span>
-                      <template x-if="show.breakRange">
-                        <span class="showRowBreakTime" x-text="show.breakRange"></span>
-                      </template>
-                    </div>
-                  </template>
-                  <template x-if="!show.isBreak">
+                  <div class="showRowBreakContent" x-show="show.isBreak" x-cloak>
+                    <span class="showRowBreakLabel">Programming break</span>
+                    <template x-if="show.breakRange">
+                      <span class="showRowBreakTime" x-text="show.breakRange"></span>
+                    </template>
+                  </div>
+                  <div x-show="!show.isBreak" x-cloak>
                     <span class="showRowName" x-text="show.Name"></span>
                     <template x-if="show.hostLabel">
                       <span class="showRowHost" x-text="show.hostLabel"></span>
                     </template>
                     <p class="showRowDescription" x-text="show.Description"></p>
-                  </template>
+                  </div>
                 </td>
                 <td class="showRowTime" :class="{ 'showRowTime--hidden': show.isBreak }">
                   <template x-if="!show.isBreak">

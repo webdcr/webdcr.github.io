@@ -13,7 +13,8 @@
       <p class="nowplaying-title" id="nowplayingTitle">WebDCR Music</p>
       <p class="nowplaying-host" id="nowplayingHost">No show is currently playing</p>
       <p class="nowplaying-description" style="display:none">
-        <span class="nowplaying-description-track">
+        <span class="nowplaying-description-static" id="nowplayingDescriptionStatic"></span>
+        <span class="nowplaying-description-track" aria-hidden="true">
           <span class="nowplaying-description-segment">
             <span class="nowplaying-description-text" id="nowplayingDescription"></span>
             <span class="nowplaying-description-divider" aria-hidden="true">•</span>
@@ -88,6 +89,68 @@
     }
     return hours * 60 + minutes;
   };
+
+  window.webdcr.getEasternNowComponents = (function () {
+    const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const EASTERN_TIME_ZONE = 'America/New_York';
+    let formatter = null;
+    if (typeof Intl !== 'undefined' && typeof Intl.DateTimeFormat === 'function') {
+      try {
+        formatter = new Intl.DateTimeFormat('en-US', {
+          timeZone: EASTERN_TIME_ZONE,
+          weekday: 'long',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        });
+      } catch (error) {
+        formatter = null;
+      }
+    }
+
+    function fallback(date) {
+      const MINUTES_PER_DAY = 1440;
+      const EST_OFFSET = 300;
+      const utcMinutes = date.getUTCHours() * 60 + date.getUTCMinutes();
+      let minutes = utcMinutes - EST_OFFSET;
+      let dayIndex = date.getUTCDay();
+      while (minutes < 0) {
+        minutes += MINUTES_PER_DAY;
+        dayIndex = (dayIndex + 6) % 7;
+      }
+      while (minutes >= MINUTES_PER_DAY) {
+        minutes -= MINUTES_PER_DAY;
+        dayIndex = (dayIndex + 1) % 7;
+      }
+      return {
+        dayName: DAY_NAMES[dayIndex],
+        dayIndex,
+        minutes
+      };
+    }
+
+    return function getEasternNowComponents(date = new Date()) {
+      if (formatter && typeof formatter.formatToParts === 'function') {
+        try {
+          const parts = formatter.formatToParts(date);
+          const dayName = parts.find((part) => part.type === 'weekday')?.value || 'Sunday';
+          const hourPart = parts.find((part) => part.type === 'hour');
+          const minutePart = parts.find((part) => part.type === 'minute');
+          const hours = hourPart ? parseInt(hourPart.value, 10) : 0;
+          const minutes = minutePart ? parseInt(minutePart.value, 10) : 0;
+          const safeDayIndex = DAY_NAMES.indexOf(dayName);
+          return {
+            dayName: safeDayIndex >= 0 ? DAY_NAMES[safeDayIndex] : DAY_NAMES[0],
+            dayIndex: safeDayIndex >= 0 ? safeDayIndex : 0,
+            minutes: hours * 60 + minutes
+          };
+        } catch (error) {
+          return fallback(date);
+        }
+      }
+      return fallback(date);
+    };
+  })();
 </script>
 
 <script>
@@ -446,27 +509,38 @@
     const nowPlayingImage = document.getElementById("nowplayingImage");
     const nowPlayingDescription = document.getElementById("nowplayingDescription");
     const nowPlayingDescriptionClone = document.getElementById("nowplayingDescriptionClone");
+    const nowPlayingDescriptionStatic = document.getElementById("nowplayingDescriptionStatic");
     const marqueeWrapper = document.querySelector('.nowplaying-description');
 
     function updateMarqueeState(wrapper) {
       if (!wrapper) {
         return;
       }
+      wrapper.classList.remove('nowplaying-description--marquee');
       const track = wrapper.querySelector('.nowplaying-description-track');
       const firstSegment = wrapper.querySelector('.nowplaying-description-segment');
-      if (!track || !firstSegment) {
-        return;
-      }
+      const staticText = wrapper.querySelector('.nowplaying-description-static');
       const wrapperWidth = wrapper.getBoundingClientRect().width;
-      const segmentWidth = firstSegment.getBoundingClientRect().width;
-      const needsMarquee = segmentWidth > wrapperWidth + 16;
-      wrapper.classList.toggle('nowplaying-description--marquee', needsMarquee);
+      let baseContentWidth = 0;
+      if (staticText && staticText.textContent) {
+        baseContentWidth = staticText.scrollWidth;
+      }
+      if (!baseContentWidth && firstSegment) {
+        baseContentWidth = firstSegment.getBoundingClientRect().width;
+      }
+      const needsMarquee = baseContentWidth > wrapperWidth + 16;
       if (needsMarquee) {
+        wrapper.classList.add('nowplaying-description--marquee');
+      } else {
+        wrapper.classList.remove('nowplaying-description--marquee');
+      }
+      const trackWidth = track ? Math.max(track.scrollWidth, track.getBoundingClientRect().width) : baseContentWidth;
+      if (needsMarquee && track && trackWidth > 0) {
         const SCROLL_SPEED = 28;
         const MIN_DURATION = 20;
-        const durationSeconds = Math.max(segmentWidth / SCROLL_SPEED, MIN_DURATION);
+        const durationSeconds = Math.max(trackWidth / SCROLL_SPEED, MIN_DURATION);
         track.style.setProperty('--marquee-duration', `${durationSeconds}s`);
-      } else {
+      } else if (track) {
         track.style.removeProperty('--marquee-duration');
       }
     }
@@ -494,9 +568,11 @@
         "Friday",
         "Saturday"
       ];
-      const currentDate = new Date();
-      const currentDay = daysOfWeek[currentDate.getDay()];
-      const nowMinutes = currentDate.getHours() * 60 + currentDate.getMinutes();
+      const easternNow = window.webdcr && typeof window.webdcr.getEasternNowComponents === 'function'
+        ? window.webdcr.getEasternNowComponents()
+        : { dayName: daysOfWeek[new Date().getDay()], minutes: new Date().getHours() * 60 + new Date().getMinutes() };
+      const currentDay = easternNow.dayName;
+      const nowMinutes = easternNow.minutes;
 
       let matchingShow = null;
 
@@ -538,12 +614,18 @@
         if (description) {
           nowPlayingDescription.textContent = description;
           nowPlayingDescriptionClone.textContent = description;
+          if (nowPlayingDescriptionStatic) {
+            nowPlayingDescriptionStatic.textContent = description;
+          }
           marqueeWrapper.style.display = '';
           requestAnimationFrame(() => updateMarqueeState(marqueeWrapper));
         } else {
           marqueeWrapper.style.display = 'none';
           nowPlayingDescription.textContent = '';
           nowPlayingDescriptionClone.textContent = '';
+          if (nowPlayingDescriptionStatic) {
+            nowPlayingDescriptionStatic.textContent = '';
+          }
           marqueeWrapper.classList.remove('nowplaying-description--marquee');
           const track = marqueeWrapper.querySelector('.nowplaying-description-track');
           if (track) {

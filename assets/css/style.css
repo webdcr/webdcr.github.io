@@ -185,7 +185,7 @@ a:not(.navitem):not(.author-link):not(.wordmark-link):focus-visible {
 .nowplaying-cover {
   width: 76px;
   height: 76px;
-  border: 1.5px solid #000;
+  border: 1px solid #000;
   border-radius: 10px;
   overflow: hidden;
   background: #fafafa;
@@ -229,30 +229,52 @@ a:not(.navitem):not(.author-link):not(.wordmark-link):focus-visible {
   color: var(--color-text);
   max-width: clamp(180px, 60vw, 460px);
   width: 100%;
-  overflow: hidden;
-  white-space: nowrap;
   position: relative;
   line-height: 1.2;
+  white-space: normal;
   user-select: none;
   cursor: default;
-  mask-image: linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.85) 12%, rgba(0, 0, 0, 0.85) 88%, rgba(0, 0, 0, 0) 100%);
-  -webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.85) 12%, rgba(0, 0, 0, 0.85) 88%, rgba(0, 0, 0, 0) 100%);
 }
 
 .nowplaying-description * {
   user-select: none;
 }
 
+.nowplaying-description-static {
+  display: inline;
+}
+
+
 .nowplaying-description-track {
   display: inline-flex;
   align-items: center;
-  padding-left: 24px;
   --marquee-duration: 24s;
   animation: none;
   will-change: transform;
+  position: absolute;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.nowplaying-description--marquee {
+  overflow: hidden;
+  white-space: nowrap;
+  mask-image: linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.85) 12%, rgba(0, 0, 0, 0.85) 88%, rgba(0, 0, 0, 0) 100%);
+  -webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.85) 12%, rgba(0, 0, 0, 0.85) 88%, rgba(0, 0, 0, 0) 100%);
+}
+
+.nowplaying-description--marquee .nowplaying-description-static {
+  display: none;
 }
 
 .nowplaying-description--marquee .nowplaying-description-track {
+  position: static;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  padding-left: 24px;
   animation: marquee var(--marquee-duration) linear infinite;
 }
 
@@ -284,7 +306,7 @@ a:not(.navitem):not(.author-link):not(.wordmark-link):focus-visible {
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  border: 1.5px solid #000;
+  border: 1px solid #000;
   background-color: #fff;
   cursor: pointer;
   background-repeat: no-repeat;
@@ -312,11 +334,11 @@ a:not(.navitem):not(.author-link):not(.wordmark-link):focus-visible {
 }
 
 .radioPlayer:hover {
-  transform: translateY(1px);
+  transform: translateY(-1px);
 }
 
 .radioPlayer:active {
-  transform: translateY(-1px);
+  transform: translateY(0);
 }
 
 @keyframes spin {

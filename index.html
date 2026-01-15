@@ -131,6 +131,17 @@ preload_listen_icon_hover: true
   const HAND_GRAYED = '/assets/images/hand1-gray.png';
 
   document.addEventListener('alpine:init', () => {
+    const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const getEasternNow =
+      window.webdcr && typeof window.webdcr.getEasternNowComponents === 'function'
+        ? window.webdcr.getEasternNowComponents
+        : function basicEasternNow() {
+            const now = new Date();
+            return {
+              dayName: DAY_NAMES[now.getDay()] || DAY_NAMES[0],
+              minutes: now.getHours() * 60 + now.getMinutes()
+            };
+          };
     Alpine.data('listenButtonApp', () => ({
       iconSrc: HAND_NORMAL,
       cursorSrc: HAND_NORMAL,
@@ -400,15 +411,7 @@ preload_listen_icon_hover: true
     }));
 
     Alpine.data('scheduleApp', () => ({
-      daysOfWeek: [
-        'Sunday',
-        'Monday',
-        'Tuesday',
-        'Wednesday',
-        'Thursday',
-        'Friday',
-        'Saturday'
-      ],
+      daysOfWeek: DAY_NAMES,
       shows: window.WEBDCR_SHOWS || [],
       timeParser:
         window.webdcr && typeof window.webdcr.parseTimeToMinutes === 'function'
@@ -417,7 +420,7 @@ preload_listen_icon_hover: true
       groupedShows: {},
       activeDay: 'Sunday',
       nowMinutes: 0,
-      currentDayName: 'Sunday',
+      currentDayName: DAY_NAMES[0],
       init() {
         this.prepareShows();
         this.setActiveDayToToday();
@@ -554,9 +557,9 @@ preload_listen_icon_hover: true
         return `/assets/images/showalbums/${sanitized}`;
       },
       updateCurrentTime() {
-        const now = new Date();
-        this.nowMinutes = now.getHours() * 60 + now.getMinutes();
-        this.currentDayName = this.daysOfWeek[now.getDay()] || this.daysOfWeek[0];
+        const easternNow = getEasternNow();
+        this.nowMinutes = easternNow.minutes;
+        this.currentDayName = easternNow.dayName || this.daysOfWeek[0];
       },
       scheduleTicker() {
         const now = new Date();
@@ -576,8 +579,8 @@ preload_listen_icon_hover: true
         }, delay);
       },
       setActiveDayToToday() {
-        const todayIndex = new Date().getDay();
-        this.activeDay = this.daysOfWeek[todayIndex] || this.daysOfWeek[0];
+        const easternNow = getEasternNow();
+        this.activeDay = easternNow.dayName || this.daysOfWeek[0];
       }
     }));
   });

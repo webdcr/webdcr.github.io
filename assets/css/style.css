@@ -1207,6 +1207,16 @@ article img {
     font-weight: 600;
     order: -1;
   }
+  .showRowImage--hidden,
+  .showRowTime--hidden {
+    display: none;
+  }
+  .showRow.showRow--break {
+    padding: 8px 0;
+  }
+  .showRow--break .showRowInfo {
+    padding: 0;
+  }
   .showRowTimeContent {
     align-items: flex-start;
   }

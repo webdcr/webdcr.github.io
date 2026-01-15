@@ -1,12 +1,41 @@
 ---
 permalink: /404.html
 layout: default
+hide_nowplaying: true
 title: Page not found
 ---
 
 <div class="page-content error-page">
+  <style>
+    .error-page {
+      text-align: center;
+    }
+    .error-page pre {
+      margin: 0;
+    }
+    .error-page h1 {
+      margin-top: 0.25rem;
+      margin-bottom: 0.75rem;
+    }
+    .error-page p {
+      margin: 0.5rem 0;
+    }
+    .error-page img {
+      max-width: 720px;
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin: 0.75rem auto 1rem;
+      display: block;
+      clip-path: inset(5% 0 0 0);
+    }
+  </style>
   <pre>404</pre>
   <h1 class="pagetitle">Rats!</h1>
+  <img
+    src="/assets/images/rats.jpeg"
+    alt="Rats cheering at the WDCR studio"
+  />
   <p>
     We can’t find that page. It may have moved or the URL might be wrong.
   </p>

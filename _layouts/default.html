@@ -23,7 +23,7 @@
     <script defer src="{{ '/assets/js/alpine.js' | relative_url }}"></script>
   </head>
   <body>
-    <div id="cont">
+    <div id="cont" class="{% if page.hide_nowplaying %}no-nowplaying{% endif %}">
       {% include header.html %}
       <!-- Include header -->
 

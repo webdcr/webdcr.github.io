@@ -1,7 +1,6 @@
 ---
 permalink: /404.html
 layout: default
-hide_nowplaying: true
 title: Page not found
 ---
 
@@ -25,21 +24,37 @@ title: Page not found
       width: 100%;
       height: auto;
       border-radius: 8px;
-      margin: 0.75rem auto 1rem;
+      margin: 0.75rem auto 0.35rem;
       display: block;
-      clip-path: inset(5% 0 0 0);
+      clip-path: inset(5% 0 5% 0);
+    }
+    .error-page .image-credit {
+      font-size: 0.82rem;
+      color: #555;
+      margin: -0.3rem auto 0.35rem;
+      max-width: 720px;
+      text-align: right;
+    }
+    .error-page .image-credit a {
+      color: inherit;
+      text-decoration: underline;
     }
   </style>
   <pre>404</pre>
   <h1 class="pagetitle">Rats!</h1>
-  <img
-    src="/assets/images/rats.jpeg"
-    alt="Rats cheering at the WDCR studio"
-  />
   <p>
     We can’t find that page. It may have moved or the URL might be wrong.
   </p>
   <p>
     <a href="/">Return to the homepage</a>
+  </p>
+  <img
+    src="/assets/images/rats.jpeg"
+    alt="Rats cheering at the WDCR studio"
+  />
+  <p class="image-credit">
+    <a href="https://eloisemargaretlangan.com/" target="_blank" rel="noopener"
+      >Eloise Margaret Langan</a
+    >
   </p>
 </div>

@@ -267,7 +267,8 @@ a:not(.navitem):not(.author-link):not(.wordmark-link):focus-visible {
   width: 100%;
   position: relative;
   line-height: 1.2;
-  white-space: normal;
+  white-space: nowrap;
+  overflow: hidden;
   user-select: none;
   cursor: default;
 }

@@ -275,6 +275,8 @@ a:not(.navitem):not(.author-link):not(.wordmark-link):focus-visible {
 
 .nowplaying-description * {
   user-select: none;
+  font-size: inherit;
+  line-height: inherit;
 }
 
 .nowplaying-description-static {
@@ -1257,9 +1259,9 @@ article img {
     font-size: 0.7rem;
   }
   .nowplaying-description {
-    font-size: 0.58rem;
+    font-size: clamp(0.48rem, 2.2vw, 0.56rem);
     max-width: clamp(140px, 70vw, 320px);
-    line-height: 1.2;
+    line-height: 1.15;
   }
   .schedule-table {
     display: block;

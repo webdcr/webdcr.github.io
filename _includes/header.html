@@ -657,7 +657,7 @@
     scheduleShowUpdates();
 
     let resizeRaf = null;
-    window.addEventListener('resize', () => {
+    const queueMarqueeUpdate = () => {
       if (!marqueeWrapper || marqueeWrapper.style.display === 'none') {
         return;
       }
@@ -668,6 +668,36 @@
         updateMarqueeState(marqueeWrapper);
         resizeRaf = null;
       });
-    });
+    };
+
+    let lastMeasuredWidth = marqueeWrapper ? Math.round(marqueeWrapper.getBoundingClientRect().width) : null;
+    if (marqueeWrapper && 'ResizeObserver' in window) {
+      const marqueeResizeObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          if (entry.target !== marqueeWrapper) {
+            continue;
+          }
+          const measuredWidth = Math.round(entry.contentRect ? entry.contentRect.width : entry.target.getBoundingClientRect().width);
+          if (lastMeasuredWidth === measuredWidth) {
+            return;
+          }
+          lastMeasuredWidth = measuredWidth;
+          queueMarqueeUpdate();
+        }
+      });
+      marqueeResizeObserver.observe(marqueeWrapper);
+    } else {
+      window.addEventListener('resize', () => {
+        if (!marqueeWrapper) {
+          return;
+        }
+        const measuredWidth = Math.round(marqueeWrapper.getBoundingClientRect().width);
+        if (lastMeasuredWidth === measuredWidth) {
+          return;
+        }
+        lastMeasuredWidth = measuredWidth;
+        queueMarqueeUpdate();
+      });
+    }
   })();
 </script>

@@ -261,6 +261,7 @@ a:not(.navitem):not(.author-link):not(.wordmark-link):focus-visible {
 }
 
 .nowplaying-description {
+  font-size: 0.75rem;
   font-size: clamp(0.66rem, 1.4vw, 0.75rem);
   color: var(--color-text);
   max-width: clamp(180px, 60vw, 460px);
@@ -1259,6 +1260,7 @@ article img {
     font-size: 0.7rem;
   }
   .nowplaying-description {
+    font-size: 0.56rem;
     font-size: clamp(0.48rem, 2.2vw, 0.56rem);
     max-width: clamp(140px, 70vw, 320px);
     line-height: 1.15;

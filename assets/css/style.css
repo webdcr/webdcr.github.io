@@ -272,6 +272,8 @@ a:not(.navitem):not(.author-link):not(.wordmark-link):focus-visible {
   overflow: hidden;
   user-select: none;
   cursor: default;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 .nowplaying-description * {
@@ -1264,6 +1266,8 @@ article img {
     font-size: clamp(0.48rem, 2.2vw, 0.56rem);
     max-width: clamp(140px, 70vw, 320px);
     line-height: 1.15;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
   .schedule-table {
     display: block;

@@ -65,13 +65,12 @@ permalink: /about/
       </p>
       <p>We hope to see you there!</p>
     </div>
-  </div>
 
-  <h2 class="section-label">Our team</h2>
-  <div class="directorateContainer">
-    {% assign directorate = site.data.directorate %} {% for person in directorate %}
-    {% capture director_name %}
-      {% if person["Name"] %}
+    <h2 class="section-label">Our team</h2>
+    <div class="directorateContainer">
+      {% assign directorate = site.data.directorate %} {% for person in directorate %}
+      {% capture director_name %}
+        {% if person["Name"] %}
         {{ person["Name"] }}
       {% else %}
         {{ person["First"] }} {{ person["Last"] }}
@@ -95,4 +94,6 @@ permalink: /about/
       </div>
     </div>
     {% endfor %}
+    </div>
   </div>
+</div>

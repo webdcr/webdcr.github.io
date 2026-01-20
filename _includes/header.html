@@ -34,6 +34,8 @@
       :data-mode="$store.radioPlayer ? $store.radioPlayer.state : 'stopped'"
       aria-label="Toggle the live stream"
       :aria-pressed="$store.radioPlayer ? ($store.radioPlayer.state === 'playing').toString() : 'false'"
+      @keydown.space.prevent.stop="true"
+      @keyup.space.prevent.stop="true"
       @click="$store.radioPlayer && $store.radioPlayer.toggle()"
     ></button>
   </div>

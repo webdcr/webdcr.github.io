@@ -1,0 +1,162 @@
+---
+layout: oralhistory_clean
+---
+{% assign oh_base = site.oralhistory_baseurl | default: '/oralhistory' %}
+{% assign vocab = site.data.vocab | default: {} %}
+{% assign people_data = site.data.people | default: {} %}
+{% assign empty_array = '' | split: '' %}
+{% assign participants = page.people.participants | default: empty_array %}
+{% assign interviewers = page.people.interviewers | default: empty_array %}
+{% assign segments = page.segments | default: empty_array %}
+{% assign readable_date = page.date | date: '%B %-d, %Y' %}
+{% assign participant_labels = '' %}
+{% if participants.size > 0 %}
+  {% for slug in participants %}
+    {% assign person_meta = people_data[slug] %}
+    {% capture current_label %}
+      {{ person_meta.name | default: slug }}{% if person_meta.class_year %} '{{ person_meta.class_year | slice: -2, 2 }}{% endif %}
+    {% endcapture %}
+    {% if participant_labels == '' %}
+      {% assign participant_labels = current_label | strip %}
+    {% else %}
+      {% assign participant_labels = participant_labels | append: ', ' | append: current_label | strip %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+{% assign participant_heading = participant_labels | strip %}
+{% if participant_heading == '' %}
+  {% assign participant_heading = 'Oral history interview' %}
+{% endif %}
+<article class="oralhistory-interview">
+  <header class="oralhistory-detail-head">
+    <h1 class="pagetitle">
+      {{ participant_heading }}
+      <span class="oralhistory-detail-date">
+        {% if page.date %}interviewed {{ readable_date }}{% endif %}
+        {% if interviewers.size > 0 %}
+          by
+          {% for slug in interviewers %}
+            {% assign meta = people_data[slug] %}
+            {{ meta.name | default: slug }}{% if meta.class_year %} '{{ meta.class_year | slice: -2, 2 }}{% endif %}{% unless forloop.last %}, {% endunless %}
+          {% endfor %}
+        {% endif %}
+      </span>
+    </h1>
+  </header>
+
+  <div class="oralhistory-detail-layout">
+    {% assign has_audio = page.rights.publish_audio and page.audio.url %}
+    {% if has_audio or segments.size > 0 %}
+    <aside class="oralhistory-audio-panel">
+      {% if has_audio %}
+      <h2>Audio</h2>
+      {% assign audio_src = page.audio.url %}
+      {% if audio_src contains '://' %}
+        {% assign final_audio_src = audio_src %}
+      {% elsif audio_src and audio_src != '' %}
+        {% assign first_char = audio_src | slice: 0, 1 %}
+        {% if first_char == '/' %}
+          {% assign final_audio_src = audio_src %}
+        {% else %}
+          {% assign final_audio_src = oh_base | append: '/' | append: audio_src %}
+        {% endif %}
+      {% endif %}
+      {% if final_audio_src %}
+      <div class="oralhistory-audio">
+        {% include audio-player.html src=final_audio_src %}
+        {% if page.audio.duration %}
+        <p class="oralhistory-audio-meta">Duration: {{ page.audio.duration }}</p>
+        {% endif %}
+      </div>
+      {% endif %}
+      {% endif %}
+
+      {% if segments.size > 0 %}
+      <div class="oralhistory-segments">
+        <h3>Segments</h3>
+        <ul>
+          {% for seg in segments %}
+          {% assign seg_id = seg.id | default: 'segment-' | append: forloop.index %}
+          <li>
+            {% if seg.time %}<span class="oralhistory-segment-time">{{ seg.time }}</span>{% endif %}
+            {% if seg.label %}
+            <a class="oralhistory-segment-label" href="#{{ seg_id }}">{{ seg.label }}</a>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </aside>
+    {% endif %}
+
+    <section class="oralhistory-transcript">
+      <h2>Transcript</h2>
+      {% if page.rights.publish_transcript %}
+        {% if segments.size > 0 %}
+          {% for seg in segments %}
+          {% assign seg_id = seg.id | default: 'segment-' | append: forloop.index %}
+          <article class="oralhistory-segment" id="{{ seg_id }}">
+            <div class="oralhistory-segment-heading">
+              {% if seg.time %}<span class="oralhistory-segment-time">{{ seg.time }}</span>{% endif %}
+              {% if seg.label %}<h3>{{ seg.label }}</h3>{% endif %}
+            </div>
+            <div class="oralhistory-segment-content">
+              {{ seg.content | markdownify }}
+            </div>
+          </article>
+          {% endfor %}
+        {% else %}
+          {{ content }}
+        {% endif %}
+      {% else %}
+      <p>The transcript for this interview is not yet available.</p>
+      {% endif %}
+    </section>
+  </div>
+
+  <div class="oralhistory-detail-grid">
+    {% if participants.size > 0 %}
+    <section class="oralhistory-panel oralhistory-panel-people">
+      <h2>Participants</h2>
+      {% for slug in participants %}
+      {% assign meta = people_data[slug] %}
+      <div class="oralhistory-person">
+        <p class="oralhistory-person-name">
+          {{ meta.name | default: slug }}{% if meta.class_year %}
+          <span class="oralhistory-meta-muted">’{{ meta.class_year | slice: -2, 2 }}</span>
+          {% endif %}
+        </p>
+        {% if meta.blurb %}
+        <p class="oralhistory-person-blurb">{{ meta.blurb }}</p>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </section>
+    {% endif %}
+
+    {% if interviewers.size > 0 %}
+    <section class="oralhistory-panel">
+      <h2>Interviewers</h2>
+      <ul class="oralhistory-meta-list">
+        {% for slug in interviewers %}
+        {% assign meta = people_data[slug] %}
+        <li>{{ meta.name | default: slug }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+
+    {% if page.tags %}
+    <section class="oralhistory-panel">
+      <h2>Tags</h2>
+      <div class="oralhistory-tag-list">
+        {% for tag in page.tags %}
+        {% assign tag_meta = vocab[tag] %}
+        <a class="oralhistory-tag-link" href="{{ oh_base }}/tags/{{ tag }}/">{{ tag_meta.label | default: tag }}</a>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+  </div>
+</article>

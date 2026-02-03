@@ -1,0 +1,11 @@
+station-culture:
+  label: "Station culture"
+  description: "Studio life, traditions, norms, rituals."
+
+music-discovery:
+  label: "Music discovery"
+  description: "How DJs found, curated, and shared music."
+
+campus-life:
+  label: "Campus life"
+  description: "How the station intersected with Dartmouth life."

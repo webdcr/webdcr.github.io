@@ -4,6 +4,8 @@ email: webdcr@dartmouth.edu
 description: WebDCR is free form radio by the students of Dartmouth College.
 baseurl: ''
 url: ''
+oralhistory_baseurl: "/oralhistory"
+oralhistory_title: "Dartmouth College Radio Oral History"
 liveradio_url: https://17653.live.streamtheworld.com/DC_RADIOAAC.aac?pname=StandardPlayerV4&pversion=4.19.2-044&dist=triton-web&tdsdk=js-2.9&swm=false&banners=300x250&burst-time=15
 term: 26W
 collections:
@@ -16,3 +18,13 @@ collections:
   authors:
     output: true
     permalink: "/musicblog/contributor/:name/"
+  interviews:
+    output: true
+    permalink: "/oralhistory/interviews/:path/"
+
+defaults:
+  - scope:
+      path: ""
+      type: interviews
+    values:
+      layout: oralhistory_interview

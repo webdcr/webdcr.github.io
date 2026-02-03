@@ -1,3 +1,4 @@
+{% unless page.hide_header %}
 {% unless page.hide_nowplaying %}
 <div class="nowplaying-banner" role="region" aria-live="polite">
   <div class="nowplaying-inner">
@@ -154,6 +155,7 @@
     };
   })();
 </script>
+{% endunless %}
 
 <script>
   document.addEventListener('alpine:init', () => {
@@ -597,9 +599,11 @@
       }
 
       const title = matchingShow && matchingShow["Name"] ? matchingShow["Name"] : "WebDCR Music";
-      const host = matchingShow && matchingShow["Host(s)"]
-        ? `with ${matchingShow["Host(s)"]}`
-        : "No show is currently playing";
+      const matchingHost = matchingShow && matchingShow["Host(s)"]
+        ? String(matchingShow["Host(s)"]).trim()
+        : "";
+      const hostText = matchingHost ? `with ${matchingHost}` : "";
+      const noShowText = "No show is currently playing";
       const description = matchingShow && matchingShow["Description"] ? matchingShow["Description"] : '';
       const art = sanitizeImagePath(matchingShow && matchingShow["Image name"]);
 
@@ -607,7 +611,18 @@
         nowPlayingTitle.innerText = title;
       }
       if (nowPlayingHost) {
-        nowPlayingHost.innerText = host;
+        if (matchingShow) {
+          if (hostText) {
+            nowPlayingHost.innerText = hostText;
+            nowPlayingHost.style.removeProperty('display');
+          } else {
+            nowPlayingHost.innerText = '';
+            nowPlayingHost.style.display = 'none';
+          }
+        } else {
+          nowPlayingHost.innerText = noShowText;
+          nowPlayingHost.style.removeProperty('display');
+        }
       }
       if (nowPlayingImage) {
         nowPlayingImage.src = art;

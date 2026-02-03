@@ -1,0 +1,39 @@
+{% assign oh_base = site.oralhistory_baseurl | default: '/oralhistory' %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link rel="icon" href="{{ '/favicon.ico' | relative_url }}">
+    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}" />
+    <link rel="stylesheet" href="{{ '/assets/css/oralhistory.css' | relative_url }}" />
+    {% if page.preload_listen_icon_hover %}
+    <link
+      rel="preload"
+      href="{{ '/assets/images/hand2.png' | relative_url }}"
+      as="image"
+    />
+    {% endif %}
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="{{ page.description | default: site.description | strip_newlines | escape }}"
+    />
+    <title>
+      {{ site.oralhistory_title | default: site.title }}{% if page.title %} - {{ page.title }}{% endif %}
+    </title>
+  </head>
+  <body class="oralhistory-body">
+    <div class="oralhistory-banner">
+      <img src="{{ oh_base }}/assets/banner.png" alt="Broadcasting at Dartmouth Oral History" />
+      <p class="oralhistory-return">
+        <a href="/" aria-label="Return to WebDCR home">← return to webdcr.com</a>
+      </p>
+    </div>
+    <div id="cont">
+      <main class="oralhistory-main">
+        {{ content }}
+      </main>
+    </div>
+    {% include footer.html %}
+  </body>
+</html>

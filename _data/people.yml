@@ -1,0 +1,11 @@
+jane-doe:
+  name: "Jane Doe"
+  class_year: "2003"
+  blurb: "Late-night DJ in the early 2000s; helped train new hosts."
+  links:
+    - label: "Alumni profile"
+      url: "https://example.com"
+
+james-underwood:
+  name: "James Underwood"
+  blurb: "Interviewer and editor for the Dartmouth College Radio Oral History project."

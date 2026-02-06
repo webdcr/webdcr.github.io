@@ -22,7 +22,7 @@ permalink: /musicblog/
   {% assign author_pages = site.authors | sort: 'name' %}
   {% if author_pages.size > 0 %}
   <section class="musicblog-authors">
-    <h2 class="section-label">Our Contributors</h2>
+    <h2 class="section-label">Contributors</h2>
     <div class="author-pill-group">
       {% for author_page in author_pages %}
         <a class="author-pill" href="{{ author_page.url | relative_url }}">

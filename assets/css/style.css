@@ -7,6 +7,12 @@
   --nowplaying-width: 320px;
 }
 
+::selection,
+::-moz-selection {
+  background: var(--color-primary);
+  color: #fff;
+}
+
 @font-face {
   font-family: "Helvetica Neue";
   src: local("Helvetica Neue"), local("HelveticaNeue"),

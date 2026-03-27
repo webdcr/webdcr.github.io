@@ -47,7 +47,7 @@ collections:
       media_library:
         allow_multiple: false
         choose_url: true
-    sortable_fields: [date, title]
+    sortable_fields: [date]
     fields:
       - label: Layout
         name: layout
@@ -81,7 +81,7 @@ collections:
       media_library:
         allow_multiple: false
         choose_url: true
-    sortable_fields: [date, title]
+    sortable_fields: [date]
     fields:
       - label: Layout
         name: layout

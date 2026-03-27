@@ -24,6 +24,7 @@ collections:
       media_library:
         allow_multiple: false
         choose_url: true
+    sortable_fields: [name]
     fields:
       - label: Name
         name: name
@@ -46,6 +47,7 @@ collections:
       media_library:
         allow_multiple: false
         choose_url: true
+    sortable_fields: [date, title]
     fields:
       - label: Layout
         name: layout
@@ -79,6 +81,7 @@ collections:
       media_library:
         allow_multiple: false
         choose_url: true
+    sortable_fields: [date, title]
     fields:
       - label: Layout
         name: layout

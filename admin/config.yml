@@ -33,7 +33,7 @@ collections:
   - name: musicblog
     label: Music Blog
     folder: _musicblog
-    extension: html
+    extension: md
     create: true
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     sort: date:desc
@@ -63,7 +63,7 @@ collections:
   - name: news
     label: News
     folder: _news
-    extension: html
+    extension: md
     create: true
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     sort: date:desc

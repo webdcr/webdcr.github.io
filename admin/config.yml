@@ -1,6 +1,6 @@
 backend:
   name: github
-  repo: your-org/your-repo
+  repo: webdcr/webdcr.github.io
   branch: main
 publish_mode: editorial_workflow
 local_backend: true

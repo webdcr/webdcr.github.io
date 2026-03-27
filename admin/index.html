@@ -3,11 +3,122 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>WebDCR CMS</title>
-    <link rel="stylesheet" href="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.css" />
+    <title>WebDCR CMS (Sveltia)</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: #0e0e0e;
+        color: #fff;
+      }
+      .loading {
+        text-align: center;
+        padding: 3rem 1rem;
+        font-size: 1rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        opacity: 0.6;
+      }
+    </style>
   </head>
   <body>
-    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-    <script src="./admin.js"></script>
+    <div id="sveltia-cms-root">
+      <div class="loading">Loading WebDCR CMS…</div>
+    </div>
+
+    <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
+    <script>
+      window.CMS &&
+        window.CMS.init({
+          backend: {
+            name: 'github',
+            repo: 'webdcr/webdcr.github.io',
+            branch: 'main'
+          },
+          publish_mode: 'editorial_workflow',
+          local_backend: true,
+          media_folder: 'assets/uploads',
+          public_folder: '/assets/uploads',
+          site_url: 'https://www.webdcr.com',
+          collections: [
+            {
+              name: 'authors',
+              label: 'Blog Authors',
+              folder: '_authors',
+              extension: 'md',
+              create: true,
+              slug: '{{slug}}',
+              identifier_field: 'author_id',
+              editor: { preview: false },
+              fields: [
+                {
+                  label: 'Name',
+                  name: 'name',
+                  widget: 'string',
+                  hint: "Format: First Last ’YY"
+                },
+                {
+                  label: 'Author ID',
+                  name: 'author_id',
+                  widget: 'string',
+                  hint:
+                    'Lowercase name with hyphens, no class year (e.g., first-last)'
+                }
+              ]
+            },
+            {
+              name: 'musicblog',
+              label: 'Music Blog',
+              folder: '_musicblog',
+              extension: 'html',
+              create: true,
+              slug: '{{year}}-{{month}}-{{day}}-{{slug}}',
+              sort: 'date:desc',
+              format: 'frontmatter',
+              editor: { preview: true },
+              fields: [
+                { label: 'Layout', name: 'layout', widget: 'hidden', default: 'blogpost' },
+                { label: 'Title', name: 'title', widget: 'string' },
+                {
+                  label: 'Publish Date',
+                  name: 'date',
+                  widget: 'datetime',
+                  format: 'YYYY-MM-DDTHH:mm:ssZ'
+                },
+                {
+                  label: 'Permalink',
+                  name: 'permalink',
+                  widget: 'string',
+                  required: false,
+                  hint: 'Defaults to /musicblog/<slug>/ when left empty.'
+                },
+                { label: 'Body', name: 'body', widget: 'markdown' }
+              ]
+            },
+            {
+              name: 'news',
+              label: 'News',
+              folder: '_news',
+              extension: 'html',
+              create: true,
+              slug: '{{year}}-{{month}}-{{day}}-{{slug}}',
+              sort: 'date:desc',
+              format: 'frontmatter',
+              editor: { preview: true },
+              fields: [
+                { label: 'Layout', name: 'layout', widget: 'hidden', default: 'newspost' },
+                { label: 'Title', name: 'title', widget: 'string' },
+                {
+                  label: 'Publish Date',
+                  name: 'date',
+                  widget: 'datetime',
+                  format: 'YYYY-MM-DDTHH:mm:ssZ'
+                },
+                { label: 'Body', name: 'body', widget: 'markdown' }
+              ]
+            }
+          ]
+        })
+    </script>
   </body>
 </html>

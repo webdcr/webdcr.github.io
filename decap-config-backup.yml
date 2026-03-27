@@ -1,3 +1,4 @@
+# Backup of the Decap CMS configuration (no longer used)
 backend:
   name: github
   repo: webdcr/webdcr.github.io

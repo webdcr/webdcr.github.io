@@ -1,11 +1,12 @@
 backend:
-  name: git-gateway
+  name: github
+  repo: your-org/your-repo
   branch: main
 publish_mode: editorial_workflow
 local_backend: true
 media_folder: assets/uploads
 public_folder: /assets/uploads
-site_url: https://wdcr.netlify.app
+site_url: https://www.webdcr.com
 collections:
   - name: authors
     label: Blog Authors

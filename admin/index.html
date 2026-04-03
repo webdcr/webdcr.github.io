@@ -2,12 +2,79 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="robots" content="noindex" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Sveltia CMS</title>
+    <title>WebDCR Admin</title>
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="stylesheet" href="/assets/css/style.css" id="site-stylesheet" />
+    <style>
+      body {
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        background: #050505;
+        color: #f7f7f7;
+        min-height: 100vh;
+        margin: 0;
+      }
+      .admin-hub {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: clamp(2rem, 6vw, 4rem) clamp(1.25rem, 4vw, 3rem);
+      }
+      h1 {
+        font-size: clamp(2rem, 6vw, 3rem);
+        margin-bottom: 0.5rem;
+      }
+      p.subtitle {
+        margin-top: 0;
+        color: #c3c3c3;
+      }
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.25rem;
+        margin-top: 2rem;
+      }
+      .card-link {
+        background: #101010;
+        border: 1px solid #252525;
+        border-radius: 16px;
+        padding: 1.5rem;
+        text-decoration: none;
+        color: inherit;
+        transition: border-color 150ms ease, transform 150ms ease;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .card-link:hover,
+      .card-link:focus-visible {
+        border-color: #68dd2a;
+        transform: translateY(-2px);
+        outline: none;
+      }
+      .card-link h2 {
+        font-size: 1.25rem;
+        margin: 0;
+      }
+      .card-link span {
+        font-size: 0.95rem;
+        color: #c4c6b0;
+      }
+    </style>
   </head>
   <body>
-    <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
-    <script src="/admin/custom-components.js"></script>
+    <div class="admin-hub">
+      <h1>WebDCR admin</h1>
+      <p class="subtitle">Choose a tool below.</p>
+      <div class="card-grid">
+        <a class="card-link" href="/admin/cms/">
+          <h2>Open CMS</h2>
+          <span>Create or edit News, Music Blog, and author content.</span>
+        </a>
+        <a class="card-link" href="/admin/shows-upload.html">
+          <h2>Update schedule CSV</h2>
+          <span>Upload a new <code>shows.csv</code> with a GitHub token.</span>
+        </a>
+      </div>
+    </div>
   </body>
 </html>

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en" x-data="showsUploader()" x-init="init()">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Update Schedule CSV</title>
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="stylesheet" href="/assets/css/style.css" id="site-stylesheet" />
+    <style>
+      body {
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        background: #0d0d0d;
+        color: #f7f7f7;
+        min-height: 100vh;
+        margin: 0;
+      }
+      .upload-shell {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 2rem clamp(1rem, 4vw, 3rem);
+      }
+      .card {
+        background: #111;
+        border: 1px solid #333;
+        border-radius: 16px;
+        padding: clamp(1.5rem, 4vw, 2.5rem);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+      }
+      label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+      }
+      input[type="text"],
+      input[type="password"],
+      input[type="file"],
+      textarea {
+        width: 100%;
+        border: 1px solid #555;
+        background: #181818;
+        color: #f0f0f0;
+        border-radius: 8px;
+        padding: 0.8rem;
+        font-size: 1rem;
+      }
+      input[type="file"] {
+        padding: 0.5rem;
+        cursor: pointer;
+      }
+      button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        background: #68dd2a;
+        color: #031600;
+        font-weight: 700;
+        border: none;
+        border-radius: 999px;
+        padding: 0.75rem 1.75rem;
+        cursor: pointer;
+        transition: transform 160ms ease, box-shadow 160ms ease;
+        box-shadow: 0 4px 12px rgba(104, 221, 42, 0.35);
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+      .field-group {
+        margin-bottom: 1.5rem;
+      }
+      .status {
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        margin-top: 1rem;
+      }
+      .status.info {
+        background: rgba(104, 221, 42, 0.15);
+        color: #c3ff9c;
+        border: 1px solid rgba(104, 221, 42, 0.4);
+      }
+      .status.error {
+        background: rgba(255, 99, 71, 0.12);
+        color: #ffb3a5;
+        border: 1px solid rgba(255, 99, 71, 0.4);
+      }
+      .hint {
+        color: #c0c0c0;
+        font-size: 0.9rem;
+      }
+      .inline-hint {
+        color: #9da07a;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+      }
+    </style>
+    <script defer src="/assets/js/alpine.js"></script>
+  </head>
+  <body>
+    <div class="upload-shell">
+      <div class="card">
+        <h1>Upload a new schedule CSV</h1>
+        <p class="hint">
+          Paste a GitHub personal access token (PAT) with <code>repo</code> scope, pick the
+          updated <code>shows.csv</code>, and click Upload. Nothing is stored or sent anywhere else—
+          the browser talks directly to GitHub.
+        </p>
+        <form @submit.prevent="handleSubmit">
+          <div class="field-group">
+            <label for="token">GitHub personal access token</label>
+            <input
+              id="token"
+              type="password"
+              placeholder="ghp_..."
+              x-model.trim="token"
+              autocomplete="off"
+              required
+            />
+            <p class="inline-hint">Needs access to webdcr/webdcr.github.io.</p>
+          </div>
+
+          <div class="field-group">
+            <label for="commitMessage">Commit message</label>
+            <input
+              id="commitMessage"
+              type="text"
+              x-model.trim="commitMessage"
+              required
+            />
+          </div>
+
+          <div class="field-group">
+            <label for="csvFile">Select updated shows.csv</label>
+            <input
+              id="csvFile"
+              type="file"
+              accept=".csv"
+              @change="handleFileChange"
+              required
+            />
+            <template x-if="selectedFileName">
+              <p class="inline-hint">Selected: <span x-text="selectedFileName"></span></p>
+            </template>
+          </div>
+
+          <button type="submit" :disabled="isSubmitting || !fileContent || !token">
+            <span x-show="!isSubmitting">Upload to GitHub</span>
+            <span x-show="isSubmitting">Uploading…</span>
+          </button>
+        </form>
+
+        <template x-if="statusMessage">
+          <p class="status" :class="statusType" x-text="statusMessage"></p>
+        </template>
+      </div>
+    </div>
+
+    <script>
+      function showsUploader() {
+        return {
+          token: '',
+          commitMessage: '',
+          fileContent: '',
+          selectedFileName: '',
+          isSubmitting: false,
+          statusMessage: '',
+          statusType: 'info',
+          init() {
+            this.commitMessage = this.defaultCommitMessage();
+          },
+          defaultCommitMessage() {
+            const now = new Date();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const year = String(now.getFullYear()).slice(-2);
+            return `${month}/${day}/${year} shows.csv update`;
+          },
+          handleFileChange(event) {
+            const file = event.target.files?.[0];
+            if (!file) {
+              this.fileContent = '';
+              this.selectedFileName = '';
+              return;
+            }
+            this.selectedFileName = file.name;
+            file.text().then((text) => {
+              this.fileContent = text;
+            }).catch(() => {
+              this.fileContent = '';
+              this.setStatus('Could not read file. Try again.', 'error');
+            });
+          },
+          setStatus(message, type = 'info') {
+            this.statusMessage = message;
+            this.statusType = type === 'error' ? 'error' : 'info';
+          },
+          async handleSubmit() {
+            if (!this.token || !this.fileContent) {
+              this.setStatus('Token and CSV file are required.', 'error');
+              return;
+            }
+            this.isSubmitting = true;
+            this.setStatus('Contacting GitHub…');
+            try {
+              const sha = await this.fetchCurrentSha();
+              await this.uploadNewCsv(sha);
+              this.setStatus('Success! The schedule CSV was updated.', 'info');
+            } catch (error) {
+              this.setStatus(error.message || 'Upload failed. Double-check your token and try again.', 'error');
+            } finally {
+              this.isSubmitting = false;
+            }
+          },
+          async fetchCurrentSha() {
+            const endpoint = 'https://api.github.com/repos/webdcr/webdcr.github.io/contents/_data/shows.csv';
+            const response = await fetch(endpoint, {
+              headers: {
+                Accept: 'application/vnd.github+json',
+                Authorization: `Bearer ${this.token}`
+              }
+            });
+            const data = await response.json();
+            if (!response.ok) {
+              throw new Error(data?.message || 'Could not read shows.csv from GitHub.');
+            }
+            if (!data?.sha) {
+              throw new Error('GitHub response did not include a file SHA.');
+            }
+            return data.sha;
+          },
+          async uploadNewCsv(currentSha) {
+            const endpoint = 'https://api.github.com/repos/webdcr/webdcr.github.io/contents/_data/shows.csv';
+            const payload = {
+              message: this.commitMessage || this.defaultCommitMessage(),
+              content: this.toBase64(this.fileContent),
+              sha: currentSha
+            };
+            const response = await fetch(endpoint, {
+              method: 'PUT',
+              headers: {
+                Accept: 'application/vnd.github+json',
+                Authorization: `Bearer ${this.token}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            if (!response.ok) {
+              throw new Error(data?.message || 'GitHub rejected the upload.');
+            }
+            return data;
+          },
+          toBase64(text) {
+            return btoa(unescape(encodeURIComponent(text)));
+          }
+        };
+      }
+    </script>
+  </body>
+</html>

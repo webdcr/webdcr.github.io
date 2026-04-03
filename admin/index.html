@@ -9,8 +9,8 @@
     <style>
       body {
         font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        background: #050505;
-        color: #f7f7f7;
+        background: #f4f7fb;
+        color: #0f1c24;
         min-height: 100vh;
         margin: 0;
       }
@@ -34,22 +34,23 @@
         margin-top: 2rem;
       }
       .card-link {
-        background: #101010;
-        border: 1px solid #252525;
+        background: #ffffff;
+        border: 1px solid #dbe4f0;
         border-radius: 16px;
         padding: 1.5rem;
         text-decoration: none;
         color: inherit;
-        transition: border-color 150ms ease, transform 150ms ease;
+        transition: border-color 150ms ease, box-shadow 150ms ease;
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
+        box-shadow: 0 10px 30px rgba(15, 31, 53, 0.08);
       }
       .card-link:hover,
       .card-link:focus-visible {
-        border-color: #68dd2a;
-        transform: translateY(-2px);
+        border-color: #009874;
         outline: none;
+        box-shadow: 0 15px 35px rgba(0, 152, 116, 0.15);
       }
       .card-link h2 {
         font-size: 1.25rem;
@@ -57,14 +58,13 @@
       }
       .card-link span {
         font-size: 0.95rem;
-        color: #c4c6b0;
+        color: #4a5967;
       }
     </style>
   </head>
   <body>
     <div class="admin-hub">
       <h1>WebDCR admin</h1>
-      <p class="subtitle">Choose a tool below.</p>
       <div class="card-grid">
         <a class="card-link" href="/admin/cms/">
           <h2>Open CMS</h2>

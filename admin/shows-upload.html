@@ -9,8 +9,8 @@
     <style>
       body {
         font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        background: #0d0d0d;
-        color: #f7f7f7;
+        background: #f8f9fb;
+        color: #0d1b1e;
         min-height: 100vh;
         margin: 0;
       }
@@ -20,11 +20,11 @@
         padding: 2rem clamp(1rem, 4vw, 3rem);
       }
       .card {
-        background: #111;
-        border: 1px solid #333;
+        background: #ffffff;
+        border: 1px solid #e1e5ea;
         border-radius: 16px;
         padding: clamp(1.5rem, 4vw, 2.5rem);
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
       }
       label {
         display: block;
@@ -37,9 +37,9 @@
       input[type="file"],
       textarea {
         width: 100%;
-        border: 1px solid #555;
-        background: #181818;
-        color: #f0f0f0;
+        border: 1px solid #cfd8e3;
+        background: #fff;
+        color: inherit;
         border-radius: 8px;
         padding: 0.8rem;
         font-size: 1rem;
@@ -53,15 +53,15 @@
         align-items: center;
         justify-content: center;
         gap: 0.5rem;
-        background: #68dd2a;
-        color: #031600;
+        background: #007a5f;
+        color: #fff;
         font-weight: 700;
         border: none;
         border-radius: 999px;
         padding: 0.75rem 1.75rem;
         cursor: pointer;
         transition: transform 160ms ease, box-shadow 160ms ease;
-        box-shadow: 0 4px 12px rgba(104, 221, 42, 0.35);
+        box-shadow: 0 4px 16px rgba(0, 90, 70, 0.25);
       }
       button:disabled {
         opacity: 0.5;
@@ -78,21 +78,21 @@
         margin-top: 1rem;
       }
       .status.info {
-        background: rgba(104, 221, 42, 0.15);
-        color: #c3ff9c;
-        border: 1px solid rgba(104, 221, 42, 0.4);
+        background: #e6f4ea;
+        color: #196a39;
+        border: 1px solid #b9e2c5;
       }
       .status.error {
-        background: rgba(255, 99, 71, 0.12);
-        color: #ffb3a5;
-        border: 1px solid rgba(255, 99, 71, 0.4);
+        background: #fdeceb;
+        color: #a0271f;
+        border: 1px solid #f5b4ad;
       }
       .hint {
-        color: #c0c0c0;
+        color: #4d5b66;
         font-size: 0.9rem;
       }
       .inline-hint {
-        color: #9da07a;
+        color: #5f6d74;
         font-size: 0.85rem;
         margin-top: 0.25rem;
       }
@@ -103,11 +103,6 @@
     <div class="upload-shell">
       <div class="card">
         <h1>Upload a new schedule CSV</h1>
-        <p class="hint">
-          Paste a GitHub personal access token (PAT) with <code>repo</code> scope, pick the
-          updated <code>shows.csv</code>, and click Upload. Nothing is stored or sent anywhere else—
-          the browser talks directly to GitHub.
-        </p>
         <form @submit.prevent="handleSubmit">
           <div class="field-group">
             <label for="token">GitHub personal access token</label>

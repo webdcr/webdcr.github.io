@@ -6,7 +6,8 @@ baseurl: ''
 url: ''
 oralhistory_baseurl: "/oralhistory"
 oralhistory_title: "Dartmouth College Radio Oral History"
-liveradio_url: https://17653.live.streamtheworld.com/DC_RADIOAAC.aac?pname=StandardPlayerV4&pversion=4.19.2-044&dist=triton-web&tdsdk=js-2.9&swm=false&banners=300x250&burst-time=15
+liveradio_url_old: https://17653.live.streamtheworld.com/DC_RADIOAAC.aac?pname=StandardPlayerV4&pversion=4.19.2-044&dist=triton-web&tdsdk=js-2.9&swm=false&banners=300x250&burst-time=15
+liveradio_url: http://playerservices.streamtheworld.com/api/livestream-redirect/DC_RADIO.mp3
 term: 26W
 collections:
   news:

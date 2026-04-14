@@ -56,6 +56,13 @@ collections:
       - label: Title
         name: title
         widget: string
+      - label: Author
+        name: author
+        widget: relation
+        collection: authors
+        search_fields: ["name"]
+        value_field: author_id
+        display_fields: ["name"]
       - label: Publish Date
         name: date
         widget: datetime

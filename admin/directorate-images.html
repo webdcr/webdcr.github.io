@@ -33,10 +33,15 @@
       <div class="card">
         <h1>Manage Directorate Images</h1>
         <div class="field-group">
-          <label>Upload New Photos</label>
-          <input type="file" multiple accept="image/*" @change="handleFileUpload" :disabled="!token" />
+          <label>Select New Photos (Multiple allowed)</label>
+          <input type="file" multiple accept="image/*" @change="selectedFiles = Array.from($event.target.files)" :disabled="!token" />
         </div>
         
+        <button class="btn btn-primary" @click="handleFileUpload" :disabled="!token || selectedFiles.length === 0 || isUploading">
+          <span x-show="!isUploading">Upload Selected Photos</span>
+          <span x-show="isUploading">Uploading...</span>
+        </button>
+
         <template x-if="statusMessage">
           <p class="status" :class="statusType" x-text="statusMessage"></p>
         </template>
@@ -93,6 +98,8 @@
           loading: false,
           statusMessage: '',
           statusType: 'info',
+          selectedFiles: [],
+          isUploading: false,
           renamingImage: null,
           newName: '',
           isRenaming: false,
@@ -122,11 +129,11 @@
             } catch (e) { this.setStatus(e.message, 'error'); } finally { this.loading = false; }
           },
 
-          async handleFileUpload(e) {
-            const files = Array.from(e.target.files);
-            if (!files.length) return;
-            this.setStatus(`Uploading ${files.length} images...`);
-            for (const file of files) {
+          async handleFileUpload() {
+            if (!this.selectedFiles.length) return;
+            this.isUploading = true;
+            this.setStatus(`Uploading ${this.selectedFiles.length} photos...`);
+            for (const file of this.selectedFiles) {
               try {
                 const reader = new FileReader();
                 const content = await new Promise((resolve) => {
@@ -141,6 +148,8 @@
               } catch (e) { this.setStatus(`Error: ${e.message}`, 'error'); break; }
             }
             this.setStatus('Upload complete!');
+            this.selectedFiles = [];
+            this.isUploading = false;
             this.fetchImages();
           },
 

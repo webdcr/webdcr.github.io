@@ -14,11 +14,6 @@
         <h1>Upload a new schedule CSV</h1>
         <form @submit.prevent="handleSubmit">
           <div class="field-group">
-            <label for="commitMessage">Commit message</label>
-            <input id="commitMessage" type="text" x-model.trim="commitMessage" required />
-          </div>
-
-          <div class="field-group">
             <label for="csvFile">Select updated shows.csv</label>
             <input id="csvFile" type="file" accept=".csv" @change="handleFileChange" required />
           </div>

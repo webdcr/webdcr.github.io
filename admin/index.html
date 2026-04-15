@@ -7,32 +7,10 @@
     <link rel="icon" href="/favicon.ico" />
     <script src="auth.js"></script>
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        background: #f0f0f0;
-        color: #333;
-        margin: 0;
-        padding: 20px;
-      }
-      .admin-hub {
-        max-width: 900px;
-        margin: 0 auto;
-        background: #fff;
-        border: 1px solid #ccc;
-        padding: 30px;
-      }
-      h1 {
-        font-size: 24px;
-        margin-top: 0;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 10px;
-        color: #000;
-      }
       .card-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 15px;
-        margin-top: 20px;
       }
       .card-link {
         background: #f9f9f9;
@@ -59,29 +37,30 @@
   </head>
   <body>
     <div class="admin-content-wrapper">
-      <div class="admin-hub">
+      <div class="card">
         <h1>WebDCR admin</h1>
-      <div class="card-grid">
-        <a class="card-link" href="/admin/cms/">
-          <h2>Open CMS</h2>
-          <span>Create or edit News, Music Blog, and author content.</span>
-        </a>
-        <a class="card-link" href="/admin/shows-upload.html">
-          <h2>Update schedule CSV</h2>
-          <span>Upload a new <code>shows.csv</code> with a GitHub token.</span>
-        </a>
-        <a class="card-link" href="/admin/shows-images.html">
-          <h2>Manage show images</h2>
-          <span>View, upload, rename, and delete show album art.</span>
-        </a>
-        <a class="card-link" href="/admin/directorate-upload.html">
-          <h2>Update directorate CSV</h2>
-          <span>Upload a new <code>directorate.csv</code> for the About page.</span>
-        </a>
-        <a class="card-link" href="/admin/directorate-images.html">
-          <h2>Manage directorate photos</h2>
-          <span>View, upload, rename, and delete directorate member photos.</span>
-        </a>
+        <div class="card-grid">
+          <a class="card-link" href="/admin/cms/">
+            <h2>Open CMS</h2>
+            <span>Create or edit News, Music Blog, and author content.</span>
+          </a>
+          <a class="card-link" href="/admin/shows-upload.html">
+            <h2>Update schedule CSV</h2>
+            <span>Upload a new <code>shows.csv</code> with a GitHub token.</span>
+          </a>
+          <a class="card-link" href="/admin/shows-images.html">
+            <h2>Manage show images</h2>
+            <span>View, upload, rename, and delete show album art.</span>
+          </a>
+          <a class="card-link" href="/admin/directorate-upload.html">
+            <h2>Update directorate CSV</h2>
+            <span>Upload a new <code>directorate.csv</code> for the About page.</span>
+          </a>
+          <a class="card-link" href="/admin/directorate-images.html">
+            <h2>Manage directorate photos</h2>
+            <span>View, upload, rename, and delete directorate member photos.</span>
+          </a>
+        </div>
       </div>
     </div>
   </body>

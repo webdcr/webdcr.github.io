@@ -30,31 +30,99 @@ window.AdminAuth = {
 
 // Simple UI Component for the Auth Bar
 document.addEventListener('DOMContentLoaded', () => {
-  // Inject global reset to ensure header touches edges
+  // Inject global reset and standardized admin styles
   const style = document.createElement('style');
   style.innerHTML = `
-    body { margin: 0 !important; padding: 0 !important; }
-    .admin-content-wrapper { padding: 20px; }
+    * { box-sizing: border-box; }
+    body { 
+      margin: 0 !important; 
+      padding: 0 !important; 
+      font-family: Arial, sans-serif !important;
+      background: #f0f0f0 !important;
+      color: #333 !important;
+      line-height: 1.4 !important;
+    }
+    .admin-content-wrapper { padding: 20px; max-width: 1000px; margin: 0 auto; display: none; }
+    body.logged-in .admin-content-wrapper { display: block; }
+    
+    #admin-login-prompt {
+      display: none;
+      text-align: center;
+      padding: 40px;
+      color: #666;
+      font-size: 13px;
+    }
+    body.logged-out #admin-login-prompt { display: block; }
+
+    /* Shared Classic Admin UI */
+    .card { background: #fff; border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; }
+    h1 { font-size: 22px; margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px; color: #000; }
+    h2 { font-size: 18px; margin-top: 0; }
+    
+    .btn { 
+      display: inline-block; padding: 6px 12px; background: #eee; border: 1px solid #999; 
+      color: #333; cursor: pointer; font-size: 13px; font-weight: bold; text-decoration: none; 
+      line-height: normal;
+    }
+    .btn:hover { background: #ddd; }
+    .btn-primary { background: #0056b3; color: #fff; border-color: #004494; }
+    .btn-primary:hover { background: #004494; }
+    .btn-danger { background: #c00; color: #fff; border-color: #900; }
+    .btn-danger:hover { background: #900; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .field-group { margin-bottom: 15px; }
+    label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 5px; }
+    input[type="text"], input[type="password"], input[type="file"] { 
+      width: 100%; border: 1px solid #aaa; padding: 8px; box-sizing: border-box; font-size: 13px;
+    }
+    
+    .status { padding: 10px; font-size: 14px; margin-top: 10px; border: 1px solid #ccc; }
+    .status.info { background: #e7f3ff; color: #004085; border-color: #b8daff; }
+    .status.error { background: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+
+    #admin-auth-header {
+      background: #f0f0f0;
+      border-bottom: 1px solid #ccc;
+      width: 100%;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      font-family: Arial, sans-serif;
+    }
+    #admin-auth-header * { font-family: Arial, sans-serif; }
+    #admin-auth-header .brand { color: #000; text-decoration: none; font-weight: bold; font-size: 14px; }
+    #admin-auth-header .status { font-size: 11px; color: #666; margin-left: 10px; }
+    #admin-auth-header .controls { display: flex; align-items: center; gap: 8px; }
+    #admin-auth-header label { font-weight: bold; font-size: 11px; }
+    #admin-auth-header input { font-size: 11px; padding: 3px 6px; width: 140px; border: 1px solid #ccc; background: #fff; }
+    #admin-auth-header button { font-size: 11px; padding: 3px 10px; cursor: pointer; background: #eee; border: 1px solid #999; font-weight: bold; color: #333; }
+    #admin-auth-header .btn-logout { background: #fff; border-color: #f5c6cb; color: #721c24; }
   `;
   document.head.appendChild(style);
 
   const header = document.createElement('div');
   header.id = 'admin-auth-header';
   header.innerHTML = `
-    <div style="background: #f0f0f0; color: #333; padding: 6px 20px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; font-family: Arial, sans-serif; border-bottom: 1px solid #ccc;">
-      <div style="display: flex; align-items: center; gap: 15px;">
-        <a href="/admin/index.html" style="color: #000; text-decoration: none; font-weight: bold; font-size: 14px;">WebDCR Admin</a>
-        <span id="auth-status" style="font-size: 11px; color: #666;">Checking...</span>
-      </div>
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <label style="font-weight: bold; font-size: 11px;">Token:</label>
-        <input id="auth-token-input" type="password" placeholder="ghp_..." style="font-size: 11px; padding: 2px 6px; width: 140px; border: 1px solid #ccc;">
-        <button id="auth-save-btn" style="font-size: 11px; padding: 2px 10px; cursor: pointer; background: #eee; border: 1px solid #999; font-weight: bold;">Save</button>
-        <button id="auth-logout-btn" style="font-size: 11px; padding: 2px 10px; cursor: pointer; background: #fff; border: 1px solid #f5c6cb; color: #721c24; font-weight: bold; margin-left: 5px;">Log Out</button>
-      </div>
+    <div style="display: flex; align-items: center;">
+      <a href="/admin/index.html" class="brand">WebDCR Admin</a>
+      <span id="auth-status" class="status">Checking...</span>
+    </div>
+    <div class="controls">
+      <label>Token:</label>
+      <input id="auth-token-input" type="password" placeholder="ghp_...">
+      <button id="auth-save-btn">Save</button>
+      <button id="auth-logout-btn" class="btn-logout">Log Out</button>
     </div>
   `;
   document.body.prepend(header);
+
+  const prompt = document.createElement('div');
+  prompt.id = 'admin-login-prompt';
+  prompt.innerText = 'Please log in with a token above to access admin tools.';
+  document.body.appendChild(prompt);
 
   const input = document.getElementById('auth-token-input');
   const saveBtn = document.getElementById('auth-save-btn');
@@ -67,8 +135,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const check = await window.AdminAuth.validateToken();
     if (check.valid) {
       status.innerHTML = `<span style="color: #2e7d32;">● Connected (${check.user})</span>`;
+      document.body.classList.remove('logged-out');
+      document.body.classList.add('logged-in');
     } else {
       status.innerHTML = `<span style="color: #d32f2f;">● Disconnected</span>`;
+      document.body.classList.remove('logged-in');
+      document.body.classList.add('logged-out');
     }
   }
 
@@ -87,4 +159,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
   updateStatus();
 });
+
 

@@ -5,115 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Update Schedule CSV</title>
     <link rel="icon" href="/favicon.ico" />
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        background: #f0f0f0;
-        color: #333;
-        margin: 0;
-        padding: 20px;
-      }
-      .upload-shell {
-        max-width: 600px;
-        margin: 0 auto;
-      }
-      .card {
-        background: #ffffff;
-        border: 1px solid #ccc;
-        padding: 25px;
-      }
-      h1 {
-        font-size: 22px;
-        margin-top: 0;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 10px;
-      }
-      label {
-        display: block;
-        font-size: 13px;
-        font-weight: bold;
-        margin-bottom: 5px;
-      }
-      input[type="text"],
-      input[type="password"],
-      input[type="file"] {
-        width: 100%;
-        border: 1px solid #aaa;
-        padding: 8px;
-        box-sizing: border-box;
-        margin-bottom: 15px;
-      }
-      button {
-        background: #0056b3;
-        color: #fff;
-        font-weight: bold;
-        border: 1px solid #004494;
-        padding: 10px 20px;
-        cursor: pointer;
-      }
-      button:hover {
-        background: #004494;
-      }
-      button:disabled {
-        background: #ccc;
-        border-color: #bbb;
-        cursor: not-allowed;
-      }
-      .status {
-        padding: 10px;
-        font-size: 14px;
-        margin-top: 15px;
-        border: 1px solid #ccc;
-      }
-      .status.info {
-        background: #e7f3ff;
-        color: #004085;
-        border-color: #b8daff;
-      }
-      .status.error {
-        background: #f8d7da;
-        color: #721c24;
-        border-color: #f5c6cb;
-      }
-      .inline-hint {
-        color: #666;
-        font-size: 12px;
-        margin-top: -10px;
-        margin-bottom: 15px;
-      }
-    </style>
     <script defer src="/assets/js/alpine.js"></script>
     <script src="auth.js"></script>
   </head>
   <body>
     <div class="admin-content-wrapper">
-      <div class="upload-shell">
-      <a href="/admin/index.html" style="text-decoration: none; color: #0056b3; font-weight: bold; font-size: 13px;">&larr; Back to Dashboard</a>
-      <div class="card" style="margin-top: 10px;">
+      <div class="card">
         <h1>Upload a new schedule CSV</h1>
         <form @submit.prevent="handleSubmit">
           <div class="field-group">
             <label for="commitMessage">Commit message</label>
-            <input
-              id="commitMessage"
-              type="text"
-              x-model.trim="commitMessage"
-              required
-            />
+            <input id="commitMessage" type="text" x-model.trim="commitMessage" required />
           </div>
 
           <div class="field-group">
             <label for="csvFile">Select updated shows.csv</label>
-            <input
-              id="csvFile"
-              type="file"
-              accept=".csv"
-              @change="handleFileChange"
-              required
-            />
+            <input id="csvFile" type="file" accept=".csv" @change="handleFileChange" required />
           </div>
 
-          <button type="submit" :disabled="isSubmitting || !fileContent || !token">
+          <button type="submit" class="btn btn-primary" :disabled="isSubmitting || !fileContent || !token">
             <span x-show="!isSubmitting">Upload to GitHub</span>
             <span x-show="isSubmitting">Uploading…</span>
           </button>
@@ -210,7 +120,6 @@
             const response = await fetch(endpoint, {
               method: 'PUT',
               headers: {
-                Accept: 'application/vnd.github+json',
                 Authorization: `Bearer ${this.token}`,
                 'Content-Type': 'application/json'
               },
@@ -228,6 +137,5 @@
         };
       }
     </script>
-    </div>
   </body>
 </html>

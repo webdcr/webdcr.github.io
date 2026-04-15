@@ -85,21 +85,21 @@ document.addEventListener('DOMContentLoaded', () => {
       background: #f0f0f0;
       border-bottom: 1px solid #ccc;
       width: 100%;
-      height: 40px;
+      height: 32px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 20px;
+      padding: 0 15px;
       font-family: Arial, sans-serif;
     }
-    #admin-auth-header * { font-family: Arial, sans-serif; }
-    #admin-auth-header .brand { color: #000; text-decoration: none; font-weight: bold; font-size: 14px; }
-    #admin-auth-header .status { font-size: 11px; color: #666; margin-left: 10px; }
-    #admin-auth-header .controls { display: flex; align-items: center; gap: 8px; }
-    #admin-auth-header label { font-weight: bold; font-size: 11px; }
-    #admin-auth-header input { font-size: 11px; padding: 3px 6px; width: 140px; border: 1px solid #ccc; background: #fff; }
-    #admin-auth-header button { font-size: 11px; padding: 3px 10px; cursor: pointer; background: #eee; border: 1px solid #999; font-weight: bold; color: #333; }
-    #admin-auth-header .btn-logout { background: #fff; border-color: #f5c6cb; color: #721c24; }
+    #admin-auth-header * { font-family: Arial, sans-serif; border: none; background: none; }
+    #admin-auth-header .brand { color: #000; text-decoration: none; font-weight: bold; font-size: 13px; }
+    #admin-auth-header .status { font-size: 10px; color: #666; margin-left: 8px; border: none !important; background: none !important; }
+    #admin-auth-header .controls { display: flex; align-items: center; gap: 6px; }
+    #admin-auth-header label { font-weight: bold; font-size: 10px; }
+    #admin-auth-header input { font-size: 10px; padding: 2px 5px; width: 130px; border: 1px solid #ccc !important; background: #fff !important; }
+    #admin-auth-header button { font-size: 10px; padding: 2px 8px; cursor: pointer; background: #eee !important; border: 1px solid #999 !important; font-weight: bold; color: #333 !important; }
+    #admin-auth-header .btn-logout { background: #fff !important; border-color: #f5c6cb !important; color: #721c24 !important; }
   `;
   document.head.appendChild(style);
 

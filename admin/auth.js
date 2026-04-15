@@ -33,14 +33,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const header = document.createElement('div');
   header.id = 'admin-auth-header';
   header.innerHTML = `
-    <div style="background: #333; color: #fff; padding: 5px 20px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; font-family: Arial, sans-serif;">
+    <div style="background: #f8f8f8; color: #333; padding: 10px 20px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; font-family: Arial, sans-serif; border-bottom: 2px solid #ccc; margin-bottom: 20px;">
       <div>
-        <strong>WebDCR Admin</strong> | 
-        <span id="auth-status">Checking connection...</span>
+        <a href="/admin/index.html" style="color: #000; text-decoration: none; font-weight: bold; font-size: 16px;">WebDCR Admin Dashboard</a>
+        <span id="auth-status" style="margin-left: 15px; font-size: 11px;">Checking connection...</span>
       </div>
-      <div>
-        <input id="auth-token-input" type="password" placeholder="GitHub PAT" style="font-size: 10px; padding: 2px 5px; width: 150px; background: #444; color: #fff; border: 1px solid #555;">
-        <button id="auth-save-btn" style="font-size: 10px; padding: 2px 8px; cursor: pointer; background: #555; color: #fff; border: 1px solid #666;">Save Token</button>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <label style="font-weight: bold; font-size: 11px;">GitHub Token:</label>
+        <input id="auth-token-input" type="password" placeholder="ghp_..." style="font-size: 12px; padding: 4px 8px; width: 200px; border: 1px solid #999;">
+        <button id="auth-save-btn" style="font-size: 11px; padding: 4px 12px; cursor: pointer; background: #eee; border: 1px solid #999; font-weight: bold;">Update Token</button>
       </div>
     </div>
   `;

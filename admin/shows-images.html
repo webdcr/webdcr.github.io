@@ -70,18 +70,14 @@
       [x-cloak] { display: none !important; }
     </style>
     <script defer src="/assets/js/alpine.js"></script>
+    <script src="auth.js"></script>
   </head>
   <body>
     <div class="container">
-      <a href="/admin/index.html" style="text-decoration: none; color: #007a5f; font-weight: 600;">&larr; Back to Dashboard</a>
+      <a href="/admin/index.html" style="text-decoration: none; color: #0056b3; font-weight: bold; font-size: 13px;">&larr; Back to Dashboard</a>
       
-      <div class="card" style="margin-top: 1rem;">
+      <div class="card" style="margin-top: 10px;">
         <h1>Manage Show Images</h1>
-        <div class="field-group">
-          <label for="token">GitHub Personal Access Token</label>
-          <input id="token" type="password" x-model="token" placeholder="ghp_..." @change="saveToken" />
-          <p style="font-size: 0.8rem; color: #666; margin-top: 0.4rem;">Token is saved in your browser's local storage.</p>
-        </div>
         
         <div class="field-group">
           <label>Upload New Images (Multiple allowed)</label>
@@ -276,13 +272,14 @@
             
             this.isRenaming = true;
             try {
-              // 1. Get current content
-              const resGet = await fetch(this.renamingImage.url, {
+              // 1. Get the blob (works for files > 1MB)
+              const resBlob = await fetch(`https://api.github.com/repos/${this.repo}/git/blobs/${this.renamingImage.sha}`, {
                 headers: { Authorization: `Bearer ${this.token}` }
               });
-              const data = await resGet.json();
+              if (!resBlob.ok) throw new Error('Failed to fetch image data');
+              const blobData = await resBlob.json();
               
-              // 2. Create new file
+              // 2. Create new file using that blob content
               const resCreate = await fetch(`https://api.github.com/repos/${this.repo}/contents/${this.path}/${this.newName}`, {
                 method: 'PUT',
                 headers: {
@@ -290,29 +287,33 @@
                   'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                  message: `Rename ${this.renamingImage.name} to ${this.newName} (Part 1: Create)`,
-                  content: data.content
+                  message: `Rename ${this.renamingImage.name} to ${this.newName}`,
+                  content: blobData.content,
+                  encoding: 'base64'
                 })
               });
               
-              if (!resCreate.ok) throw new Error('Failed to create new file during rename');
+              if (!resCreate.ok) {
+                const err = await resCreate.json();
+                throw new Error(err.message || 'Failed to create new file');
+              }
               
               // 3. Delete old file
-              const resDelete = await fetch(this.renamingImage.url, {
+              const resDelete = await fetch(`https://api.github.com/repos/${this.repo}/contents/${this.renamingImage.path}`, {
                 method: 'DELETE',
                 headers: {
                   Authorization: `Bearer ${this.token}`,
                   'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                  message: `Rename ${this.renamingImage.name} to ${this.newName} (Part 2: Delete)`,
+                  message: `Cleanup after rename`,
                   sha: this.renamingImage.sha
                 })
               });
               
-              if (!resDelete.ok) throw new Error('New file created, but failed to delete old file');
+              if (!resDelete.ok) throw new Error('New file created, but failed to delete old one.');
               
-              this.setStatus('Image renamed successfully');
+              this.setStatus('Renamed successfully!');
               this.renamingImage = null;
               this.fetchImages();
             } catch (e) {

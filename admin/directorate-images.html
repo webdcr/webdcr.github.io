@@ -70,6 +70,7 @@
       [x-cloak] { display: none !important; }
     </style>
     <script defer src="/assets/js/alpine.js"></script>
+    <script src="auth.js"></script>
   </head>
   <body>
     <div class="container">
@@ -77,10 +78,6 @@
       
       <div class="card" style="margin-top: 10px;">
         <h1>Manage Directorate Images</h1>
-        <div class="field-group">
-          <label for="token">GitHub Personal Access Token</label>
-          <input id="token" type="password" x-model="token" placeholder="ghp_..." @change="saveToken" />
-        </div>
         
         <div class="field-group">
           <label>Upload New Photos</label>
@@ -222,12 +219,15 @@
           async confirmRename() {
             this.isRenaming = true;
             try {
-              const resGet = await fetch(this.renamingImage.url, { headers: { Authorization: `Bearer ${this.token}` } });
-              const data = await resGet.json();
+              const resBlob = await fetch(`https://api.github.com/repos/${this.repo}/git/blobs/${this.renamingImage.sha}`, {
+                headers: { Authorization: `Bearer ${this.token}` }
+              });
+              const blobData = await resBlob.json();
+
               await fetch(`https://api.github.com/repos/${this.repo}/contents/${this.path}/${this.newName}`, {
                 method: 'PUT',
                 headers: { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: `Rename to ${this.newName}`, content: data.content })
+                body: JSON.stringify({ message: `Rename to ${this.newName}`, content: blobData.content })
               });
               await fetch(this.renamingImage.url, {
                 method: 'DELETE',

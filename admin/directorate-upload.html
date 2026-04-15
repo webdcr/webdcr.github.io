@@ -83,6 +83,7 @@
       }
     </style>
     <script defer src="/assets/js/alpine.js"></script>
+    <script src="auth.js"></script>
   </head>
   <body>
     <div class="upload-shell">
@@ -90,20 +91,6 @@
       <div class="card" style="margin-top: 10px;">
         <h1>Upload new Directorate CSV</h1>
         <form @submit.prevent="handleSubmit">
-          <div class="field-group">
-            <label for="token">GitHub personal access token</label>
-            <input
-              id="token"
-              type="password"
-              placeholder="ghp_..."
-              x-model.trim="token"
-              autocomplete="off"
-              @change="saveToken"
-              required
-            />
-            <p class="inline-hint">Needs access to webdcr/webdcr.github.io.</p>
-          </div>
-
           <div class="field-group">
             <label for="csvFile">Select updated directorate.csv</label>
             <input

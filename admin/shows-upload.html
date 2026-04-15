@@ -83,25 +83,14 @@
       }
     </style>
     <script defer src="/assets/js/alpine.js"></script>
+    <script src="auth.js"></script>
   </head>
   <body>
     <div class="upload-shell">
-      <div class="card">
+      <a href="/admin/index.html" style="text-decoration: none; color: #0056b3; font-weight: bold; font-size: 13px;">&larr; Back to Dashboard</a>
+      <div class="card" style="margin-top: 10px;">
         <h1>Upload a new schedule CSV</h1>
         <form @submit.prevent="handleSubmit">
-          <div class="field-group">
-            <label for="token">GitHub personal access token</label>
-            <input
-              id="token"
-              type="password"
-              placeholder="ghp_..."
-              x-model.trim="token"
-              autocomplete="off"
-              required
-            />
-            <p class="inline-hint">Needs access to webdcr/webdcr.github.io.</p>
-          </div>
-
           <div class="field-group">
             <label for="commitMessage">Commit message</label>
             <input
@@ -121,9 +110,6 @@
               @change="handleFileChange"
               required
             />
-            <template x-if="selectedFileName">
-              <p class="inline-hint">Selected: <span x-text="selectedFileName"></span></p>
-            </template>
           </div>
 
           <button type="submit" :disabled="isSubmitting || !fileContent || !token">

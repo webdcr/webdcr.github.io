@@ -93,8 +93,8 @@ document.addEventListener('DOMContentLoaded', () => {
       font-family: Arial, sans-serif;
     }
     #admin-auth-header * { font-family: Arial, sans-serif; border: none; background: none; }
-    #admin-auth-header .brand { color: #000; text-decoration: none; font-weight: bold; font-size: 13px; }
-    #admin-auth-header .status { font-size: 10px; color: #666; margin-left: 8px; border: none !important; background: none !important; }
+    #admin-auth-header .brand { color: #000; text-decoration: none; font-weight: bold; font-size: 13px; line-height: 1; }
+    #admin-auth-header .status { font-size: 10px; color: #666; margin-left: 8px; border: none !important; background: none !important; line-height: 1; vertical-align: middle; }
     #admin-auth-header .controls { display: flex; align-items: center; gap: 6px; }
     #admin-auth-header label { font-weight: bold; font-size: 10px; }
     #admin-auth-header input { font-size: 10px; padding: 2px 5px; width: 130px; border: 1px solid #ccc !important; background: #fff !important; }
@@ -110,12 +110,12 @@ document.addEventListener('DOMContentLoaded', () => {
       <a href="/admin/index.html" class="brand">WebDCR Admin</a>
       <span id="auth-status" class="status">Checking...</span>
     </div>
-    <div class="controls">
-      <label>Token:</label>
-      <input id="auth-token-input" type="password" placeholder="ghp_...">
-      <button id="auth-save-btn">Save</button>
-      <button id="auth-logout-btn" class="btn-logout">Log Out</button>
-    </div>
+      <div class="controls">
+        <label>Token:</label>
+        <input id="auth-token-input" type="password" placeholder="ghp_...">
+        <button id="auth-save-btn">Log In</button>
+        <button id="auth-logout-btn" class="btn-logout">Log Out</button>
+      </div>
   `;
   document.body.prepend(header);
 
@@ -132,6 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
   input.value = window.AdminAuth.getToken();
 
   async function updateStatus() {
+    status.innerText = 'Checking...';
     const check = await window.AdminAuth.validateToken();
     if (check.valid) {
       status.innerHTML = `<span style="color: #2e7d32;">● Connected (${check.user})</span>`;
@@ -141,6 +142,9 @@ document.addEventListener('DOMContentLoaded', () => {
       status.innerHTML = `<span style="color: #d32f2f;">● Disconnected</span>`;
       document.body.classList.remove('logged-in');
       document.body.classList.add('logged-out');
+      if (input.value && !check.valid) {
+        status.innerHTML = `<span style="color: #d32f2f;">● Invalid Token!</span>`;
+      }
     }
   }
 

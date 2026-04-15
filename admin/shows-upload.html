@@ -86,7 +86,8 @@
     <script src="auth.js"></script>
   </head>
   <body>
-    <div class="upload-shell">
+    <div class="admin-content-wrapper">
+      <div class="upload-shell">
       <a href="/admin/index.html" style="text-decoration: none; color: #0056b3; font-weight: bold; font-size: 13px;">&larr; Back to Dashboard</a>
       <div class="card" style="margin-top: 10px;">
         <h1>Upload a new schedule CSV</h1>
@@ -127,7 +128,7 @@
     <script>
       function showsUploader() {
         return {
-          token: '',
+          token: window.AdminAuth.getToken(),
           commitMessage: '',
           fileContent: '',
           selectedFileName: '',
@@ -136,6 +137,9 @@
           statusType: 'info',
           init() {
             this.commitMessage = this.defaultCommitMessage();
+            window.addEventListener('admin-auth-changed', () => {
+              this.token = window.AdminAuth.getToken();
+            });
           },
           defaultCommitMessage() {
             const now = new Date();
@@ -184,7 +188,6 @@
             const endpoint = 'https://api.github.com/repos/webdcr/webdcr.github.io/contents/_data/shows.csv';
             const response = await fetch(endpoint, {
               headers: {
-                Accept: 'application/vnd.github+json',
                 Authorization: `Bearer ${this.token}`
               }
             });
@@ -225,5 +228,6 @@
         };
       }
     </script>
+    </div>
   </body>
 </html>

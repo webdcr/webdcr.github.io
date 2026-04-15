@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       if (isManualLogin) {
         overlay.style.display = 'flex';
-        setTimeout(() => { overlay.style.display = 'none'; }, 3000);
+        setTimeout(() => { overlay.style.display = 'none'; }, 1750);
       }
     }
   }

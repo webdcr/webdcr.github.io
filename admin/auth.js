@@ -95,7 +95,13 @@ document.addEventListener('DOMContentLoaded', () => {
     #admin-auth-header * { font-family: Arial, sans-serif; border: none; background: none; }
     #admin-auth-header .brand { color: #000; text-decoration: none; font-weight: bold; font-size: 13px; line-height: 1; }
     #admin-auth-header .status { font-size: 10px; color: #666; margin-left: 8px; border: none !important; background: none !important; line-height: 1; vertical-align: middle; }
+    #admin-auth-header .controls-container { position: relative; display: flex; align-items: center; }
     #admin-auth-header .controls { display: flex; align-items: center; gap: 6px; }
+    #admin-auth-header .controls-overlay { 
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
+      background: #f0f0f0; display: none; align-items: center; justify-content: center;
+      color: #d32f2f; font-weight: bold; font-size: 11px; z-index: 10;
+    }
     #admin-auth-header label { font-weight: bold; font-size: 10px; }
     #admin-auth-header input { font-size: 10px; padding: 2px 5px; width: 130px; border: 1px solid #ccc !important; background: #fff !important; }
     #admin-auth-header button { font-size: 10px; padding: 2px 8px; cursor: pointer; background: #eee !important; border: 1px solid #999 !important; font-weight: bold; color: #333 !important; }
@@ -110,12 +116,15 @@ document.addEventListener('DOMContentLoaded', () => {
       <a href="/admin/index.html" class="brand">WebDCR Admin</a>
       <span id="auth-status" class="status">Checking...</span>
     </div>
+    <div class="controls-container">
+      <div id="auth-overlay" class="controls-overlay">Invalid Token!</div>
       <div class="controls">
         <label>Token:</label>
         <input id="auth-token-input" type="password" placeholder="ghp_...">
         <button id="auth-save-btn">Log In</button>
         <button id="auth-logout-btn" class="btn-logout">Log Out</button>
       </div>
+    </div>
   `;
   document.body.prepend(header);
 
@@ -128,10 +137,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const saveBtn = document.getElementById('auth-save-btn');
   const logoutBtn = document.getElementById('auth-logout-btn');
   const status = document.getElementById('auth-status');
+  const overlay = document.getElementById('auth-overlay');
 
   input.value = window.AdminAuth.getToken();
 
-  async function updateStatus() {
+  async function updateStatus(isManualLogin = false) {
     status.innerText = 'Checking...';
     const check = await window.AdminAuth.validateToken();
     if (check.valid) {
@@ -142,16 +152,17 @@ document.addEventListener('DOMContentLoaded', () => {
       status.innerHTML = `<span style="color: #d32f2f;">● Disconnected</span>`;
       document.body.classList.remove('logged-in');
       document.body.classList.add('logged-out');
-      if (input.value && !check.valid) {
-        status.innerHTML = `<span style="color: #d32f2f;">● Invalid Token!</span>`;
+      
+      if (isManualLogin) {
+        overlay.style.display = 'flex';
+        setTimeout(() => { overlay.style.display = 'none'; }, 3000);
       }
     }
   }
 
   saveBtn.onclick = () => {
     window.AdminAuth.setToken(input.value);
-    updateStatus();
-    location.reload();
+    updateStatus(true);
   };
 
   logoutBtn.onclick = () => {

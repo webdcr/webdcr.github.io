@@ -5,62 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>WebDCR Admin</title>
     <link rel="icon" href="/favicon.ico" />
-    <link rel="stylesheet" href="/assets/css/style.css" id="site-stylesheet" />
     <style>
       body {
-        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        background: #f4f7fb;
-        color: #0f1c24;
-        min-height: 100vh;
+        font-family: Arial, sans-serif;
+        background: #f0f0f0;
+        color: #333;
         margin: 0;
+        padding: 20px;
       }
       .admin-hub {
-        max-width: 960px;
+        max-width: 900px;
         margin: 0 auto;
-        padding: clamp(2rem, 6vw, 4rem) clamp(1.25rem, 4vw, 3rem);
+        background: #fff;
+        border: 1px solid #ccc;
+        padding: 30px;
       }
       h1 {
-        font-size: clamp(2rem, 6vw, 3rem);
-        margin-bottom: 0.5rem;
-      }
-      p.subtitle {
+        font-size: 24px;
         margin-top: 0;
-        color: #c3c3c3;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+        color: #000;
       }
       .card-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 1.25rem;
-        margin-top: 2rem;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
       }
       .card-link {
-        background: #ffffff;
-        border: 1px solid #dbe4f0;
-        border-radius: 16px;
-        padding: 1.5rem;
+        background: #f9f9f9;
+        border: 1px solid #ddd;
+        padding: 20px;
         text-decoration: none;
-        color: inherit;
-        transition: border-color 150ms ease, box-shadow 150ms ease;
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-        box-shadow: 0 10px 30px rgba(15, 31, 53, 0.08);
-        background-image: linear-gradient(135deg, #ffffff 0%, #fefefe 100%);
+        color: #0056b3;
+        display: block;
       }
-      .card-link:hover,
-      .card-link:focus-visible {
-        border-color: #ff8a3d;
-        outline: none;
-        box-shadow: 0 20px 40px rgba(255, 138, 61, 0.2);
-        background-image: linear-gradient(135deg, #fff3eb 0%, #ffe8d3 100%);
+      .card-link:hover {
+        background: #f0f4f8;
+        border-color: #0056b3;
       }
       .card-link h2 {
-        font-size: 1.25rem;
-        margin: 0;
+        font-size: 18px;
+        margin: 0 0 8px 0;
+        text-decoration: underline;
       }
       .card-link span {
-        font-size: 0.95rem;
-        color: #4a5967;
+        font-size: 13px;
+        color: #555;
       }
     </style>
   </head>
@@ -75,6 +67,18 @@
         <a class="card-link" href="/admin/shows-upload.html">
           <h2>Update schedule CSV</h2>
           <span>Upload a new <code>shows.csv</code> with a GitHub token.</span>
+        </a>
+        <a class="card-link" href="/admin/shows-images.html">
+          <h2>Manage show images</h2>
+          <span>View, upload, rename, and delete show album art.</span>
+        </a>
+        <a class="card-link" href="/admin/directorate-upload.html">
+          <h2>Update directorate CSV</h2>
+          <span>Upload a new <code>directorate.csv</code> for the About page.</span>
+        </a>
+        <a class="card-link" href="/admin/directorate-images.html">
+          <h2>Manage directorate photos</h2>
+          <span>View, upload, rename, and delete directorate member photos.</span>
         </a>
       </div>
     </div>

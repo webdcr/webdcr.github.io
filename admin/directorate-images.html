@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en" x-data="imageManager()" x-init="init()">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Manage Directorate Images</title>
+    <link rel="icon" href="/favicon.ico" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f0f0f0;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+      }
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+      .card {
+        background: #ffffff;
+        border: 1px solid #ccc;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      h1 { font-size: 22px; margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+      h2 { font-size: 18px; }
+      .field-group { margin-bottom: 15px; }
+      label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 5px; }
+      input[type="text"], input[type="password"], input[type="file"] {
+        width: 100%; border: 1px solid #aaa; padding: 8px; box-sizing: border-box;
+      }
+      .btn {
+        display: inline-block; padding: 6px 12px; background: #eee; border: 1px solid #999;
+        color: #333; cursor: pointer; font-size: 13px; font-weight: bold; text-decoration: none;
+      }
+      .btn:hover { background: #ddd; }
+      .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+      .btn-primary { background: #0056b3; color: #fff; border-color: #004494; }
+      .btn-primary:hover { background: #004494; }
+      .btn-danger { background: #c00; color: #fff; border-color: #900; }
+      .btn-danger:hover { background: #900; }
+      
+      .image-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+      }
+      .image-card {
+        background: #fff; border: 1px solid #ccc; padding: 10px;
+      }
+      .image-preview {
+        width: 100%; aspect-ratio: 1; object-fit: cover; background: #eee; border: 1px solid #ddd;
+      }
+      .image-info { padding-top: 10px; }
+      .image-name { font-weight: bold; font-size: 12px; word-break: break-all; margin-bottom: 8px; height: 30px; overflow: hidden; }
+      .image-actions { display: flex; gap: 5px; }
+      
+      .status { padding: 10px; font-size: 14px; margin-top: 10px; border: 1px solid #ccc; }
+      .status.info { background: #e7f3ff; color: #004085; border-color: #b8daff; }
+      .status.error { background: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+      
+      .modal {
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5);
+        display: flex; align-items: center; justify-content: center; z-index: 1000;
+      }
+      .modal-content { background: #fff; padding: 20px; border: 1px solid #333; width: 90%; max-width: 400px; }
+      
+      [x-cloak] { display: none !important; }
+    </style>
+    <script defer src="/assets/js/alpine.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <a href="/admin/index.html" style="text-decoration: none; color: #0056b3; font-weight: bold; font-size: 13px;">&larr; Back to Dashboard</a>
+      
+      <div class="card" style="margin-top: 10px;">
+        <h1>Manage Directorate Images</h1>
+        <div class="field-group">
+          <label for="token">GitHub Personal Access Token</label>
+          <input id="token" type="password" x-model="token" placeholder="ghp_..." @change="saveToken" />
+        </div>
+        
+        <div class="field-group">
+          <label>Upload New Photos</label>
+          <input type="file" multiple accept="image/*" @change="handleFileUpload" :disabled="!token" />
+        </div>
+        
+        <template x-if="statusMessage">
+          <p class="status" :class="statusType" x-text="statusMessage"></p>
+        </template>
+      </div>
+
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h2>Current Photos</h2>
+          <button class="btn" @click="fetchImages" :disabled="loading">
+            <span x-show="!loading">Refresh List</span>
+            <span x-show="loading">Loading...</span>
+          </button>
+        </div>
+        
+        <div class="image-grid" x-show="!loading">
+          <template x-for="img in images" :key="img.path">
+            <div class="image-card">
+              <img :src="img.download_url" class="image-preview" loading="lazy" />
+              <div class="image-info">
+                <div class="image-name" x-text="img.name"></div>
+                <div class="image-actions">
+                  <button class="btn" @click="startRename(img)">Rename</button>
+                  <button class="btn btn-danger" @click="deleteImage(img)">Delete</button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rename Modal -->
+    <div class="modal" x-show="renamingImage" x-cloak>
+      <div class="modal-content">
+        <h3>Rename Photo</h3>
+        <div class="field-group">
+          <label>New Filename</label>
+          <input type="text" x-model="newName" />
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button class="btn" @click="renamingImage = null">Cancel</button>
+          <button class="btn btn-primary" @click="confirmRename" :disabled="isRenaming">Rename</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function imageManager() {
+        return {
+          token: localStorage.getItem('gh_token') || '',
+          repo: 'webdcr/webdcr.github.io',
+          path: 'assets/images/directorate',
+          images: [],
+          loading: false,
+          statusMessage: '',
+          statusType: 'info',
+          renamingImage: null,
+          newName: '',
+          isRenaming: false,
+
+          init() {
+            this.fetchImages();
+          },
+
+          saveToken() {
+            localStorage.setItem('gh_token', this.token);
+          },
+
+          setStatus(msg, type = 'info') {
+            this.statusMessage = msg;
+            this.statusType = type;
+            if (type === 'info') setTimeout(() => this.statusMessage = '', 5000);
+          },
+
+          async fetchImages() {
+            this.loading = true;
+            try {
+              const headers = {};
+              if (this.token) headers.Authorization = `Bearer ${this.token}`;
+              const res = await fetch(`https://api.github.com/repos/${this.repo}/contents/${this.path}`, { headers });
+              if (!res.ok) throw new Error('Failed to fetch images');
+              const data = await res.json();
+              this.images = data.filter(file => /\.(jpg|jpeg|png|gif|webp)$/i.test(file.name));
+            } catch (e) {
+              this.setStatus(e.message, 'error');
+            } finally {
+              this.loading = false;
+            }
+          },
+
+          async handleFileUpload(e) {
+            const files = Array.from(e.target.files);
+            if (!files.length) return;
+            this.setStatus(`Uploading ${files.length} images...`);
+            for (const file of files) {
+              try {
+                const reader = new FileReader();
+                const content = await new Promise((resolve) => {
+                  reader.onload = () => resolve(reader.result.split(',')[1]);
+                  reader.readAsDataURL(file);
+                });
+                await fetch(`https://api.github.com/repos/${this.repo}/contents/${this.path}/${file.name}`, {
+                  method: 'PUT',
+                  headers: { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ message: `Upload photo: ${file.name}`, content: content })
+                });
+              } catch (e) {
+                this.setStatus(`Error: ${e.message}`, 'error');
+                break;
+              }
+            }
+            this.setStatus('Upload complete!');
+            this.fetchImages();
+          },
+
+          async deleteImage(img) {
+            if (!confirm(`Delete ${img.name}?`)) return;
+            try {
+              await fetch(`https://api.github.com/repos/${this.repo}/contents/${img.path}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: `Delete photo: ${img.name}`, sha: img.sha })
+              });
+              this.fetchImages();
+            } catch (e) { this.setStatus(e.message, 'error'); }
+          },
+
+          startRename(img) {
+            this.renamingImage = img;
+            this.newName = img.name;
+          },
+
+          async confirmRename() {
+            this.isRenaming = true;
+            try {
+              const resGet = await fetch(this.renamingImage.url, { headers: { Authorization: `Bearer ${this.token}` } });
+              const data = await resGet.json();
+              await fetch(`https://api.github.com/repos/${this.repo}/contents/${this.path}/${this.newName}`, {
+                method: 'PUT',
+                headers: { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: `Rename to ${this.newName}`, content: data.content })
+              });
+              await fetch(this.renamingImage.url, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: `Cleanup rename`, sha: this.renamingImage.sha })
+              });
+              this.renamingImage = null;
+              this.fetchImages();
+            } catch (e) { this.setStatus(e.message, 'error'); } finally { this.isRenaming = false; }
+          }
+        };
+      }
+    </script>
+  </body>
+</html>

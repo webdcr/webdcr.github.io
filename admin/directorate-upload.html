@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" x-data="showsUploader()" x-init="init()">
+<html lang="en" x-data="directorateUploader()" x-init="init()">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Update Schedule CSV</title>
+    <title>Update Directorate CSV</title>
     <link rel="icon" href="/favicon.ico" />
     <style>
       body {
@@ -86,8 +86,9 @@
   </head>
   <body>
     <div class="upload-shell">
-      <div class="card">
-        <h1>Upload a new schedule CSV</h1>
+      <a href="/admin/index.html" style="text-decoration: none; color: #0056b3; font-weight: bold; font-size: 13px;">&larr; Back to Dashboard</a>
+      <div class="card" style="margin-top: 10px;">
+        <h1>Upload new Directorate CSV</h1>
         <form @submit.prevent="handleSubmit">
           <div class="field-group">
             <label for="token">GitHub personal access token</label>
@@ -97,23 +98,14 @@
               placeholder="ghp_..."
               x-model.trim="token"
               autocomplete="off"
+              @change="saveToken"
               required
             />
             <p class="inline-hint">Needs access to webdcr/webdcr.github.io.</p>
           </div>
 
           <div class="field-group">
-            <label for="commitMessage">Commit message</label>
-            <input
-              id="commitMessage"
-              type="text"
-              x-model.trim="commitMessage"
-              required
-            />
-          </div>
-
-          <div class="field-group">
-            <label for="csvFile">Select updated shows.csv</label>
+            <label for="csvFile">Select updated directorate.csv</label>
             <input
               id="csvFile"
               type="file"
@@ -121,9 +113,6 @@
               @change="handleFileChange"
               required
             />
-            <template x-if="selectedFileName">
-              <p class="inline-hint">Selected: <span x-text="selectedFileName"></span></p>
-            </template>
           </div>
 
           <button type="submit" :disabled="isSubmitting || !fileContent || !token">
@@ -139,38 +128,25 @@
     </div>
 
     <script>
-      function showsUploader() {
+      function directorateUploader() {
         return {
-          token: '',
-          commitMessage: '',
+          token: localStorage.getItem('gh_token') || '',
           fileContent: '',
-          selectedFileName: '',
           isSubmitting: false,
           statusMessage: '',
           statusType: 'info',
-          init() {
-            this.commitMessage = this.defaultCommitMessage();
-          },
-          defaultCommitMessage() {
-            const now = new Date();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const year = String(now.getFullYear()).slice(-2);
-            return `${month}/${day}/${year} shows.csv update`;
+          init() {},
+          saveToken() {
+            localStorage.setItem('gh_token', this.token);
           },
           handleFileChange(event) {
             const file = event.target.files?.[0];
             if (!file) {
               this.fileContent = '';
-              this.selectedFileName = '';
               return;
             }
-            this.selectedFileName = file.name;
             file.text().then((text) => {
               this.fileContent = text;
-            }).catch(() => {
-              this.fileContent = '';
-              this.setStatus('Could not read file. Try again.', 'error');
             });
           },
           setStatus(message, type = 'info') {
@@ -178,63 +154,45 @@
             this.statusType = type === 'error' ? 'error' : 'info';
           },
           async handleSubmit() {
-            if (!this.token || !this.fileContent) {
-              this.setStatus('Token and CSV file are required.', 'error');
-              return;
-            }
             this.isSubmitting = true;
             this.setStatus('Contacting GitHub…');
             try {
               const sha = await this.fetchCurrentSha();
               await this.uploadNewCsv(sha);
-              this.setStatus('Success! The schedule CSV was updated.', 'info');
+              this.setStatus('Success! The directorate CSV was updated.', 'info');
             } catch (error) {
-              this.setStatus(error.message || 'Upload failed. Double-check your token and try again.', 'error');
+              this.setStatus(error.message, 'error');
             } finally {
               this.isSubmitting = false;
             }
           },
           async fetchCurrentSha() {
-            const endpoint = 'https://api.github.com/repos/webdcr/webdcr.github.io/contents/_data/shows.csv';
-            const response = await fetch(endpoint, {
-              headers: {
-                Accept: 'application/vnd.github+json',
-                Authorization: `Bearer ${this.token}`
-              }
+            const endpoint = 'https://api.github.com/repos/webdcr/webdcr.github.io/contents/_data/directorate.csv';
+            const res = await fetch(endpoint, {
+              headers: { Authorization: `Bearer ${this.token}` }
             });
-            const data = await response.json();
-            if (!response.ok) {
-              throw new Error(data?.message || 'Could not read shows.csv from GitHub.');
-            }
-            if (!data?.sha) {
-              throw new Error('GitHub response did not include a file SHA.');
-            }
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Could not find current CSV.');
             return data.sha;
           },
-          async uploadNewCsv(currentSha) {
-            const endpoint = 'https://api.github.com/repos/webdcr/webdcr.github.io/contents/_data/shows.csv';
-            const payload = {
-              message: this.commitMessage || this.defaultCommitMessage(),
-              content: this.toBase64(this.fileContent),
-              sha: currentSha
-            };
-            const response = await fetch(endpoint, {
+          async uploadNewCsv(sha) {
+            const endpoint = 'https://api.github.com/repos/webdcr/webdcr.github.io/contents/_data/directorate.csv';
+            const res = await fetch(endpoint, {
               method: 'PUT',
               headers: {
-                Accept: 'application/vnd.github+json',
                 Authorization: `Bearer ${this.token}`,
                 'Content-Type': 'application/json'
               },
-              body: JSON.stringify(payload)
+              body: JSON.stringify({
+                message: 'Update directorate.csv via admin panel',
+                content: btoa(unescape(encodeURIComponent(this.fileContent))),
+                sha: sha
+              })
             });
-            const data = await response.json();
-            if (!response.ok) {
-              throw new Error(data?.message || 'GitHub rejected the upload.');
+            if (!res.ok) {
+              const data = await res.json();
+              throw new Error(data.message || 'Upload failed.');
             }
-            return data;
-          },
-          toBase64(text) {
-            return btoa(unescape(encodeURIComponent(text)));
           }
         };
       }

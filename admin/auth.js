@@ -125,6 +125,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function updateStatus(isManualLogin = false) {
     status.innerText = 'Checking...';
+    loginBtn.disabled = true;
+    logoutBtn.disabled = true;
+
     const check = await window.AdminAuth.validateToken();
     
     if (check.valid) {

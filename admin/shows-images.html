@@ -50,10 +50,13 @@
       <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <h2>Current Images</h2>
-          <button class="btn" @click="fetchImages" :disabled="loading">
-            <span x-show="!loading">Refresh List</span>
-            <span x-show="loading">Loading...</span>
-          </button>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-danger" @click="deleteAllImages" :disabled="loading || images.length === 0">Delete All</button>
+            <button class="btn" @click="fetchImages" :disabled="loading">
+              <span x-show="!loading">Refresh List</span>
+              <span x-show="loading">Loading...</span>
+            </button>
+          </div>
         </div>
         
         <div class="image-grid" x-show="!loading">
@@ -150,6 +153,23 @@
             this.setStatus('Upload complete!');
             this.selectedFiles = [];
             this.isUploading = false;
+            this.fetchImages();
+          },
+
+          async deleteAllImages() {
+            if (!confirm(`Are you sure you want to delete ALL ${this.images.length} images? This cannot be undone.`)) return;
+            this.loading = true;
+            this.setStatus(`Deleting ${this.images.length} images...`);
+            for (const img of this.images) {
+              try {
+                await fetch(`https://api.github.com/repos/${this.repo}/contents/${img.path}`, {
+                  method: 'DELETE',
+                  headers: { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ message: `Delete all: ${img.name}`, sha: img.sha })
+                });
+              } catch (e) { console.error(e); }
+            }
+            this.setStatus('All images deleted.');
             this.fetchImages();
           },
 

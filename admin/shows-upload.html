@@ -16,6 +16,9 @@
           <div class="field-group">
             <label for="csvFile">Select updated shows.csv</label>
             <input id="csvFile" type="file" accept=".csv" @change="handleFileChange" required />
+            <p style="margin-top: 5px; font-size: 11px;">
+              <a href="https://docs.google.com/spreadsheets/d/1NkQ6ZKsuo4iZmkqlZ3gTNcVZDz7ZTr2mIRNHOsTzRXc/edit?gid=1256281664#gid=1256281664" target="_blank" style="color: #0056b3; text-decoration: underline;">Template / follow this format</a>
+            </p>
           </div>
 
           <button type="submit" class="btn btn-primary" :disabled="isSubmitting || !fileContent || !token">

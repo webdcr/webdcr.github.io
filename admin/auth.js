@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     .btn-primary:hover:not(:disabled) { background: #004494; }
     .btn-danger { background: #fff; color: #721c24; border-color: #f5c6cb; }
     .btn-danger:hover:not(:disabled) { background: #f8d7da; }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
 
     .field-group { margin-bottom: 15px; }
     label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 5px; }

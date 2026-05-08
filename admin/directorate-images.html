@@ -211,10 +211,28 @@
           },
 
           async assignDirector(img, newId) {
-            if (!newId) return;
+            let targetId = newId;
+            if (!targetId) {
+              // Generate random 8-digit hex for unassigned
+              targetId = Math.floor(Math.random() * 0xffffffff).toString(16).padStart(8, '0');
+            }
+
             const ext = img.name.substring(img.name.lastIndexOf('.'));
-            const newName = newId + ext;
+            const newName = targetId + ext;
             if (newName === img.name) return;
+
+            // Check if any existing image matches the targetId (ignoring extension)
+            const exists = this.images.some(existingImg => {
+              const existingId = existingImg.name.substring(0, existingImg.name.lastIndexOf('.')).toLowerCase();
+              return existingId === targetId.toLowerCase() && existingImg.name !== img.name;
+            });
+
+            if (exists) {
+              alert(`An image for ${newId} already exists! Please delete it first if you wish to replace it.`);
+              const currentId = img.name.substring(0, img.name.lastIndexOf('.')).toLowerCase();
+              event.target.value = this.directors.some(d => d.id === currentId) ? currentId : '';
+              return;
+            }
 
             if (!confirm(`Rename ${img.name} to ${newName}?`)) {
               // Revert select if cancelled by triggering a re-render
@@ -234,7 +252,7 @@
               await fetch(`https://api.github.com/repos/${this.repo}/contents/${this.path}/${newName}`, {
                 method: 'PUT',
                 headers: { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: `Assign image to ${newId}`, content: blobData.content })
+                body: JSON.stringify({ message: `Assign image to ${targetId}`, content: blobData.content })
               });
               
               await fetch(img.url, {
@@ -243,7 +261,7 @@
                 body: JSON.stringify({ message: `Cleanup after assignment`, sha: img.sha })
               });
               
-              this.setStatus(`Assigned to ${newId}`);
+              this.setStatus(newId ? `Assigned to ${newId}` : `Unassigned photo`);
               this.fetchImages();
             } catch (e) {
               this.setStatus(`Error: ${e.message}`, 'error');

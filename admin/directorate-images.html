@@ -67,7 +67,7 @@
                 <div class="image-name" x-text="img.name"></div>
                 <div style="margin-bottom: 8px;">
                   <select @change="assignDirector(img, $event.target.value)" style="width: 100%; font-size: 12px; padding: 4px;" :disabled="loading">
-                    <option value="" disabled>Unassigned</option>
+                    <option value="">Unassigned</option>
                     <template x-for="dir in directors" :key="dir.id">
                       <option :value="dir.id" x-text="dir.name" :selected="img.name.substring(0, img.name.lastIndexOf('.')).toLowerCase() === dir.id"></option>
                     </template>

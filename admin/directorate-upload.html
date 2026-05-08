@@ -3,32 +3,122 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Update Directorate CSV</title>
+    <title>Edit Directorate CSV</title>
     <link rel="icon" href="/favicon.ico" />
     <script defer src="/assets/js/alpine.js"></script>
     <script src="auth.js"></script>
+    <style>
+      .csv-table-wrapper {
+        overflow-x: auto;
+        max-height: 60vh;
+        margin-bottom: 1rem;
+        border: 1px solid #ccc;
+      }
+      .csv-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .csv-table th, .csv-table td {
+        padding: 0;
+        border: 1px solid #ccc;
+      }
+      .csv-table th {
+        background: #f0f0f0;
+        font-size: 12px;
+        padding: 6px;
+      }
+      .csv-input {
+        width: 100%;
+        min-width: 80px;
+        padding: 3px;
+        font-size: 12px !important;
+        line-height: 1.2;
+        border: 1px solid transparent;
+        box-sizing: border-box;
+      }
+      .csv-input:focus {
+        border: 1px solid #0056b3;
+        outline: none;
+      }
+      .csv-btn-icon {
+        cursor: pointer;
+        color: #d9534f;
+        background: none;
+        border: none;
+        font-weight: bold;
+        padding: 0 4px;
+      }
+      .csv-btn-icon:hover {
+        color: #c9302c;
+      }
+      .card.wide-card {
+        max-width: 90%;
+      }
+    </style>
   </head>
   <body>
     <div class="admin-content-wrapper">
-      <div class="card">
-        <h1>Upload new Directorate CSV</h1>
-        <form @submit.prevent="handleSubmit">
-          <div class="field-group">
-            <label for="csvFile">Select updated directorate.csv</label>
-            <input id="csvFile" type="file" accept=".csv" @change="handleFileChange" required />
-            <p style="margin-top: 5px; font-size: 11px;">
-              <a href="https://docs.google.com/spreadsheets/d/1NBiGRPdYdXYSP8-O7z96OHKOeeNiEDir0yv54t_YgkU/edit?gid=38942536#gid=38942536" target="_blank" style="color: #0056b3; text-decoration: underline;">Template / follow this format</a>
-            </p>
-          </div>
+      <div class="card wide-card">
+        <h1>Edit Directorate CSV</h1>
+        <p style="font-size: 13px; color: #555; margin-bottom: 15px;">
+          Having trouble? You can reference the <a href="https://docs.google.com/spreadsheets/d/1NBiGRPdYdXYSP8-O7z96OHKOeeNiEDir0yv54t_YgkU/edit?gid=38942536#gid=38942536" target="_blank" style="color: #0056b3; text-decoration: underline;">Template Google Sheet</a>.
+        </p>
+        
+        <template x-if="isLoading">
+          <p>Loading current data from GitHub...</p>
+        </template>
 
-          <button type="submit" class="btn btn-primary" :disabled="isSubmitting || !fileContent || !token">
-            <span x-show="!isSubmitting">Upload to GitHub</span>
-            <span x-show="isSubmitting">Uploading…</span>
-          </button>
-        </form>
+        <template x-if="!token">
+          <p class="status error">Please log in to edit the CSV.</p>
+        </template>
+
+        <template x-if="!isLoading && token && headers.length > 0">
+          <form @submit.prevent="handleSubmit">
+            <div class="csv-table-wrapper">
+              <table class="csv-table">
+                <thead>
+                  <tr>
+                    <th style="width: 40px; text-align: center;"></th>
+                    <template x-for="(header, index) in headers" :key="'head-'+index">
+                      <th style="padding: 8px;" x-text="header"></th>
+                    </template>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template x-for="(rowObj, rIndex) in bodyRows" :key="rowObj.id">
+                    <tr>
+                      <td style="text-align: center;">
+                        <button type="button" @click="removeRow(rIndex)" title="Remove Row" class="csv-btn-icon">×</button>
+                      </td>
+                      <template x-for="(cell, cIndex) in rowObj.data" :key="cIndex">
+                        <td>
+                          <input type="text" x-model="rowObj.data[cIndex]" class="csv-input" />
+                        </td>
+                      </template>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+            
+            <div style="margin-top: 10px; display: flex; gap: 10px;">
+              <button type="button" @click="addRow()" class="btn" style="background: #e0e0e0; color: #333;">+ Add Row</button>
+              <button type="button" @click="downloadCsv()" class="btn" style="background: #e0e0e0; color: #333;">Download CSV</button>
+              <button type="button" @click="$refs.fileInput.click()" class="btn" style="background: #e0e0e0; color: #333;">Upload CSV</button>
+              <input type="file" accept=".csv" x-ref="fileInput" style="display: none" @change="handleFileUpload" />
+            </div>
+
+            <div style="margin-top: 20px;">
+              <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
+                <span x-show="!isSubmitting">Save to GitHub</span>
+                <span x-show="isSubmitting">Saving…</span>
+              </button>
+            </div>
+          </form>
+        </template>
 
         <template x-if="statusMessage">
-          <p class="status" :class="statusType" x-text="statusMessage"></p>
+          <p class="status" :class="statusType" x-text="statusMessage" style="margin-top: 15px;"></p>
         </template>
       </div>
     </div>
@@ -36,20 +126,132 @@
     <script>
       function directorateUploader() {
         return {
-          token: window.AdminAuth.getToken(),
+          token: window.AdminAuth ? window.AdminAuth.getToken() : '',
           fileContent: '',
+          sha: '',
+          headers: [],
+          bodyRows: [],
+          isLoading: false,
           isSubmitting: false,
           statusMessage: '',
           statusType: 'info',
           init() {
             window.addEventListener('admin-auth-changed', () => {
               this.token = window.AdminAuth.getToken();
+              if (this.token && this.headers.length === 0) {
+                this.loadCurrentCsv();
+              }
+            });
+            if (this.token) {
+              this.loadCurrentCsv();
+            }
+          },
+          parseCSV(str) {
+            const rows = [];
+            let current = [];
+            let inQuotes = false;
+            let val = '';
+            for (let i = 0; i < str.length; i++) {
+              const char = str[i];
+              const nextChar = str[i+1];
+              if (char === '"' && inQuotes && nextChar === '"') {
+                val += '"';
+                i++;
+              } else if (char === '"') {
+                inQuotes = !inQuotes;
+              } else if (char === ',' && !inQuotes) {
+                current.push(val);
+                val = '';
+              } else if ((char === '\n' || char === '\r') && !inQuotes) {
+                if (char === '\r' && nextChar === '\n') i++;
+                current.push(val);
+                rows.push(current);
+                current = [];
+                val = '';
+              } else {
+                val += char;
+              }
+            }
+            if (val !== '' || current.length > 0) {
+              current.push(val);
+              rows.push(current);
+            }
+            return rows;
+          },
+          stringifyCSV(rows) {
+            return rows.map(row => {
+              return row.map(val => {
+                val = String(val || '');
+                if (val.includes(',') || val.includes('"') || val.includes('\n') || val.includes('\r')) {
+                  return `"${val.replace(/"/g, '""')}"`;
+                }
+                return val;
+              }).join(',');
+            }).join('\n');
+          },
+          async loadCurrentCsv() {
+            this.isLoading = true;
+            this.setStatus('Loading current CSV...', 'info');
+            try {
+              const data = await this.fetchCurrentCsvData();
+              this.sha = data.sha;
+              const content = decodeURIComponent(escape(atob(data.content.replace(/\s/g, ''))));
+              this.fileContent = content;
+              const parsed = this.parseCSV(content);
+              if (parsed.length > 0) {
+                this.headers = parsed[0];
+                this.bodyRows = parsed.slice(1).map((row, i) => ({ id: Date.now() + i, data: row }));
+              } else {
+                this.headers = ['Column 1'];
+                this.bodyRows = [{ id: Date.now(), data: [''] }];
+              }
+              this.setStatus('CSV loaded. Ready to edit.', 'info');
+              setTimeout(() => this.statusMessage = '', 3000);
+            } catch (err) {
+              this.setStatus(err.message, 'error');
+            } finally {
+              this.isLoading = false;
+            }
+          },
+          async fetchCurrentCsvData() {
+            const endpoint = 'https://api.github.com/repos/webdcr/webdcr.github.io/contents/_data/directorate.csv';
+            const res = await fetch(endpoint, {
+              headers: { Authorization: `Bearer ${this.token}` }
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Could not find current CSV.');
+            return data;
+          },
+          handleFileUpload(event) {
+            const file = event.target.files?.[0];
+            if (!file) return;
+            file.text().then((text) => {
+              const parsed = this.parseCSV(text);
+              if (parsed.length > 0) {
+                this.headers = parsed[0];
+                this.bodyRows = parsed.slice(1).map((row, i) => ({ id: Date.now() + i, data: row }));
+              }
+              event.target.value = '';
             });
           },
-          handleFileChange(event) {
-            const file = event.target.files?.[0];
-            if (!file) { this.fileContent = ''; return; }
-            file.text().then((text) => { this.fileContent = text; });
+          addRow() {
+            const colCount = this.headers.length;
+            this.bodyRows.push({ id: Date.now(), data: new Array(colCount).fill('') });
+          },
+          removeRow(index) {
+            this.bodyRows.splice(index, 1);
+          },
+          downloadCsv() {
+            const rowsToSave = [this.headers, ...this.bodyRows.map(r => r.data)];
+            const csvStr = this.stringifyCSV(rowsToSave);
+            const blob = new Blob([csvStr], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'directorate.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
           },
           setStatus(message, type = 'info') {
             this.statusMessage = message;
@@ -59,19 +261,14 @@
             this.isSubmitting = true;
             this.setStatus('Contacting GitHub…');
             try {
-              const sha = await this.fetchCurrentSha();
-              await this.uploadNewCsv(sha);
+              const rowsToSave = [this.headers, ...this.bodyRows.map(r => r.data)];
+              this.fileContent = this.stringifyCSV(rowsToSave);
+              await this.uploadNewCsv(this.sha);
               this.setStatus('Success! The directorate CSV was updated.', 'info');
+              setTimeout(() => {
+                if (this.statusType !== 'error') this.statusMessage = '';
+              }, 4000);
             } catch (error) { this.setStatus(error.message, 'error'); } finally { this.isSubmitting = false; }
-          },
-          async fetchCurrentSha() {
-            const endpoint = 'https://api.github.com/repos/webdcr/webdcr.github.io/contents/_data/directorate.csv';
-            const res = await fetch(endpoint, {
-              headers: { Authorization: `Bearer ${this.token}` }
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message || 'Could not find current CSV.');
-            return data.sha;
           },
           async uploadNewCsv(sha) {
             const endpoint = 'https://api.github.com/repos/webdcr/webdcr.github.io/contents/_data/directorate.csv';
@@ -88,6 +285,8 @@
               const data = await res.json();
               throw new Error(data.message || 'Upload failed.');
             }
+            const responseData = await res.json();
+            this.sha = responseData.content.sha;
           }
         };
       }

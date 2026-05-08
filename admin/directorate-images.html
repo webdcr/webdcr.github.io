@@ -65,28 +65,20 @@
               <img :src="img.download_url" class="image-preview" loading="lazy" />
               <div class="image-info">
                 <div class="image-name" x-text="img.name"></div>
+                <div style="margin-bottom: 8px;">
+                  <select @change="assignDirector(img, $event.target.value)" style="width: 100%; font-size: 12px; padding: 4px;" :disabled="loading">
+                    <option value="" disabled>Unassigned</option>
+                    <template x-for="dir in directors" :key="dir.id">
+                      <option :value="dir.id" x-text="dir.name" :selected="img.name.substring(0, img.name.lastIndexOf('.')).toLowerCase() === dir.id"></option>
+                    </template>
+                  </select>
+                </div>
                 <div class="image-actions">
-                  <button class="btn" @click="startRename(img)">Rename</button>
-                  <button class="btn btn-danger" @click="deleteImage(img)">Delete</button>
+                  <button class="btn btn-danger" @click="deleteImage(img)" style="width: 100%;">Delete</button>
                 </div>
               </div>
             </div>
           </template>
-        </div>
-      </div>
-    </div>
-
-    <!-- Rename Modal -->
-    <div class="modal" x-show="renamingImage" x-cloak>
-      <div class="modal-content">
-        <h2>Rename Photo</h2>
-        <div class="field-group">
-          <label>New Filename</label>
-          <input type="text" x-model="newName" />
-        </div>
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button class="btn" @click="renamingImage = null">Cancel</button>
-          <button class="btn btn-primary" @click="confirmRename" :disabled="isRenaming">Rename</button>
         </div>
       </div>
     </div>
@@ -98,17 +90,16 @@
           repo: 'webdcr/webdcr.github.io',
           path: 'assets/images/directorate',
           images: [],
+          directors: [],
           loading: false,
           statusMessage: '',
           statusType: 'info',
           selectedFiles: [],
           isUploading: false,
-          renamingImage: null,
-          newName: '',
-          isRenaming: false,
 
           init() {
             this.fetchImages();
+            this.fetchDirectors();
             window.addEventListener('admin-auth-changed', () => {
               this.token = window.AdminAuth.getToken();
             });
@@ -185,31 +176,79 @@
             } catch (e) { this.setStatus(e.message, 'error'); }
           },
 
-          startRename(img) {
-            this.renamingImage = img;
-            this.newName = img.name;
+          async fetchDirectors() {
+            try {
+              const res = await fetch(`https://api.github.com/repos/${this.repo}/contents/_data/directorate.csv`, {
+                headers: this.token ? { Authorization: `Bearer ${this.token}` } : {}
+              });
+              if (!res.ok) return;
+              const data = await res.json();
+              const content = decodeURIComponent(escape(atob(data.content.replace(/\s/g, ''))));
+              const lines = content.split(/\r?\n/);
+              const dirList = [];
+              for (let i = 1; i < lines.length; i++) {
+                const line = lines[i];
+                if (!line.trim()) continue;
+                let cols = [];
+                let inQuotes = false;
+                let val = '';
+                for (let j = 0; j < line.length; j++) {
+                  if (line[j] === '"') inQuotes = !inQuotes;
+                  else if (line[j] === ',' && !inQuotes) { cols.push(val); val = ''; }
+                  else val += line[j];
+                }
+                cols.push(val);
+                if (cols.length >= 2 && cols[1]) {
+                  const originalName = cols[1];
+                  const idName = originalName.toLowerCase().replace(/[^a-z]/g, '');
+                  if (idName) {
+                    dirList.push({ name: originalName, id: idName });
+                  }
+                }
+              }
+              this.directors = dirList;
+            } catch (e) { console.error('Error fetching directors', e); }
           },
 
-          async confirmRename() {
-            this.isRenaming = true;
+          async assignDirector(img, newId) {
+            if (!newId) return;
+            const ext = img.name.substring(img.name.lastIndexOf('.'));
+            const newName = newId + ext;
+            if (newName === img.name) return;
+
+            if (!confirm(`Rename ${img.name} to ${newName}?`)) {
+              // Revert select if cancelled by triggering a re-render
+              const currentId = img.name.substring(0, img.name.lastIndexOf('.')).toLowerCase();
+              event.target.value = this.directors.some(d => d.id === currentId) ? currentId : '';
+              return;
+            }
+
+            this.setStatus(`Renaming to ${newName}...`);
+            this.loading = true;
             try {
-              const resBlob = await fetch(`https://api.github.com/repos/${this.repo}/git/blobs/${this.renamingImage.sha}`, {
+              const resBlob = await fetch(`https://api.github.com/repos/${this.repo}/git/blobs/${img.sha}`, {
                 headers: { Authorization: `Bearer ${this.token}` }
               });
               const blobData = await resBlob.json();
-              await fetch(`https://api.github.com/repos/${this.repo}/contents/${this.path}/${this.newName}`, {
+              
+              await fetch(`https://api.github.com/repos/${this.repo}/contents/${this.path}/${newName}`, {
                 method: 'PUT',
                 headers: { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: `Rename to ${this.newName}`, content: blobData.content })
+                body: JSON.stringify({ message: `Assign image to ${newId}`, content: blobData.content })
               });
-              await fetch(this.renamingImage.url, {
+              
+              await fetch(img.url, {
                 method: 'DELETE',
                 headers: { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: `Cleanup rename`, sha: this.renamingImage.sha })
+                body: JSON.stringify({ message: `Cleanup after assignment`, sha: img.sha })
               });
-              this.renamingImage = null;
+              
+              this.setStatus(`Assigned to ${newId}`);
               this.fetchImages();
-            } catch (e) { this.setStatus(e.message, 'error'); } finally { this.isRenaming = false; }
+            } catch (e) {
+              this.setStatus(`Error: ${e.message}`, 'error');
+              this.loading = false;
+            }
           }
         };
       }

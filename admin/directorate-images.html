@@ -228,7 +228,7 @@
             });
 
             if (exists) {
-              alert(`An image for ${newId} already exists! Please delete it first if you wish to replace it.`);
+              alert(`An image for ${newId} already exists! Please delete, reassign or unassign it first if you wish to replace it.`);
               const currentId = img.name.substring(0, img.name.lastIndexOf('.')).toLowerCase();
               event.target.value = this.directors.some(d => d.id === currentId) ? currentId : '';
               return;

@@ -97,6 +97,11 @@
           selectedFiles: [],
           isUploading: false,
 
+          isUnassigned(img) {
+            const id = img.name.substring(0, img.name.lastIndexOf('.')).toLowerCase();
+            return !this.directors.some(d => d.id === id);
+          },
+
           init() {
             this.fetchImages();
             this.fetchDirectors();

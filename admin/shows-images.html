@@ -266,26 +266,3 @@
     </script>
   </body>
 </html>
-is.repo}/git/blobs/${this.renamingImage.sha}`, {
-                headers: { Authorization: `Bearer ${this.token}` }
-              });
-              const blobData = await resBlob.json();
-              await fetch(`https://api.github.com/repos/${this.repo}/contents/${this.path}/${this.newName}`, {
-                method: 'PUT',
-                headers: { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: `Rename to ${this.newName}`, content: blobData.content })
-              });
-              await fetch(this.renamingImage.url, {
-                method: 'DELETE',
-                headers: { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: `Cleanup rename`, sha: this.renamingImage.sha })
-              });
-              this.renamingImage = null;
-              this.fetchImages();
-            } catch (e) { this.setStatus(e.message, 'error'); } finally { this.isRenaming = false; }
-          }
-        };
-      }
-    </script>
-  </body>
-</html>

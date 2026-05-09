@@ -65,9 +65,16 @@
               <img :src="img.download_url" class="image-preview" loading="lazy" />
               <div class="image-info">
                 <div class="image-name" x-text="img.name"></div>
+                <div style="margin-bottom: 8px;">
+                  <select @change="assignShow(img, $event.target.value)" style="width: 100%; font-size: 12px; padding: 4px;" :disabled="loading">
+                    <option value="">Unassigned</option>
+                    <template x-for="show in shows" :key="show.id">
+                      <option :value="show.id" x-text="show.name" :selected="img.name.substring(0, img.name.lastIndexOf('.')).toLowerCase() === show.id"></option>
+                    </template>
+                  </select>
+                </div>
                 <div class="image-actions">
-                  <button class="btn" @click="startRename(img)">Rename</button>
-                  <button class="btn btn-danger" @click="deleteImage(img)">Delete</button>
+                  <button class="btn btn-danger" @click="deleteImage(img)" style="width: 100%;">Delete</button>
                 </div>
               </div>
             </div>

@@ -46,11 +46,6 @@
           <form @submit.prevent="handleSubmit">
             
             <div style="margin-bottom: 20px; padding: 15px; background: #e9ecef; border: 1px solid #ccc;">
-              <button type="button" class="btn btn-primary" style="background: #28a745; border-color: #218838; margin-bottom: 15px;" @click="incrementTermAndSave" :disabled="isSubmitting">
-                <span x-show="!isSubmitting">Increment Term and Save</span>
-                <span x-show="isSubmitting">Saving…</span>
-              </button>
-
               <div style="display: flex; align-items: center; gap: 10px;">
                 <label style="margin: 0;">Term:</label>
                 <input type="text" x-model="parsedTerm" style="width: 100px; padding: 6px; font-size: 14px; border: 1px solid #aaa;" />

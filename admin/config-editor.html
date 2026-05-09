@@ -108,6 +108,34 @@
             this.statusMessage = message;
             this.statusType = type === 'error' ? 'error' : 'info';
           },
+          async incrementTermAndSave() {
+            if (!this.fileContent) return;
+            
+            let termUpdated = false;
+            this.fileContent = this.fileContent.replace(/^(term:\s*)(\d{2})([WSXF])$/m, (match, prefix, yearStr, letter) => {
+              let year = parseInt(yearStr, 10);
+              let newLetter = letter;
+              if (letter === 'W') {
+                newLetter = 'S';
+              } else if (letter === 'S') {
+                newLetter = 'X';
+              } else if (letter === 'X') {
+                newLetter = 'F';
+              } else if (letter === 'F') {
+                newLetter = 'W';
+                year += 1;
+              }
+              termUpdated = true;
+              return `${prefix}${year}${newLetter}`;
+            });
+
+            if (!termUpdated) {
+              alert("Could not find a valid 'term: XXA' line to increment (where A is W, S, X, or F).");
+              return;
+            }
+
+            await this.handleSubmit();
+          },
           async handleSubmit() {
             if (!confirm("Are you sure you want to save changes to _config.yml? Incorrect formatting can break the website build.")) {
               return;

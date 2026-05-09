@@ -158,6 +158,7 @@
                 year += 1;
               }
               termUpdated = true;
+              this.parsedTerm = `${year}${newLetter}`;
               return `${prefix}${year}${newLetter}`;
             });
 
@@ -169,10 +170,6 @@
             await this.handleSubmit();
           },
           async handleSubmit() {
-            if (!confirm("Are you sure you want to save changes to _config.yml? Incorrect formatting can break the website build.")) {
-              return;
-            }
-            
             this.isSubmitting = true;
             this.setStatus('Contacting GitHub…');
             try {
@@ -201,6 +198,13 @@
               this.setStatus(error.message, 'error'); 
             } finally { 
               this.isSubmitting = false; 
+            }
+          }
+        };
+      }
+    </script>
+  </body>
+</html>         this.isSubmitting = false; 
             }
           }
         };

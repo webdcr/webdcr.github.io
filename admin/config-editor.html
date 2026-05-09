@@ -140,35 +140,6 @@
             }
             await this.handleSubmit();
           },
-          async incrementTermAndSave() {
-            if (!this.fileContent) return;
-            
-            let termUpdated = false;
-            this.fileContent = this.fileContent.replace(/^(term:\s*)(\d{2})([WSXF])$/m, (match, prefix, yearStr, letter) => {
-              let year = parseInt(yearStr, 10);
-              let newLetter = letter;
-              if (letter === 'W') {
-                newLetter = 'S';
-              } else if (letter === 'S') {
-                newLetter = 'X';
-              } else if (letter === 'X') {
-                newLetter = 'F';
-              } else if (letter === 'F') {
-                newLetter = 'W';
-                year += 1;
-              }
-              termUpdated = true;
-              this.parsedTerm = `${year}${newLetter}`;
-              return `${prefix}${year}${newLetter}`;
-            });
-
-            if (!termUpdated) {
-              alert("Could not find a valid 'term: XXA' line to increment (where A is W, S, X, or F).");
-              return;
-            }
-
-            await this.handleSubmit();
-          },
           async handleSubmit() {
             this.isSubmitting = true;
             this.setStatus('Contacting GitHub…');
@@ -186,6 +157,32 @@
               if (!res.ok) {
                 const data = await res.json();
                 throw new Error(data.message || 'Upload failed.');
+              }
+              const responseData = await res.json();
+              this.sha = responseData.content.sha;
+              
+              this.setStatus('Success! _config.yml was updated.', 'info');
+              setTimeout(() => {
+                if (this.statusType !== 'error') this.statusMessage = '';
+              }, 4000);
+            } catch (error) { 
+              this.setStatus(error.message, 'error'); 
+            } finally { 
+              this.isSubmitting = false; 
+            }
+          }
+        };
+      }
+    </script>
+  </body>
+</html>         this.isSubmitting = false; 
+            }
+          }
+        };
+      }
+    </script>
+  </body>
+</html>r(data.message || 'Upload failed.');
               }
               const responseData = await res.json();
               this.sha = responseData.content.sha;

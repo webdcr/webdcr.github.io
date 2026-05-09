@@ -93,12 +93,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const header = document.createElement('div');
   header.id = 'admin-auth-header';
+  const isMainPage = window.location.pathname === '/admin/' || window.location.pathname === '/admin/index.html';
+  
   header.innerHTML = `
-    <div style="display: flex; align-items: center;">
-      <a href="/admin/index.html" class="brand">WebDCR Admin</a>
+    <div style="flex: 1; display: flex; align-items: center;">
+      <span class="brand">WebDCR Admin</span>
       <span id="auth-status" class="status-tag">Checking...</span>
     </div>
-    <div class="controls-container">
+    <div style="flex: 1; text-align: center; font-size: 13px; font-weight: bold;">
+      ${!isMainPage ? '<a href="/admin/index.html" style="color: #0056b3; text-decoration: none;">&larr; Back to Dashboard</a>' : ''}
+    </div>
+    <div class="controls-container" style="flex: 1; justify-content: flex-end;">
       <div id="auth-overlay" class="controls-overlay">Invalid Token!</div>
       <div class="controls">
         <label>Token:</label>

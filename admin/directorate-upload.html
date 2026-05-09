@@ -60,12 +60,8 @@
     <div class="admin-content-wrapper">
       <div class="card wide-card">
         <h1>Edit Directorate CSV</h1>
-        <p style="font-size: 13px; color: #555; margin-bottom: 15px;">
-          Having trouble? You can reference the <a href="https://docs.google.com/spreadsheets/d/1NBiGRPdYdXYSP8-O7z96OHKOeeNiEDir0yv54t_YgkU/edit?gid=38942536#gid=38942536" target="_blank" style="color: #0056b3; text-decoration: underline;">Template Google Sheet</a>.
-        </p>
-        
-        <template x-if="isLoading">
-          <p>Loading current data from GitHub...</p>
+
+        <template x-if="isLoading">          <p>Loading current data from GitHub...</p>
         </template>
 
         <template x-if="!token">

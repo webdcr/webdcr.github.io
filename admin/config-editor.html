@@ -44,16 +44,35 @@
 
         <template x-if="!isLoading && token && fileContent !== null">
           <form @submit.prevent="handleSubmit">
-            <div class="field-group">
-              <textarea class="config-textarea" x-model="fileContent" spellcheck="false"></textarea>
-            </div>
-
-            <div style="margin-top: 20px;">
-              <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
-                <span x-show="!isSubmitting">Save to GitHub</span>
+            
+            <div style="margin-bottom: 20px; padding: 15px; background: #e9ecef; border: 1px solid #ccc;">
+              <button type="button" class="btn btn-primary" style="background: #28a745; border-color: #218838; margin-bottom: 15px;" @click="incrementTermAndSave" :disabled="isSubmitting">
+                <span x-show="!isSubmitting">Increment Term and Save</span>
                 <span x-show="isSubmitting">Saving…</span>
               </button>
+
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <label style="margin: 0;">Term:</label>
+                <input type="text" x-model="parsedTerm" style="width: 100px; padding: 6px; font-size: 14px; border: 1px solid #aaa;" />
+                <button type="button" class="btn btn-primary" @click="saveTerm" :disabled="isSubmitting">
+                  <span x-show="!isSubmitting">Save</span>
+                  <span x-show="isSubmitting">Saving…</span>
+                </button>
+              </div>
             </div>
+
+            <details style="margin-bottom: 20px; border: 1px solid #ccc; padding: 10px; background: #fafafa;">
+              <summary style="cursor: pointer; font-weight: bold; margin-bottom: 10px;">Edit raw file</summary>
+              <div class="field-group">
+                <textarea class="config-textarea" x-model="fileContent" spellcheck="false" style="background: #fff;"></textarea>
+              </div>
+              <div style="margin-top: 10px;">
+                <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
+                  <span x-show="!isSubmitting">Save to GitHub</span>
+                  <span x-show="isSubmitting">Saving…</span>
+                </button>
+              </div>
+            </details>
           </form>
         </template>
 
@@ -107,6 +126,19 @@
           setStatus(message, type = 'info') {
             this.statusMessage = message;
             this.statusType = type === 'error' ? 'error' : 'info';
+          },
+          async saveTerm() {
+            if (!this.fileContent || !this.parsedTerm) return;
+            let termUpdated = false;
+            this.fileContent = this.fileContent.replace(/^(term:\s*)([A-Za-z0-9]+)$/m, (m, prefix) => {
+              termUpdated = true;
+              return `${prefix}${this.parsedTerm}`;
+            });
+            if (!termUpdated) {
+              alert("Could not find a valid 'term:' line in config to update.");
+              return;
+            }
+            await this.handleSubmit();
           },
           async incrementTermAndSave() {
             if (!this.fileContent) return;

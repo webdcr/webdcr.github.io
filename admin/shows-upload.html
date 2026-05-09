@@ -102,7 +102,10 @@
             <div style="margin-top: 10px; display: flex; gap: 10px;">
               <button type="button" @click="addRow()" class="btn" style="background: #e0e0e0; color: #333;">+ Add Row</button>
               <button type="button" @click="downloadCsv()" class="btn" style="background: #e0e0e0; color: #333;">Download CSV</button>
+              <button type="button" @click="$refs.fileInput.click()" class="btn" style="background: #e0e0e0; color: #333;">Upload CSV</button>
+              <input type="file" accept=".csv" x-ref="fileInput" style="display: none" @change="handleFileUpload" />
             </div>
+            <p style="font-size: 12px; color: #666; margin-top: 5px; margin-bottom: 0;">CSV must be formatted right, see this spreadsheet for a <a href="https://docs.google.com/spreadsheets/d/1NkQ6ZKsuo4iZmkqlZ3gTNcVZDz7ZTr2mIRNHOsTzRXc/edit?gid=1256281664#gid=1256281664" target="_blank" style="color: #0056b3;">template</a>.</p>
 
             <div style="margin-top: 20px;">
               <button type="submit" class="btn btn-primary" :disabled="isSubmitting">

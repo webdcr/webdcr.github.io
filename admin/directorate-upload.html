@@ -103,6 +103,7 @@
               <button type="button" @click="$refs.fileInput.click()" class="btn" style="background: #e0e0e0; color: #333;">Upload CSV</button>
               <input type="file" accept=".csv" x-ref="fileInput" style="display: none" @change="handleFileUpload" />
             </div>
+            <p style="font-size: 12px; color: #666; margin-top: 5px; margin-bottom: 0;">CSV must be formatted right, see this spreadsheet for a <a href="https://docs.google.com/spreadsheets/d/1NBiGRPdYdXYSP8-O7z96OHKOeeNiEDir0yv54t_YgkU/edit?gid=38942536#gid=38942536" target="_blank" style="color: #0056b3;">template</a>.</p>
 
             <div style="margin-top: 20px;">
               <button type="submit" class="btn btn-primary" :disabled="isSubmitting">

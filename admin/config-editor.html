@@ -87,6 +87,7 @@
           isSubmitting: false,
           statusMessage: '',
           statusType: 'info',
+          parsedTerm: '',
           init() {
             window.addEventListener('admin-auth-changed', () => {
               this.token = window.AdminAuth.getToken();
@@ -97,6 +98,14 @@
             if (this.token) {
               this.loadCurrentConfig();
             }
+            this.$watch('fileContent', (val) => {
+              if (val) {
+                const match = val.match(/^term:\s*([A-Za-z0-9]+)/m);
+                if (match) {
+                  this.parsedTerm = match[1];
+                }
+              }
+            });
           },
           async loadCurrentConfig() {
             this.isLoading = true;
@@ -111,6 +120,12 @@
               
               this.sha = data.sha;
               this.fileContent = decodeURIComponent(escape(atob(data.content.replace(/\s/g, ''))));
+              
+              const match = this.fileContent.match(/^term:\s*([A-Za-z0-9]+)/m);
+              if (match) {
+                this.parsedTerm = match[1];
+              }
+
               this.setStatus('Config loaded. Ready to edit.', 'info');
             } catch (err) {
               this.setStatus(err.message, 'error');
@@ -125,7 +140,7 @@
           async saveTerm() {
             if (!this.fileContent || !this.parsedTerm) return;
             let termUpdated = false;
-            this.fileContent = this.fileContent.replace(/^(term:\s*)([A-Za-z0-9]+)$/m, (m, prefix) => {
+            this.fileContent = this.fileContent.replace(/^(term:\s*)([A-Za-z0-9]+)/m, (m, prefix) => {
               termUpdated = true;
               return `${prefix}${this.parsedTerm}`;
             });

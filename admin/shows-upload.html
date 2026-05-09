@@ -211,7 +211,6 @@
                 this.bodyRows = [{ id: Date.now(), data: [''] }];
               }
               this.setStatus('CSV loaded. Ready to edit.', 'info');
-              setTimeout(() => this.statusMessage = '', 3000);
             } catch (err) {
               this.setStatus(err.message, 'error');
             } finally {

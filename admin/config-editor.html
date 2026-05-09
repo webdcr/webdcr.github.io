@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" x-data="configEditor()" x-init="init()">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Edit _config.yml</title>
+    <link rel="icon" href="/favicon.ico" />
+    <script defer src="/assets/js/alpine.js"></script>
+    <script src="auth.js"></script>
+    <style>
+      .card.wide-card {
+        max-width: 90%;
+      }
+      .config-textarea {
+        width: 100%;
+        min-height: 500px;
+        font-family: monospace;
+        font-size: 13px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+        white-space: pre;
+        overflow-wrap: normal;
+        overflow-x: auto;
+      }
+      .config-textarea:focus {
+        border-color: #0056b3;
+        outline: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="admin-content-wrapper">
+      <div class="card wide-card">
+        <h1>Edit _config.yml</h1>
+
+        <template x-if="isLoading">
+          <p>Loading current config from GitHub...</p>
+        </template>
+
+        <template x-if="!token">
+          <p class="status error">Please log in to edit the config.</p>
+        </template>
+
+        <template x-if="!isLoading && token && fileContent !== null">
+          <form @submit.prevent="handleSubmit">
+            <div class="field-group">
+              <textarea class="config-textarea" x-model="fileContent" spellcheck="false"></textarea>
+            </div>
+
+            <div style="margin-top: 20px;">
+              <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
+                <span x-show="!isSubmitting">Save to GitHub</span>
+                <span x-show="isSubmitting">Saving…</span>
+              </button>
+            </div>
+          </form>
+        </template>
+
+        <template x-if="statusMessage">
+          <p class="status" :class="statusType" x-text="statusMessage" style="margin-top: 15px;"></p>
+        </template>
+      </div>
+    </div>
+
+    <script>
+      function configEditor() {
+        return {
+          token: window.AdminAuth ? window.AdminAuth.getToken() : '',
+          fileContent: null,
+          sha: '',
+          isLoading: false,
+          isSubmitting: false,
+          statusMessage: '',
+          statusType: 'info',
+          init() {
+            window.addEventListener('admin-auth-changed', () => {
+              this.token = window.AdminAuth.getToken();
+              if (this.token && this.fileContent === null) {
+                this.loadCurrentConfig();
+              }
+            });
+            if (this.token) {
+              this.loadCurrentConfig();
+            }
+          },
+          async loadCurrentConfig() {
+            this.isLoading = true;
+            this.setStatus('Loading current config...', 'info');
+            try {
+              const endpoint = 'https://api.github.com/repos/webdcr/webdcr.github.io/contents/_config.yml';
+              const res = await fetch(endpoint, {
+                headers: { Authorization: `Bearer ${this.token}` }
+              });
+              const data = await res.json();
+              if (!res.ok) throw new Error(data.message || 'Could not find current config.');
+              
+              this.sha = data.sha;
+              this.fileContent = decodeURIComponent(escape(atob(data.content.replace(/\s/g, ''))));
+              this.setStatus('Config loaded. Ready to edit.', 'info');
+            } catch (err) {
+              this.setStatus(err.message, 'error');
+            } finally {
+              this.isLoading = false;
+            }
+          },
+          setStatus(message, type = 'info') {
+            this.statusMessage = message;
+            this.statusType = type === 'error' ? 'error' : 'info';
+          },
+          async handleSubmit() {
+            if (!confirm("Are you sure you want to save changes to _config.yml? Incorrect formatting can break the website build.")) {
+              return;
+            }
+            
+            this.isSubmitting = true;
+            this.setStatus('Contacting GitHub…');
+            try {
+              const endpoint = 'https://api.github.com/repos/webdcr/webdcr.github.io/contents/_config.yml';
+              const res = await fetch(endpoint, {
+                method: 'PUT',
+                headers: { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  message: 'Update _config.yml via admin panel',
+                  content: btoa(unescape(encodeURIComponent(this.fileContent))),
+                  sha: this.sha
+                })
+              });
+              if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.message || 'Upload failed.');
+              }
+              const responseData = await res.json();
+              this.sha = responseData.content.sha;
+              
+              this.setStatus('Success! _config.yml was updated.', 'info');
+              setTimeout(() => {
+                if (this.statusType !== 'error') this.statusMessage = '';
+              }, 4000);
+            } catch (error) { 
+              this.setStatus(error.message, 'error'); 
+            } finally { 
+              this.isSubmitting = false; 
+            }
+          }
+        };
+      }
+    </script>
+  </body>
+</html>

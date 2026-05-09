@@ -61,7 +61,7 @@
         
         <div class="image-grid" x-show="!loading">
           <template x-for="img in images" :key="img.path">
-            <div class="image-card">
+            <div class="image-card" :style="isUnassigned(img) ? 'background-color: #ffe6e6;' : ''">
               <img :src="img.download_url" class="image-preview" loading="lazy" />
               <div class="image-info">
                 <div class="image-name" x-text="img.name"></div>
@@ -269,6 +269,14 @@
               const currentId = img.name.substring(0, img.name.lastIndexOf('.')).toLowerCase();
               event.target.value = this.directors.some(d => d.id === currentId) ? currentId : '';
             } finally {
+              this.loading = false;
+            }          }
+        };
+      }
+    </script>
+  </body>
+</html>
+   } finally {
               this.loading = false;
             }          }
         };

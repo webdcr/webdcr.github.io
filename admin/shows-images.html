@@ -97,6 +97,11 @@
           selectedFiles: [],
           isUploading: false,
 
+          isUnassigned(img) {
+            const id = img.name.substring(0, img.name.lastIndexOf('.')).toLowerCase();
+            return !this.shows.some(s => s.id === id);
+          },
+
           init() {
             this.fetchImages();
             this.fetchShows();

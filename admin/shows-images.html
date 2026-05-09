@@ -234,14 +234,7 @@
               return;
             }
 
-            if (!confirm(`Rename ${img.name} to ${newName}?`)) {
-              // Revert select if cancelled by triggering a re-render
-              const currentId = img.name.substring(0, img.name.lastIndexOf('.')).toLowerCase();
-              event.target.value = this.shows.some(s => s.id === currentId) ? currentId : '';
-              return;
-            }
-
-            this.setStatus(`Renaming to ${newName}...`);
+            this.setStatus(`Assigning to ${newName}...`);
             this.loading = true;
             try {
               const resBlob = await fetch(`https://api.github.com/repos/${this.repo}/git/blobs/${img.sha}`, {
@@ -249,11 +242,12 @@
               });
               const blobData = await resBlob.json();
               
-              await fetch(`https://api.github.com/repos/${this.repo}/contents/${this.path}/${newName}`, {
+              const putRes = await fetch(`https://api.github.com/repos/${this.repo}/contents/${this.path}/${newName}`, {
                 method: 'PUT',
                 headers: { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: `Assign image to ${targetId}`, content: blobData.content })
               });
+              const putData = await putRes.json();
               
               await fetch(img.url, {
                 method: 'DELETE',
@@ -261,10 +255,20 @@
                 body: JSON.stringify({ message: `Cleanup after assignment`, sha: img.sha })
               });
               
+              // Update local state immediately
+              img.name = putData.content.name;
+              img.path = putData.content.path;
+              img.sha = putData.content.sha;
+              img.url = putData.content.url;
+              img.download_url = putData.content.download_url;
+
               this.setStatus(newId ? `Assigned to ${newId}` : `Unassigned photo`);
-              this.fetchImages();
             } catch (e) {
               this.setStatus(`Error: ${e.message}`, 'error');
+              // Revert select if error by triggering a re-render
+              const currentId = img.name.substring(0, img.name.lastIndexOf('.')).toLowerCase();
+              event.target.value = this.shows.some(s => s.id === currentId) ? currentId : '';
+            } finally {
               this.loading = false;
             }
           }

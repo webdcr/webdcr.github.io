@@ -448,7 +448,7 @@ description: Radio of, by, and for the students of Dartmouth College
             Day: day,
             Description: show['Description'] || '',
             hostLabel: show['Host(s)'] ? `with ${show['Host(s)']}` : '',
-            imageSrc: this.sanitizeImagePath(show['Image name']),
+            imageSrc: this.getShowImagePath(show['Name']),
             imageAlt: show['Name'] ? `${show['Name']} artwork` : 'Show artwork',
             displayTime: this.formatDisplayTime(startMinutes),
             startMinutes,
@@ -546,16 +546,13 @@ description: Radio of, by, and for the students of Dartmouth College
         }
         return `${hours}:${minutes.toString().padStart(2, '0')} ${meridiem}`;
       },
-      sanitizeImagePath(name) {
-        if (!name) {
-          return '/assets/images/showalbums/placeholder.png';
+      getShowImagePath(showName) {
+        if (!showName) return "/assets/images/showalbums/placeholder.png";
+        const idName = showName.toLowerCase().replace(/[^a-z]/g, '');
+        if (window.WEBDCR_SHOW_IMAGES && window.WEBDCR_SHOW_IMAGES[idName]) {
+          return window.WEBDCR_SHOW_IMAGES[idName];
         }
-        const trimmed = String(name).trim();
-        if (!trimmed) {
-          return '/assets/images/showalbums/placeholder.png';
-        }
-        const sanitized = encodeURIComponent(trimmed).replace(/%2F/g, '/');
-        return `/assets/images/showalbums/${sanitized}`;
+        return "/assets/images/showalbums/placeholder.png";
       },
       updateCurrentTime() {
         const easternNow = getEasternNow();

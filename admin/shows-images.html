@@ -76,21 +76,6 @@
       </div>
     </div>
 
-    <!-- Rename Modal -->
-    <div class="modal" x-show="renamingImage" x-cloak>
-      <div class="modal-content">
-        <h2>Rename Image</h2>
-        <div class="field-group">
-          <label>New Name (include extension)</label>
-          <input type="text" x-model="newName" />
-        </div>
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button class="btn" @click="renamingImage = null">Cancel</button>
-          <button class="btn btn-primary" @click="confirmRename" :disabled="isRenaming">Rename</button>
-        </div>
-      </div>
-    </div>
-
     <script>
       function imageManager() {
         return {
@@ -98,17 +83,16 @@
           repo: 'webdcr/webdcr.github.io',
           path: 'assets/images/showalbums',
           images: [],
+          shows: [],
           loading: false,
           statusMessage: '',
           statusType: 'info',
           selectedFiles: [],
           isUploading: false,
-          renamingImage: null,
-          newName: '',
-          isRenaming: false,
 
           init() {
             this.fetchImages();
+            this.fetchShows();
             window.addEventListener('admin-auth-changed', () => {
               this.token = window.AdminAuth.getToken();
             });
@@ -185,15 +169,104 @@
             } catch (e) { this.setStatus(e.message, 'error'); }
           },
 
-          startRename(img) {
-            this.renamingImage = img;
-            this.newName = img.name;
+          async fetchShows() {
+            try {
+              const res = await fetch(`https://api.github.com/repos/${this.repo}/contents/_data/shows.csv`, {
+                headers: this.token ? { Authorization: `Bearer ${this.token}` } : {}
+              });
+              if (!res.ok) return;
+              const data = await res.json();
+              const content = decodeURIComponent(escape(atob(data.content.replace(/\s/g, ''))));
+              const lines = content.split(/\r?\n/);
+              const showList = [];
+              for (let i = 1; i < lines.length; i++) {
+                const line = lines[i];
+                if (!line.trim()) continue;
+                let cols = [];
+                let inQuotes = false;
+                let val = '';
+                for (let j = 0; j < line.length; j++) {
+                  if (line[j] === '"') inQuotes = !inQuotes;
+                  else if (line[j] === ',' && !inQuotes) { cols.push(val); val = ''; }
+                  else val += line[j];
+                }
+                cols.push(val);
+                if (cols.length >= 1 && cols[0]) {
+                  const originalName = cols[0];
+                  const idName = originalName.toLowerCase().replace(/[^a-z]/g, '');
+                  if (idName) {
+                    showList.push({ name: originalName, id: idName });
+                  }
+                }
+              }
+              this.shows = showList;
+            } catch (e) { console.error('Error fetching shows', e); }
           },
 
-          async confirmRename() {
-            this.isRenaming = true;
+          async assignShow(img, newId) {
+            let targetId = newId;
+            if (!targetId) {
+              // Generate random 8-digit hex for unassigned
+              targetId = Math.floor(Math.random() * 0xffffffff).toString(16).padStart(8, '0');
+            }
+
+            const ext = img.name.substring(img.name.lastIndexOf('.'));
+            const newName = targetId + ext;
+            if (newName === img.name) return;
+
+            // Check if any existing image matches the targetId (ignoring extension)
+            const exists = this.images.some(existingImg => {
+              const existingId = existingImg.name.substring(0, existingImg.name.lastIndexOf('.')).toLowerCase();
+              return existingId === targetId.toLowerCase() && existingImg.name !== img.name;
+            });
+
+            if (exists) {
+              alert(`An image for ${newId} already exists! Please delete, reassign or unassign it first if you wish to replace it.`);
+              const currentId = img.name.substring(0, img.name.lastIndexOf('.')).toLowerCase();
+              event.target.value = this.shows.some(s => s.id === currentId) ? currentId : '';
+              return;
+            }
+
+            if (!confirm(`Rename ${img.name} to ${newName}?`)) {
+              // Revert select if cancelled by triggering a re-render
+              const currentId = img.name.substring(0, img.name.lastIndexOf('.')).toLowerCase();
+              event.target.value = this.shows.some(s => s.id === currentId) ? currentId : '';
+              return;
+            }
+
+            this.setStatus(`Renaming to ${newName}...`);
+            this.loading = true;
             try {
-              const resBlob = await fetch(`https://api.github.com/repos/${this.repo}/git/blobs/${this.renamingImage.sha}`, {
+              const resBlob = await fetch(`https://api.github.com/repos/${this.repo}/git/blobs/${img.sha}`, {
+                headers: { Authorization: `Bearer ${this.token}` }
+              });
+              const blobData = await resBlob.json();
+              
+              await fetch(`https://api.github.com/repos/${this.repo}/contents/${this.path}/${newName}`, {
+                method: 'PUT',
+                headers: { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: `Assign image to ${targetId}`, content: blobData.content })
+              });
+              
+              await fetch(img.url, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: `Cleanup after assignment`, sha: img.sha })
+              });
+              
+              this.setStatus(newId ? `Assigned to ${newId}` : `Unassigned photo`);
+              this.fetchImages();
+            } catch (e) {
+              this.setStatus(`Error: ${e.message}`, 'error');
+              this.loading = false;
+            }
+          }
+        };
+      }
+    </script>
+  </body>
+</html>
+is.repo}/git/blobs/${this.renamingImage.sha}`, {
                 headers: { Authorization: `Bearer ${this.token}` }
               });
               const blobData = await resBlob.json();

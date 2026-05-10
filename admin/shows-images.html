@@ -61,15 +61,15 @@
         
         <div class="image-grid" x-show="!loading">
           <template x-for="img in images" :key="img.path">
-            <div class="image-card" :style="isUnassigned(img) ? 'background-color: #ffe6e6;' : ''">
+            <div class="image-card">
               <img :src="img.download_url" class="image-preview" loading="lazy" />
               <div class="image-info">
                 <div class="image-name" x-text="img.name"></div>
                 <div style="margin-bottom: 8px;">
-                  <select @change="assignShow(img, $event.target.value)" style="width: 100%; font-size: 12px; padding: 4px;" :disabled="loading">
-                    <option value="">Unassigned</option>
-                    <template x-for="show in shows" :key="show.id">
-                      <option :value="show.id" x-text="show.name" :selected="img.name.substring(0, img.name.lastIndexOf('.')).toLowerCase() === show.id"></option>
+                  <select @change="assignShow(img.name, $event.target.value)" style="width: 100%; font-size: 12px; padding: 4px;" :disabled="loading">
+                    <option value="placeholder.png">-- Unassigned --</option>
+                    <template x-for="show in shows" :key="show.name">
+                      <option :value="show.name" x-text="show.name" :selected="show.image === img.name"></option>
                     </template>
                   </select>
                 </div>
@@ -89,31 +89,32 @@
           token: window.AdminAuth.getToken(),
           repo: 'webdcr/webdcr.github.io',
           path: 'assets/images/showalbums',
+          csvPath: '_data/shows.csv',
           images: [],
           shows: [],
+          csvSha: '',
           loading: false,
           statusMessage: '',
           statusType: 'info',
           selectedFiles: [],
           isUploading: false,
 
-          isUnassigned(img) {
-            const id = img.name.substring(0, img.name.lastIndexOf('.')).toLowerCase();
-            return !this.shows.some(s => s.id === id);
-          },
-
           init() {
             this.fetchImages();
             this.fetchShows();
             window.addEventListener('admin-auth-changed', () => {
               this.token = window.AdminAuth.getToken();
+              if (this.token) {
+                this.fetchImages();
+                this.fetchShows();
+              }
             });
           },
 
           setStatus(msg, type = 'info') {
             this.statusMessage = msg;
             this.statusType = type;
-            if (type === 'info') setTimeout(() => this.statusMessage = '', 5000);
+            if (type === 'info') setTimeout(() => { if(this.statusMessage === msg) this.statusMessage = ''; }, 5000);
           },
 
           async fetchImages() {
@@ -181,98 +182,125 @@
             } catch (e) { this.setStatus(e.message, 'error'); }
           },
 
+          parseCSV(str) {
+            const rows = [];
+            let current = [];
+            let inQuotes = false;
+            let val = '';
+            for (let i = 0; i < str.length; i++) {
+              const char = str[i];
+              const nextChar = str[i+1];
+              if (char === '"' && inQuotes && nextChar === '"') { val += '"'; i++; }
+              else if (char === '"') inQuotes = !inQuotes;
+              else if (char === ',' && !inQuotes) { current.push(val); val = ''; }
+              else if ((char === '\n' || char === '\r') && !inQuotes) {
+                if (char === '\r' && nextChar === '\n') i++;
+                current.push(val); rows.push(current); current = []; val = '';
+              } else val += char;
+            }
+            if (val !== '' || current.length > 0) { current.push(val); rows.push(current); }
+            return rows;
+          },
+
+          stringifyCSV(rows) {
+            return rows.map(row => row.map(val => {
+              val = String(val || '');
+              if (val.includes(',') || val.includes('"') || val.includes('\n') || val.includes('\r')) {
+                return `"${val.replace(/"/g, '""')}"`;
+              }
+              return val;
+            }).join(',')).join('\n');
+          },
+
           async fetchShows() {
             try {
-              const res = await fetch(`https://api.github.com/repos/${this.repo}/contents/_data/shows.csv`, {
+              const res = await fetch(`https://api.github.com/repos/${this.repo}/contents/${this.csvPath}`, {
                 headers: this.token ? { Authorization: `Bearer ${this.token}` } : {}
               });
               if (!res.ok) return;
               const data = await res.json();
+              this.csvSha = data.sha;
               const content = decodeURIComponent(escape(atob(data.content.replace(/\s/g, ''))));
-              const lines = content.split(/\r?\n/);
-              const showList = [];
-              for (let i = 1; i < lines.length; i++) {
-                const line = lines[i];
-                if (!line.trim()) continue;
-                let cols = [];
-                let inQuotes = false;
-                let val = '';
-                for (let j = 0; j < line.length; j++) {
-                  if (line[j] === '"') inQuotes = !inQuotes;
-                  else if (line[j] === ',' && !inQuotes) { cols.push(val); val = ''; }
-                  else val += line[j];
-                }
-                cols.push(val);
-                if (cols.length >= 1 && cols[0]) {
-                  const originalName = cols[0];
-                  const idName = originalName.toLowerCase().replace(/[^a-z]/g, '');
-                  if (idName) {
-                    showList.push({ name: originalName, id: idName });
-                  }
-                }
+              const parsed = this.parseCSV(content);
+              if (parsed.length > 0) {
+                const headers = parsed[0];
+                const nameIdx = headers.indexOf('Name');
+                const imgIdx = headers.indexOf('Image');
+                this.shows = parsed.slice(1).map(row => ({
+                  name: row[nameIdx],
+                  image: row[imgIdx] || 'placeholder.png'
+                })).filter(s => s.name);
+                this.csvHeaders = headers;
+                this.csvRows = parsed.slice(1);
               }
-              this.shows = showList;
             } catch (e) { console.error('Error fetching shows', e); }
           },
 
-          async assignShow(img, newId) {
-            let targetId = newId;
-            if (!targetId) {
-              // Generate random 8-digit hex for unassigned
-              targetId = Math.floor(Math.random() * 0xffffffff).toString(16).padStart(8, '0');
-            }
-
-            const ext = img.name.substring(img.name.lastIndexOf('.'));
-            const newName = targetId + ext;
-            if (newName === img.name) return;
-
-            // Check if any existing image matches the targetId (ignoring extension)
-            const exists = this.images.some(existingImg => {
-              const existingId = existingImg.name.substring(0, existingImg.name.lastIndexOf('.')).toLowerCase();
-              return existingId === targetId.toLowerCase() && existingImg.name !== img.name;
-            });
-
-            if (exists) {
-              alert(`An image for ${newId} already exists! Please delete, reassign or unassign it first if you wish to replace it.`);
-              const currentId = img.name.substring(0, img.name.lastIndexOf('.')).toLowerCase();
-              event.target.value = this.shows.some(s => s.id === currentId) ? currentId : '';
-              return;
-            }
-
-            this.setStatus(`Assigning to ${newName}...`);
+          async assignShow(imageName, showName) {
+            this.setStatus(`Updating assignment...`);
             this.loading = true;
             try {
-              const resBlob = await fetch(`https://api.github.com/repos/${this.repo}/git/blobs/${img.sha}`, {
+              // 1. Refetch CSV to get latest SHA and avoid conflicts
+              const res = await fetch(`https://api.github.com/repos/${this.repo}/contents/${this.csvPath}`, {
                 headers: { Authorization: `Bearer ${this.token}` }
               });
-              const blobData = await resBlob.json();
+              const data = await res.json();
+              const content = decodeURIComponent(escape(atob(data.content.replace(/\s/g, ''))));
+              const parsed = this.parseCSV(content);
               
-              const putRes = await fetch(`https://api.github.com/repos/${this.repo}/contents/${this.path}/${newName}`, {
+              const headers = parsed[0];
+              const nameIdx = headers.indexOf('Name');
+              const imgIdx = headers.indexOf('Image');
+
+              if (imgIdx === -1) throw new Error("Image column not found in CSV");
+
+              // 2. Update the row
+              let updated = false;
+              for (let i = 1; i < parsed.length; i++) {
+                // If this is the show we are assigning TO
+                if (parsed[i][nameIdx] === showName) {
+                  parsed[i][imgIdx] = imageName;
+                  updated = true;
+                } 
+                // If another show was using this image, we don't necessarily unassign it 
+                // unless it's a 1-to-1 relationship, but usually it's better to just update the target.
+                // However, if we selected "-- Unassigned --", we should update the show that PREVIOUSLY had it.
+                // Actually, the select is "Assign THIS image to THAT show".
+              }
+
+              if (showName === 'placeholder.png') {
+                 // Logic for "Unassigning this image from whoever has it"
+                 for (let i = 1; i < parsed.length; i++) {
+                   if (parsed[i][imgIdx] === imageName) {
+                     parsed[i][imgIdx] = 'placeholder.png';
+                     updated = true;
+                   }
+                 }
+              }
+
+              if (!updated && showName !== 'placeholder.png') {
+                throw new Error("Could not find show in CSV");
+              }
+
+              // 3. Save back to GitHub
+              const newContent = this.stringifyCSV(parsed);
+              const putRes = await fetch(`https://api.github.com/repos/${this.repo}/contents/${this.csvPath}`, {
                 method: 'PUT',
                 headers: { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: `Assign image to ${targetId}`, content: blobData.content })
+                body: JSON.stringify({
+                  message: `Assign ${imageName} to ${showName}`,
+                  content: btoa(unescape(encodeURIComponent(newContent))),
+                  sha: data.sha
+                })
               });
-              const putData = await putRes.json();
-              
-              await fetch(img.url, {
-                method: 'DELETE',
-                headers: { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: `Cleanup after assignment`, sha: img.sha })
-              });
-              
-              // Update local state immediately
-              img.name = putData.content.name;
-              img.path = putData.content.path;
-              img.sha = putData.content.sha;
-              img.url = putData.content.url;
-              img.download_url = putData.content.download_url;
 
-              this.setStatus(newId ? `Assigned to ${newId}` : `Unassigned photo`);
+              if (!putRes.ok) throw new Error("Failed to save CSV to GitHub");
+
+              this.setStatus(`Success! Assignment updated.`);
+              this.fetchShows(); // Refresh local list
             } catch (e) {
               this.setStatus(`Error: ${e.message}`, 'error');
-              // Revert select if error by triggering a re-render
-              const currentId = img.name.substring(0, img.name.lastIndexOf('.')).toLowerCase();
-              event.target.value = this.shows.some(s => s.id === currentId) ? currentId : '';
+              this.fetchShows(); // Revert local state
             } finally {
               this.loading = false;
             }

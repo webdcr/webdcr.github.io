@@ -65,13 +65,6 @@
 
 <script>
   
-  window.WEBDCR_SHOW_IMAGES = {};
-  {% for file in site.static_files %}
-    {% if file.path contains "/assets/images/showalbums/" %}
-      window.WEBDCR_SHOW_IMAGES["{{ file.basename }}"] = "{{ file.path }}";
-    {% endif %}
-  {% endfor %}
-
   window.WEBDCR_SHOWS = window.WEBDCR_SHOWS || {{ site.data.shows | jsonify }};
   window.webdcr = window.webdcr || {};
   window.webdcr.parseTimeToMinutes = function (timeString) {
@@ -557,13 +550,9 @@
       }
     }
 
-    function getShowImagePath(showName) {
-      if (!showName) return "/assets/images/showalbums/placeholder.png";
-      const idName = showName.toLowerCase().replace(/[^a-z]/g, '');
-      if (window.WEBDCR_SHOW_IMAGES && window.WEBDCR_SHOW_IMAGES[idName]) {
-        return window.WEBDCR_SHOW_IMAGES[idName];
-      }
-      return "/assets/images/showalbums/placeholder.png";
+    function getShowImagePath(show) {
+      const img = (show && show["Image"]) ? show["Image"] : "placeholder.png";
+      return "/assets/images/showalbums/" + img;
     }
 
     function loadCurShow() {
@@ -610,7 +599,7 @@
       const hostText = matchingHost ? `with ${matchingHost}` : "";
       const noShowText = "No show is currently playing";
       const description = matchingShow && matchingShow["Description"] ? matchingShow["Description"] : '';
-      const art = getShowImagePath(matchingShow && matchingShow["Name"]);
+      const art = getShowImagePath(matchingShow);
 
       if (nowPlayingTitle) {
         nowPlayingTitle.innerText = title;

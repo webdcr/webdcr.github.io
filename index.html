@@ -448,7 +448,7 @@ description: Radio of, by, and for the students of Dartmouth College
             Day: day,
             Description: show['Description'] || '',
             hostLabel: show['Host(s)'] ? `with ${show['Host(s)']}` : '',
-            imageSrc: this.getShowImagePath(show['Name']),
+            imageSrc: this.getShowImagePath(show),
             imageAlt: show['Name'] ? `${show['Name']} artwork` : 'Show artwork',
             displayTime: this.formatDisplayTime(startMinutes),
             startMinutes,
@@ -546,13 +546,9 @@ description: Radio of, by, and for the students of Dartmouth College
         }
         return `${hours}:${minutes.toString().padStart(2, '0')} ${meridiem}`;
       },
-      getShowImagePath(showName) {
-        if (!showName) return "/assets/images/showalbums/placeholder.png";
-        const idName = showName.toLowerCase().replace(/[^a-z]/g, '');
-        if (window.WEBDCR_SHOW_IMAGES && window.WEBDCR_SHOW_IMAGES[idName]) {
-          return window.WEBDCR_SHOW_IMAGES[idName];
-        }
-        return "/assets/images/showalbums/placeholder.png";
+      getShowImagePath(show) {
+        const img = (show && show["Image"]) ? show["Image"] : "placeholder.png";
+        return "/assets/images/showalbums/" + img;
       },
       updateCurrentTime() {
         const easternNow = getEasternNow();

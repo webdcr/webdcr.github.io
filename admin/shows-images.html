@@ -48,33 +48,53 @@
       </div>
 
       <div class="card">
+        <h2>Show Assignments</h2>
+        <p style="font-size: 13px; color: #666; margin-bottom: 15px;">
+          Assign artwork to your shows. Selecting <strong>placeholder.png</strong> will "unassign" the show.
+        </p>
+        <div class="csv-table-wrapper" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc;">
+          <table class="csv-table" style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="background: #f0f0f0; position: sticky; top: 0; z-index: 10;">
+                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Show Name</th>
+                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Assigned Image</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="show in shows" :key="show.name">
+                <tr style="border-bottom: 1px solid #eee;">
+                  <td style="padding: 10px; font-size: 14px;" x-text="show.name"></td>
+                  <td style="padding: 10px;">
+                    <select @change="updateAssignment(show.name, $event.target.value)" :disabled="loading" style="width: 100%; padding: 4px;">
+                      <template x-for="img in images" :key="img.name">
+                        <option :value="img.name" x-text="img.name" :selected="show.image === img.name"></option>
+                      </template>
+                    </select>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-          <h2>Current Images</h2>
+          <h2>Manage Image Files</h2>
           <div style="display: flex; gap: 10px;">
-            <button class="btn btn-danger" @click="deleteAllImages" :disabled="loading || images.length === 0">Delete All</button>
-            <button class="btn" @click="fetchImages" :disabled="loading">
-              <span x-show="!loading">Refresh List</span>
-              <span x-show="loading">Loading...</span>
-            </button>
+            <button class="btn" @click="fetchImages(); fetchShows();" :disabled="loading">Refresh</button>
           </div>
         </div>
+        <p style="font-size: 13px; color: #666;">These are the files available in <code>/assets/images/showalbums/</code>.</p>
         
         <div class="image-grid" x-show="!loading">
           <template x-for="img in images" :key="img.path">
-            <div class="image-card">
+            <div class="image-card" x-show="img.name !== 'placeholder.png'">
               <img :src="img.download_url" class="image-preview" loading="lazy" />
               <div class="image-info">
                 <div class="image-name" x-text="img.name"></div>
-                <div style="margin-bottom: 8px;">
-                  <select @change="assignShow(img.name, $event.target.value)" style="width: 100%; font-size: 12px; padding: 4px;" :disabled="loading">
-                    <option value="placeholder.png">-- Unassigned --</option>
-                    <template x-for="show in shows" :key="show.name">
-                      <option :value="show.name" x-text="show.name" :selected="show.image === img.name"></option>
-                    </template>
-                  </select>
-                </div>
                 <div class="image-actions">
-                  <button class="btn btn-danger" @click="deleteImage(img)" style="width: 100%;">Delete</button>
+                  <button class="btn btn-danger" @click="deleteImage(img)" style="width: 100%;">Delete File</button>
                 </div>
               </div>
             </div>
@@ -92,7 +112,6 @@
           csvPath: '_data/shows.csv',
           images: [],
           shows: [],
-          csvSha: '',
           loading: false,
           statusMessage: '',
           statusType: 'info',
@@ -153,25 +172,14 @@
             this.fetchImages();
           },
 
-          async deleteAllImages() {
-            if (!confirm(`Are you sure you want to delete ALL ${this.images.length} images? This cannot be undone.`)) return;
-            this.loading = true;
-            this.setStatus(`Deleting ${this.images.length} images...`);
-            for (const img of this.images) {
-              try {
-                await fetch(`https://api.github.com/repos/${this.repo}/contents/${img.path}`, {
-                  method: 'DELETE',
-                  headers: { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ message: `Delete all: ${img.name}`, sha: img.sha })
-                });
-              } catch (e) { console.error(e); }
-            }
-            this.setStatus('All images deleted.');
-            this.fetchImages();
-          },
-
           async deleteImage(img) {
-            if (!confirm(`Delete ${img.name}?`)) return;
+            const usedBy = this.shows.filter(s => s.image === img.name).map(s => s.name);
+            let msg = `Delete ${img.name}?`;
+            if (usedBy.length > 0) {
+              msg = `${img.name} is currently used by: ${usedBy.join(', ')}. Deleting it will leave these shows with broken images until reassigned. Continue?`;
+            }
+            if (!confirm(msg)) return;
+
             try {
               await fetch(`https://api.github.com/repos/${this.repo}/contents/${img.path}`, {
                 method: 'DELETE',
@@ -219,7 +227,6 @@
               });
               if (!res.ok) return;
               const data = await res.json();
-              this.csvSha = data.sha;
               const content = decodeURIComponent(escape(atob(data.content.replace(/\s/g, ''))));
               const parsed = this.parseCSV(content);
               if (parsed.length > 0) {
@@ -230,17 +237,14 @@
                   name: row[nameIdx],
                   image: row[imgIdx] || 'placeholder.png'
                 })).filter(s => s.name);
-                this.csvHeaders = headers;
-                this.csvRows = parsed.slice(1);
               }
             } catch (e) { console.error('Error fetching shows', e); }
           },
 
-          async assignShow(imageName, showName) {
-            this.setStatus(`Updating assignment...`);
+          async updateAssignment(showName, imageName) {
+            this.setStatus(`Saving assignment for "${showName}"...`);
             this.loading = true;
             try {
-              // 1. Refetch CSV to get latest SHA and avoid conflicts
               const res = await fetch(`https://api.github.com/repos/${this.repo}/contents/${this.csvPath}`, {
                 headers: { Authorization: `Bearer ${this.token}` }
               });
@@ -254,35 +258,17 @@
 
               if (imgIdx === -1) throw new Error("Image column not found in CSV");
 
-              // 2. Update the row
               let updated = false;
               for (let i = 1; i < parsed.length; i++) {
-                // If this is the show we are assigning TO
                 if (parsed[i][nameIdx] === showName) {
                   parsed[i][imgIdx] = imageName;
                   updated = true;
-                } 
-                // If another show was using this image, we don't necessarily unassign it 
-                // unless it's a 1-to-1 relationship, but usually it's better to just update the target.
-                // However, if we selected "-- Unassigned --", we should update the show that PREVIOUSLY had it.
-                // Actually, the select is "Assign THIS image to THAT show".
+                  break;
+                }
               }
 
-              if (showName === 'placeholder.png') {
-                 // Logic for "Unassigning this image from whoever has it"
-                 for (let i = 1; i < parsed.length; i++) {
-                   if (parsed[i][imgIdx] === imageName) {
-                     parsed[i][imgIdx] = 'placeholder.png';
-                     updated = true;
-                   }
-                 }
-              }
+              if (!updated) throw new Error(`Show "${showName}" not found in CSV`);
 
-              if (!updated && showName !== 'placeholder.png') {
-                throw new Error("Could not find show in CSV");
-              }
-
-              // 3. Save back to GitHub
               const newContent = this.stringifyCSV(parsed);
               const putRes = await fetch(`https://api.github.com/repos/${this.repo}/contents/${this.csvPath}`, {
                 method: 'PUT',
@@ -294,13 +280,13 @@
                 })
               });
 
-              if (!putRes.ok) throw new Error("Failed to save CSV to GitHub");
+              if (!putRes.ok) throw new Error("Failed to save to GitHub");
 
-              this.setStatus(`Success! Assignment updated.`);
-              this.fetchShows(); // Refresh local list
+              this.setStatus(`Success! "${showName}" updated.`);
+              await this.fetchShows();
             } catch (e) {
               this.setStatus(`Error: ${e.message}`, 'error');
-              this.fetchShows(); // Revert local state
+              await this.fetchShows();
             } finally {
               this.loading = false;
             }

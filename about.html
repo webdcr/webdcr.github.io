@@ -79,16 +79,13 @@ permalink: /about/
       {% endif %}
     {% endcapture %}
 {% assign director_name = director_name | strip %}
-    {% assign idName = director_name | downcase | replace: " ", "" | replace: "0", "" | replace: "1", "" | replace: "2", "" | replace: "3", "" | replace: "4", "" | replace: "5", "" | replace: "6", "" | replace: "7", "" | replace: "8", "" | replace: "9", "" | replace: "’", "" | replace: "'", "" | replace: "-", "" | replace: "–", "" | replace: "—", "" | replace: ",", "" | replace: ".", "" | replace: "!", "" | replace: "?", "" | replace: "(", "" | replace: ")", "" | replace: '"', "" | replace: '“', "" | replace: '”', "" | replace: '&', "" | replace: 'é', "e" | replace: 'á', "a" %}
+    {% assign photo_filename = person["Image"] | default: "placeholder.png" %}
+    {% assign photo_source = "/assets/images/directorate/" | append: photo_filename %}
     
-    {% assign photo_source = "/assets/images/showalbums/placeholder.png" %}
-    {% for file in site.static_files %}
-      {% if file.path contains "/assets/images/directorate/" %}
-        {% if file.basename == idName %}
-          {% assign photo_source = file.path %}
-        {% endif %}
-      {% endif %}
-    {% endfor %}
+    {% if photo_filename == "placeholder.png" %}
+      {% assign photo_source = "/assets/images/showalbums/placeholder.png" %}
+    {% endif %}
+
     <div class="directoratePerson">
       <div class="directorate-photo">
         <img src="{{ photo_source }}" alt="{{ director_name }}" />

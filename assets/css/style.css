@@ -500,7 +500,7 @@ footer {
   width: auto;
   pointer-events: none;
   z-index: 9999;
-  transform: translate(-50%, -50%) rotate(12deg);
+  transform: translate(-50%, -50%) rotate(-12deg);
   opacity: 0;
   visibility: hidden;
   left: 0;

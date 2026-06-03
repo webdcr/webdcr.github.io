@@ -7,3 +7,5 @@ permalink: /kidsthatflyinterview//
 ---
 
 {% include audio-player.html src="/assets/audio/news/KidsThatFly.mp3" %}
+
+WebDCR's Mackenzie Morong sits down with the Green Key Block Party headline band, Kids That Fly, for an exclusive interview and preview of their newest single!

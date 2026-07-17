@@ -46,10 +46,10 @@ I love this album. I am not ashamed that I love this album. It is that good. Eve
 
 Some honorable mentions! New Steve Lacy single, “the feeling”, is excellent, as well as Kelela’s “idea 1” and Helado Tropical’s “Tocando”. 
 
+Have a great rest of your summer, and until next time.
+
+                                                                                                                         \~ Joey
+
 Here’s the playlist, as promised. 
 
 <iframe src="https://embed.tidal.com/playlists/f4a447f3-99ab-4766-a3ba-59eef62da028" width="500" height="275" allow="encrypted-media; fullscreen; clipboard-write https://embed.tidal.com; web-share" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox" style="color-scheme: light dark" title="TIDAL Embed Player" />
-
-Have a great rest of your summer, and until next time.
-
-\~ Joey

@@ -48,7 +48,7 @@ Some honorable mentions! New Steve Lacy single, “the feeling”, is excellent,
 
 Have a great rest of your summer, and until next time.
 
---  Joey
+                                                                                                                               <3 Joey
 
 Here’s the playlist, as promised. 
 

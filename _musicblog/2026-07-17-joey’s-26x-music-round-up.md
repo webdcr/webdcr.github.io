@@ -26,10 +26,6 @@ _minimal_ / _ambient_ / _new age_
 
 Pretty, melodic, and with enough negative space for you to frame your own wandering thoughts with. Yoshimura relies on slow, evolving patterns and satisfying synth textures to create an equally relaxing and stimulating soundscape. I like this record paired with cheap white wine or a cold sour beer from the grocery store and _Stoner_ by John Williams. Also good for pretending to work while you’re secretly reading every Atlantic article ever posted because you finished your assignment at 11:00. 
 
-
-
-
-
 **The Beach Boys, _Surf’s Up_**
 
 _psychedelic_ / _art pop_ / _progressive_
